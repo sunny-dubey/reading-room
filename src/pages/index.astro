@@ -6,7 +6,7 @@ import ReadingMast from '../components/ReadingMast.astro';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
 
-const { learning, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
+const { learning, fetchedAt, now, deepRead, fresh, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
 const revisit = await getRevisit(now);
 const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -87,6 +87,16 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             <script type="application/json" id="plan-canon" set:html={JSON.stringify(canonPlan)} />
         </section>
 
+        {fresh.length > 0 && (
+            <section class="home-block fresh-block">
+                <header class="block-head">
+                    <h2>Fresh this week</h2>
+                    <span class="dim">new posts worth reading, picked for what they teach</span>
+                </header>
+                <div class="pick-grid">{fresh.map(i => <LearnCard i={i} />)}</div>
+            </section>
+        )}
+
         {practice && (
             <section class="practice" data-practice={`${practice.id}-w${week}`}>
                 <div class="practice-head">
@@ -148,7 +158,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             <section class="home-block">
                 <header class="block-head">
                     <h2>More worth your time</h2>
-                    <span class="dim">ranked by depth, not recency</span>
+                    <span class="dim">the best of the last three weeks</span>
                 </header>
                 <div class="pick-grid">{picks.map(i => <LearnCard i={i} />)}</div>
             </section>

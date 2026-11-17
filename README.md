@@ -38,7 +38,7 @@ Everything happens **at build time**. There's no server, no database, no API key
 1. **Fetch.** About 49 RSS/Atom sources (`src/content/feeds.yaml`): engineering blogs like Marc Brooker, Martin Fowler, Brandur, Stripe, Cloudflare, Lilian Weng, Sebastian Raschka, Jeremy Kun and more.
 2. **Analyse.** For each article (`src/lib/summarize.ts`): uses the full text from the feed or fetches the page (cached for 30 days), then estimates reading time and depth, extracts technical concepts, and gives it a **worth score (1–5)** for how much it builds lasting understanding. Announcements, newsletters and roundups score low.
 3. **Match.** A small local embedding model (all-MiniLM-L6-v2, ~23 MB, via `@huggingface/transformers`) matches each article to its closest **Roadmap topic** by meaning (`src/lib/roadmap.ts`). That's where "Why read" comes from.
-4. **Rank.** `rank = worth × 2 + freshness + topic boost + source weight`. Depth beats recency, topics you haven't covered yet get a boost, and authors known for depth get a small nudge (`src/lib/reading.ts`).
+4. **Rank.** `rank = worth × 2 + freshness + topic boost + source weight`. Depth comes first, but freshness counts for a lot (+2.5 today, halving every 4 days), so a good new post beats a slightly better old one. Topics you haven't covered yet get a boost, and authors known for depth get a small nudge (`src/lib/reading.ts`).
 5. **Render.** Astro builds static pages, deployed to GitHub Pages.
 
 The site **rebuilds itself every 6 hours** through GitHub Actions (`.github/workflows/deploy.yml`), so new articles appear without anyone pushing. After each deploy, a separate job checks that every Canon link still works.

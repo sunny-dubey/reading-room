@@ -27,6 +27,11 @@ const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.da
             : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: days > 300 ? 'numeric' : undefined });
         t.title = d.toLocaleString();
     });
+    // ---------- "New" badge: posts published in the last 48 hours (from when you're reading) ----------
+    document.querySelectorAll<HTMLElement>('[data-ts]').forEach(el => {
+        const badge = el.querySelector<HTMLElement>('[data-new]');
+        if (badge) badge.hidden = Date.now() - Number(el.dataset.ts) > 48 * 3600e3;
+    });
     // ---------- editions: show build time in the reader's timezone ----------
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const tzName = (d: Date) => {

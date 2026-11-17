@@ -5,10 +5,11 @@ import { getRoadmap } from './roadmap';
 
 const DAY = 864e5;
 
-/** How much an item deserves attention right now: depth first, freshness second. */
+/** How much an item deserves attention right now: depth first, then freshness (halves every 4 days:
+ *  +2.5 today, +1.25 at 4 days, +0.3 at two weeks), so a fresh good post beats an older slightly better one. */
+export const freshness = (i: FeedItem, now: number) => 2.5 * 0.5 ** (Math.max(0, now - +i.date) / DAY / 4);
 export const rank = (i: FeedItem, now: number) => {
-    const age = (now - +i.date) / DAY;
-    const fresh = age < 2 ? 1.2 : age < 7 ? 0.8 : age < 21 ? 0.3 : 0;
+    const fresh = freshness(i, now);
     return (i.brief?.worth ?? 2) * 2 + fresh + (i.skill?.boost ?? 0) + (i.weight ?? 0);
 };
 
@@ -46,6 +47,12 @@ async function buildReading() {
     // Today's deep read: the most worthwhile thing from the last two weeks (postmortems have their own slot).
     const recent = byRank.filter(i => now - +i.date < 14 * DAY && i.category !== 'postmortems' && i.brief?.fetched);
     const [deepRead] = take(recent.filter(i => (i.brief?.worth ?? 0) >= 4), 1);
+    // Fresh this week: the best of the last 3 days (7 if it's a quiet week), one per track first.
+    const freshPool = (days: number) => byRank.filter(i => now - +i.date < days * DAY && i.category !== 'postmortems'
+        && (i.brief?.worth ?? 0) >= 3 && (i.skill || isDeep(i)));
+    const pool = freshPool(3).length >= 3 ? freshPool(3) : freshPool(7);
+    const fresh = take(pool, 4, true);
+    fresh.push(...take(pool, 6 - fresh.length));
     // More worth your time: one per track first, then fill.
     const picks = take(byRank.filter(i => now - +i.date < 21 * DAY && isDeep(i) && i.category !== 'postmortems'), 4, true);
     picks.push(...take(byRank.filter(i => now - +i.date < 21 * DAY && isDeep(i) && i.category !== 'postmortems'), 6 - picks.length));
@@ -72,7 +79,7 @@ async function buildReading() {
         funding: startup('tc-startups'),
     };
 
-    return { items, learning, status, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, startups, roadmap };
+    return { items, learning, status, fetchedAt, now, deepRead, fresh, picks, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */

@@ -9,6 +9,7 @@ const depthLabel = { quick: 'Quick read', article: 'Article', deep: 'Deep dive' 
 ---
 <article class={`learn learn-${size}`} data-link={i.link} data-ts={+i.date} data-cat={i.category}>
     <div class="learn-meta">
+        <span class="new-badge" data-new hidden>New</span>
         {showTrack && <span class="story-cat" data-cat={i.category}>{categoryShort(i.category)}</span>}
         <span class="learn-src">{i.feedTitle}</span>
         <time data-rel datetime={i.date.toISOString()}></time>
