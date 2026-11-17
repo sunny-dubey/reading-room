@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import Tags from '../../components/Tags.astro';
+import { getLog, fmtMonth } from '../../lib/content';
+import { render } from 'astro:content';
+
+const entries = await getLog();
+const rendered = await Promise.all(entries.map(async e => ({ e, Content: (await render(e)).Content })));
+
+// Group by month so quiet stretches just look like shorter months.
+const groups = new Map<string, typeof rendered>();
+for (const r of rendered) {
+    const key = fmtMonth(r.e.data.date);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(r);
+}
+const day = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+---
+<Base title="Log" description="Short, dated things I learned.">
+    <header class="page-head">
+        <h1>Log</h1>
+        <p class="lead">Short things I learned, mostly while working with Claude. Newest first.</p>
+    </header>
+    {entries.length === 0 && <p class="empty">No entries yet. Run <code>/til</code> at the end of a session.</p>}
+    {[...groups].map(([month, rs]) => (
+        <section class="month">
+            <h2 class="month-title">{month} <span class="dim">· {rs.length}</span></h2>
+            {rs.map(({ e, Content }) => (
+                <article class="log-entry" id={e.id}>
+                    <div class="log-head">
+                        <time datetime={e.data.date.toISOString()}>{day(e.data.date)}</time>
+                        <a class="log-title" href={`/log/${e.id}/`}>{e.data.title}</a>
+                        {e.data.draft && <span class="kind">draft</span>}
+                    </div>
+                    <div class="prose prose-compact"><Content /></div>
+                    <div class="log-foot">
+                        <Tags tags={e.data.tags} />
+                        {e.data.source && <span class="dim source">{e.data.source}</span>}
+                    </div>
+                </article>
+            ))}
+        </section>
+    ))}
+</Base>

@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Search">
+    <header class="page-head"><h1>Search</h1></header>
+    <input id="q" class="search-input" type="search" placeholder="postgres, idempotency, hooks…" autocomplete="off" autofocus />
+    <p id="status" class="dim"></p>
+    <ul id="results" class="items" role="list"></ul>
+</Base>
+<script>
+    type Doc = { kind: string; title: string; href: string; tags: string[]; text: string };
+    const input = document.getElementById('q') as HTMLInputElement;
+    const list = document.getElementById('results')!;
+    const status = document.getElementById('status')!;
+    let docs: Doc[] = [];
+
+    const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+
+    function snippet(text: string, term: string) {
+        const i = text.toLowerCase().indexOf(term);
+        if (i < 0) return text.slice(0, 140);
+        const start = Math.max(0, i - 60);
+        return (start ? '…' : '') + text.slice(start, i + 100) + '…';
+    }
+
+    function run() {
+        const q = input.value.trim().toLowerCase();
+        const url = new URL(location.href);
+        q ? url.searchParams.set('q', q) : url.searchParams.delete('q');
+        history.replaceState(null, '', url);
+        if (!q) { list.innerHTML = ''; status.textContent = ''; return; }
+        const terms = q.split(/\s+/);
+        const scored = docs.map(d => {
+            const title = d.title.toLowerCase(), tags = d.tags.join(' '), text = d.text.toLowerCase();
+            let score = 0;
+            for (const t of terms) {
+                if (title.includes(t)) score += 5;
+                else if (tags.includes(t)) score += 3;
+                else if (text.includes(t)) score += 1;
+                else return { d, score: 0 };
+            }
+            return { d, score };
+        }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
+        status.textContent = `${scored.length} result${scored.length === 1 ? '' : 's'}`;
+        list.innerHTML = scored.map(({ d }) => {
+            const ext = d.kind === 'library';
+            return `<li class="item"><div class="item-meta"><span class="kind kind-${d.kind}">${d.kind}</span></div>
+                <div class="item-body"><a class="item-title" href="${esc(d.href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(d.title)}${ext ? ' ↗' : ''}</a>
+                <p class="item-blurb">${esc(snippet(d.text, terms[0]))}</p></div></li>`;
+        }).join('');
+    }
+
+    fetch('/search-index.json').then(r => r.json()).then((data: Doc[]) => {
+        docs = data;
+        const initial = new URLSearchParams(location.search).get('q');
+        if (initial) input.value = initial;
+        run();
+    });
+    input.addEventListener('input', run);
+</script>

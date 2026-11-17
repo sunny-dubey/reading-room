@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import Tags from '../../components/Tags.astro';
+import { getNotes, fmtDate } from '../../lib/content';
+const notes = await getNotes();
+---
+<Base title="Notes" description="One page per topic, kept up to date.">
+    <header class="page-head">
+        <h1>Notes</h1>
+        <p class="lead">One page per topic, kept up to date. When a topic keeps showing up in the log, it gets a page here.</p>
+    </header>
+    {notes.length === 0 ? <p class="empty">No notes yet.</p> : (
+        <div class="cards">
+            {notes.map(n => (
+                <a class="card" href={`/notes/${n.id}/`}>
+                    <span class="card-title">{n.data.title}</span>
+                    {n.data.summary && <span class="card-text">{n.data.summary}</span>}
+                    <span class="card-meta">updated {fmtDate(n.data.updated)}</span>
+                </a>
+            ))}
+        </div>
+    )}
+</Base>

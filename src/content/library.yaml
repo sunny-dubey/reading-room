@@ -1,0 +1,20 @@
+# Links worth keeping. Newest at the top is easiest to read, but order doesn't matter.
+# kind: article | video | talk | paper | repo | tool | book | thread
+
+- id: brandur-idempotency-keys
+  title: Implementing Stripe-like Idempotency Keys in Postgres
+  url: https://brandur.org/idempotency-keys
+  author: Brandur Leach
+  kind: article
+  why: The clearest end-to-end design for idempotent APIs, with atomic phases and recovery points. Directly applicable to payment flows.
+  added: 2026-11-17
+  tags: [payments, postgres, idempotency]
+
+- id: willison-blog
+  title: Simon Willison's Weblog
+  url: https://simonwillison.net/
+  author: Simon Willison
+  kind: article
+  why: Best ongoing record of practical LLM and agent tooling. Good source of log entries.
+  added: 2026-11-17
+  tags: [llm, tooling]

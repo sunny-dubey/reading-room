@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import Tags from '../components/Tags.astro';
+import { getLibrary, fmtDate } from '../lib/content';
+const links = await getLibrary();
+const kinds = [...new Set(links.map(l => l.data.kind))].sort();
+---
+<Base title="Library" description="Links worth keeping, with a line on why.">
+    <header class="page-head">
+        <h1>Library</h1>
+        <p class="lead">Articles, talks, and tools worth coming back to, each with a line on why.</p>
+    </header>
+    {kinds.length > 1 && (
+        <div class="filters" role="group" aria-label="Filter by kind">
+            <button class="filter" data-kind="all" aria-pressed="true">all</button>
+            {kinds.map(k => <button class="filter" data-kind={k} aria-pressed="false">{k}</button>)}
+        </div>
+    )}
+    {links.length === 0 ? <p class="empty">Nothing saved yet.</p> : (
+        <ul class="items" role="list">
+            {links.map(l => (
+                <li class="item" data-kind={l.data.kind}>
+                    <div class="item-meta">
+                        <time datetime={l.data.added.toISOString()}>{fmtDate(l.data.added)}</time>
+                        <span class="kind kind-library">{l.data.kind}</span>
+                    </div>
+                    <div class="item-body">
+                        <a class="item-title" href={l.data.url} target="_blank" rel="noopener noreferrer">{l.data.title}<span class="ext" aria-hidden="true"> ↗</span></a>
+                        {l.data.author && <span class="dim author"> · {l.data.author}</span>}
+                        <p class="item-blurb">{l.data.why}</p>
+                        <Tags tags={l.data.tags} />
+                    </div>
+                </li>
+            ))}
+        </ul>
+    )}
+</Base>
+<script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.filter');
+    buttons.forEach(b => b.addEventListener('click', () => {
+        const kind = b.dataset.kind;
+        buttons.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        document.querySelectorAll<HTMLElement>('.item[data-kind]').forEach(li => {
+            li.hidden = kind !== 'all' && li.dataset.kind !== kind;
+        });
+    }));
+</script>

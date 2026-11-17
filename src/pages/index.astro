@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import ItemList from '../components/ItemList.astro';
+import { getAllItems, getLog, getNotes, getWriting, getLibrary, getTagCounts } from '../lib/content';
+
+const [items, log, notes, writing, library, tags] = await Promise.all([
+    getAllItems(), getLog(), getNotes(), getWriting(), getLibrary(), getTagCounts(),
+]);
+const counts = [
+    { href: '/log/', label: ['log entry', 'log entries'], n: log.length },
+    { href: '/notes/', label: ['note', 'notes'], n: notes.length },
+    { href: '/writing/', label: ['post', 'posts'], n: writing.length },
+    { href: '/library/', label: ['saved link', 'saved links'], n: library.length },
+];
+---
+<Base>
+    <section class="intro">
+        <h1>Notebook</h1>
+        <p class="lead">
+            What I'm learning while building backend systems and working with AI tools.
+            Entries land when there's something worth writing down, not on a schedule.
+        </p>
+        <ul class="counts" role="list">
+            {counts.map(c => <li><a href={c.href}><strong>{c.n}</strong> {c.label[c.n === 1 ? 0 : 1]}</a></li>)}
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="section-title">Recently</h2>
+        {items.length ? <ItemList items={items.slice(0, 12)} /> : <p class="empty">Nothing here yet.</p>}
+    </section>
+
+    {tags.length > 0 && (
+        <section>
+            <h2 class="section-title">Topics</h2>
+            <div class="tag-cloud">
+                {tags.map(([t, n]) => <a class="tag" href={`/tags/${t}/`}>#{t} <span class="dim">{n}</span></a>)}
+            </div>
+        </section>
+    )}
+</Base>

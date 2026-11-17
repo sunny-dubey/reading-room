@@ -1,0 +1,23 @@
+---
+import Base from './Base.astro';
+import Tags from '../components/Tags.astro';
+interface Props {
+    title: string;
+    description?: string;
+    meta: string;
+    tags: string[];
+    back: { href: string; label: string };
+}
+const { title, description, meta, tags, back } = Astro.props;
+---
+<Base title={title} description={description}>
+    <article class="entry">
+        <a class="back" href={back.href}>← {back.label}</a>
+        <h1>{title}</h1>
+        <p class="entry-meta">{meta}</p>
+        <Tags tags={tags} />
+        <div class="prose">
+            <slot />
+        </div>
+    </article>
+</Base>
