@@ -16,6 +16,8 @@ Sunny's personal learning notebook. Astro 5 static site, deployed to GitHub Page
 - Log entries: one idea each, 2–8 sentences, specific (commands, numbers, error messages). Write in first person, plainly.
 - When folding log entries into a note: update the note's `updated` date and keep the log entries (notes link back to them via shared tags).
 
+- Site is served under `/sunny-docs/` (GitHub Pages project site). Wrap every internal link in `u()` from `src/lib/url.ts`, never a bare `/path`.
+
 ## Commands
 
 - `npm run dev`: local preview at http://localhost:4321

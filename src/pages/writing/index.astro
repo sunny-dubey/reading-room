@@ -1,9 +1,10 @@
 ---
+import { u } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
 import ItemList from '../../components/ItemList.astro';
 import { getWriting } from '../../lib/content';
 const posts = await getWriting();
-const items = posts.map(p => ({ kind: 'writing' as const, title: p.data.title, href: `/writing/${p.id}/`, date: p.data.date, tags: p.data.tags, blurb: p.data.description }));
+const items = posts.map(p => ({ kind: 'writing' as const, title: p.data.title, href: u(`/writing/${p.id}/`), date: p.data.date, tags: p.data.tags, blurb: p.data.description }));
 ---
 <Base title="Writing" description="Occasional long-form posts.">
     <header class="page-head">

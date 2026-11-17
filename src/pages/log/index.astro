@@ -1,4 +1,5 @@
 ---
+import { u } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
 import Tags from '../../components/Tags.astro';
 import { getLog, fmtMonth } from '../../lib/content';
@@ -29,7 +30,7 @@ const day = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'n
                 <article class="log-entry" id={e.id}>
                     <div class="log-head">
                         <time datetime={e.data.date.toISOString()}>{day(e.data.date)}</time>
-                        <a class="log-title" href={`/log/${e.id}/`}>{e.data.title}</a>
+                        <a class="log-title" href={u(`/log/${e.id}/`)}>{e.data.title}</a>
                         {e.data.draft && <span class="kind">draft</span>}
                     </div>
                     <div class="prose prose-compact"><Content /></div>

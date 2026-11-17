@@ -50,7 +50,7 @@ import Base from '../layouts/Base.astro';
         }).join('');
     }
 
-    fetch('/search-index.json').then(r => r.json()).then((data: Doc[]) => {
+    fetch(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/search-index.json`).then(r => r.json()).then((data: Doc[]) => {
         docs = data;
         const initial = new URLSearchParams(location.search).get('q');
         if (initial) input.value = initial;

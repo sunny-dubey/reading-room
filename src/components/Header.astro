@@ -1,21 +1,22 @@
 ---
+import { u } from '../lib/url';
 const path = Astro.url.pathname;
 const tabs = [
-    { href: '/log/', label: 'log' },
-    { href: '/notes/', label: 'notes' },
-    { href: '/writing/', label: 'writing' },
-    { href: '/library/', label: 'library' },
+    { href: u('/log/'), label: 'log' },
+    { href: u('/notes/'), label: 'notes' },
+    { href: u('/writing/'), label: 'writing' },
+    { href: u('/library/'), label: 'library' },
 ];
 ---
 <header class="site-header">
-    <a class="brand" href="/">sunny<span class="brand-dim">/notebook</span></a>
+    <a class="brand" href={u('/')}>sunny<span class="brand-dim">/notebook</span></a>
     <nav class="tabs" aria-label="Sections">
         {tabs.map(t => (
             <a href={t.href} aria-current={path.startsWith(t.href) ? 'page' : undefined}>{t.label}</a>
         ))}
     </nav>
     <div class="header-tools">
-        <a href="/search/" class="icon-btn" aria-label="Search">
+        <a href={u('/search/')} class="icon-btn" aria-label="Search">
             <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         </a>
         <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">

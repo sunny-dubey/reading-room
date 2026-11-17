@@ -1,4 +1,5 @@
 ---
+import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
 import ItemList from '../components/ItemList.astro';
 import { getAllItems, getLog, getNotes, getWriting, getLibrary, getTagCounts } from '../lib/content';
@@ -7,10 +8,10 @@ const [items, log, notes, writing, library, tags] = await Promise.all([
     getAllItems(), getLog(), getNotes(), getWriting(), getLibrary(), getTagCounts(),
 ]);
 const counts = [
-    { href: '/log/', label: ['log entry', 'log entries'], n: log.length },
-    { href: '/notes/', label: ['note', 'notes'], n: notes.length },
-    { href: '/writing/', label: ['post', 'posts'], n: writing.length },
-    { href: '/library/', label: ['saved link', 'saved links'], n: library.length },
+    { href: u('/log/'), label: ['log entry', 'log entries'], n: log.length },
+    { href: u('/notes/'), label: ['note', 'notes'], n: notes.length },
+    { href: u('/writing/'), label: ['post', 'posts'], n: writing.length },
+    { href: u('/library/'), label: ['saved link', 'saved links'], n: library.length },
 ];
 ---
 <Base>
@@ -34,7 +35,7 @@ const counts = [
         <section>
             <h2 class="section-title">Topics</h2>
             <div class="tag-cloud">
-                {tags.map(([t, n]) => <a class="tag" href={`/tags/${t}/`}>#{t} <span class="dim">{n}</span></a>)}
+                {tags.map(([t, n]) => <a class="tag" href={u(`/tags/${t}/`)}>#{t} <span class="dim">{n}</span></a>)}
             </div>
         </section>
     )}

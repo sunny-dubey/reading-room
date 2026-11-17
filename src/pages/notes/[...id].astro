@@ -1,4 +1,5 @@
 ---
+import { u } from '../../lib/url';
 import Entry from '../../layouts/Entry.astro';
 import { getNotes, getLog, fmtDate } from '../../lib/content';
 import { render } from 'astro:content';
@@ -11,12 +12,12 @@ const { Content } = await render(entry);
 // Log entries sharing a tag with this note: candidates to fold in.
 const related = (await getLog()).filter(l => l.data.tags.some(t => entry.data.tags.includes(t))).slice(0, 8);
 ---
-<Entry title={entry.data.title} description={entry.data.summary} meta={`updated ${fmtDate(entry.data.updated)}`} tags={entry.data.tags} back={{ href: '/notes/', label: 'notes' }}>
+<Entry title={entry.data.title} description={entry.data.summary} meta={`updated ${fmtDate(entry.data.updated)}`} tags={entry.data.tags} back={{ href: u('/notes/'), label: 'notes' }}>
     <Content />
     {related.length > 0 && (
         <aside class="related">
             <h2>Related log entries</h2>
-            <ul>{related.map(l => <li><a href={`/log/${l.id}/`}>{l.data.title}</a> <span class="dim">{fmtDate(l.data.date)}</span></li>)}</ul>
+            <ul>{related.map(l => <li><a href={u(`/log/${l.id}/`)}>{l.data.title}</a> <span class="dim">{fmtDate(l.data.date)}</span></li>)}</ul>
         </aside>
     )}
 </Entry>

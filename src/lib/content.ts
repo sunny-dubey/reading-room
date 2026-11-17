@@ -1,3 +1,4 @@
+import { u } from './url';
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 const visible = ({ data }: { data: { draft?: boolean } }) =>
@@ -30,9 +31,9 @@ export interface Item {
 export async function getAllItems(): Promise<Item[]> {
     const [log, notes, writing, library] = await Promise.all([getLog(), getNotes(), getWriting(), getLibrary()]);
     const items: Item[] = [
-        ...log.map(e => ({ kind: 'log' as const, title: e.data.title, href: `/log/${e.id}/`, date: e.data.date, tags: e.data.tags })),
-        ...notes.map(e => ({ kind: 'note' as const, title: e.data.title, href: `/notes/${e.id}/`, date: e.data.updated, tags: e.data.tags, blurb: e.data.summary })),
-        ...writing.map(e => ({ kind: 'writing' as const, title: e.data.title, href: `/writing/${e.id}/`, date: e.data.date, tags: e.data.tags, blurb: e.data.description })),
+        ...log.map(e => ({ kind: 'log' as const, title: e.data.title, href: u(`/log/${e.id}/`), date: e.data.date, tags: e.data.tags })),
+        ...notes.map(e => ({ kind: 'note' as const, title: e.data.title, href: u(`/notes/${e.id}/`), date: e.data.updated, tags: e.data.tags, blurb: e.data.summary })),
+        ...writing.map(e => ({ kind: 'writing' as const, title: e.data.title, href: u(`/writing/${e.id}/`), date: e.data.date, tags: e.data.tags, blurb: e.data.description })),
         ...library.map(e => ({ kind: 'library' as const, title: e.data.title, href: e.data.url, date: e.data.added, tags: e.data.tags, external: true, blurb: e.data.why })),
     ];
     return items.sort((a, b) => +b.date - +a.date);

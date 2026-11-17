@@ -1,4 +1,5 @@
 ---
+import { u } from '../../lib/url';
 import Entry from '../../layouts/Entry.astro';
 import { getLog, fmtDate } from '../../lib/content';
 import { render } from 'astro:content';
@@ -10,6 +11,6 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 const meta = [fmtDate(entry.data.date), entry.data.source].filter(Boolean).join(' · ');
 ---
-<Entry title={entry.data.title} meta={meta} tags={entry.data.tags} back={{ href: '/log/', label: 'log' }}>
+<Entry title={entry.data.title} meta={meta} tags={entry.data.tags} back={{ href: u('/log/'), label: 'log' }}>
     <Content />
 </Entry>
