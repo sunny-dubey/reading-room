@@ -1,0 +1,14 @@
+---
+// Local-only actions: save to library, or explain the piece back in your own words.
+import { u } from '../lib/url';
+interface Props { title: string; url: string; author?: string; }
+const { title, url, author = '' } = Astro.props;
+const dev = import.meta.env.DEV;
+const explainHref = `${u('/write/')}?kind=log&explain=1&title=${encodeURIComponent(title)}&ref=${encodeURIComponent(url)}`;
+---
+{dev && (
+    <span class="story-actions">
+        <a class="act act-primary" href={explainHref}>Explain it back</a>
+        <button type="button" class="act" data-save data-title={title} data-url={url} data-author={author}>Save</button>
+    </span>
+)}

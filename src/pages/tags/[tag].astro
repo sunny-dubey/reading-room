@@ -10,11 +10,13 @@ export async function getStaticPaths() {
 const { tag } = Astro.params;
 const items = (await getAllItems()).filter(i => i.tags.includes(tag!));
 ---
-<Base title={`#${tag}`}>
-    <header class="page-head">
-        <a class="back" href={u('/tags/')}>← topics</a>
-        <h1>#{tag}</h1>
-        <p class="lead">{items.length} {items.length === 1 ? 'item' : 'items'} across everything.</p>
-    </header>
-    <ItemList items={items} />
+<Base title={`#${tag}`} accent="note">
+    <div class="narrow">
+        <header class="page-head">
+            <a class="back" href={u('/tags/')}>← Topics</a>
+            <h1>#{tag} <span class="count-pill">{items.length}</span></h1>
+            <p class="lead">Everything tagged {tag}, across all sections.</p>
+        </header>
+        <ItemList items={items} />
+    </div>
 </Base>

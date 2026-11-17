@@ -1,4 +1,4 @@
-# sunny-docs
+# reading-room
 
 My learning notebook: **Log** (short dated learnings), **Notes** (one page per topic), **Writing** (long-form), **Library** (links worth keeping).
 
@@ -8,6 +8,8 @@ npm run dev        # http://localhost:4321
 ```
 
 ## Adding things
+
+- **In the site:** run `npm run dev`, click **+ Write** (or **Edit** on any entry), ⌘S to save. The editor only exists locally; it writes markdown into `src/content/`.
 
 - **From a Claude Code session:** type `/til` near the end. It writes draft log entries here; review them, flip `draft: false`, commit.
 - **By hand:** `npm run new log "What I learned" postgres,queues`

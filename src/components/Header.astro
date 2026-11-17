@@ -1,36 +1,42 @@
 ---
 import { u } from '../lib/url';
-const path = Astro.url.pathname;
-const tabs = [
-    { href: u('/log/'), label: 'log' },
-    { href: u('/notes/'), label: 'notes' },
-    { href: u('/writing/'), label: 'writing' },
-    { href: u('/library/'), label: 'library' },
+import ThemeToggle from './ThemeToggle.astro';
+import { CATEGORIES } from '../lib/feeds';
+const path = Astro.url.pathname.replace(/\/?$/, '/');
+const dev = import.meta.env.DEV;
+const sections = [
+    { href: u('/'), label: 'Today', cat: '' },
+    ...CATEGORIES.map(c => ({ href: u(`/${c.slug}/`), label: c.short, cat: c.id })),
+    { href: u('/canon/'), label: 'Canon', cat: '' },
+    { href: u('/concepts/'), label: 'Concepts', cat: '' },
 ];
+const notebookPaths = ['/notebook/', '/log/', '/notes/', '/writing/', '/tags/', '/write/'].map(p => u(p));
+const isNotebook = notebookPaths.some(p => path.startsWith(p));
+const isSaved = path.startsWith(u('/library/'));
 ---
-<header class="site-header">
-    <a class="brand" href={u('/')}>sunny<span class="brand-dim">/notebook</span></a>
-    <nav class="tabs" aria-label="Sections">
-        {tabs.map(t => (
-            <a href={t.href} aria-current={path.startsWith(t.href) ? 'page' : undefined}>{t.label}</a>
-        ))}
-    </nav>
-    <div class="header-tools">
-        <a href={u('/search/')} class="icon-btn" aria-label="Search">
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+<div class="nav-wrap">
+    <nav class="nav" aria-label="Primary">
+        <a class="brand" href={u('/')}>
+            <span class="brand-mark" aria-hidden="true">R</span>
+            <span class="brand-name">The Reading Room</span>
         </a>
-        <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
-        </button>
-    </div>
-</header>
-<script>
-    document.getElementById('theme-toggle')?.addEventListener('click', () => {
-        const root = document.documentElement;
-        const current = root.dataset.theme
-            ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        const next = current === 'dark' ? 'light' : 'dark';
-        root.dataset.theme = next;
-        try { localStorage.setItem('theme', next); } catch {}
-    });
-</script>
+        <div class="nav-links">
+            <a href={u('/pulse/')} aria-current={path.startsWith(u('/pulse/')) ? 'page' : undefined}>Pulse</a>
+            <a href={u('/notebook/')} aria-current={isNotebook ? 'page' : undefined}>Notebook</a>
+            <a href={u('/library/')} aria-current={isSaved ? 'page' : undefined}>Saved</a>
+        </div>
+        <div class="nav-tools">
+            {dev && <a href={u('/write/')} class="write-btn" title="Write (local only)">+ Write</a>}
+            <a href={u('/search/')} class="icon-btn" aria-label="Search" title="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </a>
+            <ThemeToggle />
+        </div>
+    </nav>
+    <nav class="sections-bar" aria-label="Sections">
+        {sections.map(s => {
+            const active = s.href === u('/') ? path === u('/').replace(/\/?$/, '/') : path.startsWith(s.href);
+            return <a href={s.href} aria-current={active ? 'page' : undefined}>{s.cat && <span class="cat-dot" data-cat={s.cat}></span>}{s.label}</a>;
+        })}
+    </nav>
+</div>

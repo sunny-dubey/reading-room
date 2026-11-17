@@ -1,0 +1,126 @@
+---
+// Shared behaviour for every Reading Room page. Include once per page.
+---
+<script>
+    const store = {
+        get<T>(k: string, d: T): T { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+        set(k: string, v: unknown) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    };
+
+    // ---------- relative times, in the reader's own timezone ----------
+    const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
+    document.querySelectorAll<HTMLTimeElement>('time[data-rel]').forEach(t => {
+        const d = new Date(t.dateTime);
+        const mins = Math.round((Date.now() - +d) / 60000);
+        const days = Math.round(mins / 1440);
+        t.textContent = mins < 1 ? 'just now'
+            : mins < 60 ? rtf.format(-mins, 'minute')
+            : mins < 1440 ? rtf.format(-Math.round(mins / 60), 'hour')
+            : days < 30 ? rtf.format(-days, 'day')
+            : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: days > 300 ? 'numeric' : undefined });
+        t.title = d.toLocaleString();
+    });
+    document.querySelectorAll<HTMLElement>('[data-today]').forEach(el => {
+        el.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    });
+
+    // ---------- read tracking (dims things you've opened) ----------
+    const read = new Set<string>(store.get('reading:read', [] as string[]));
+    const paintRead = () => document.querySelectorAll<HTMLElement>('[data-link]').forEach(el => el.classList.toggle('is-read', read.has(el.dataset.link!)));
+    paintRead();
+    document.addEventListener('click', e => {
+        const a = (e.target as HTMLElement).closest('a[data-read]');
+        const link = a?.closest<HTMLElement>('[data-link]')?.dataset.link;
+        if (!link) return;
+        read.add(link);
+        store.set('reading:read', [...read].slice(-3000));
+        paintRead();
+    });
+
+    // ---------- the Canon: progress per track ----------
+    const done = new Set<string>(store.get('canon:done', [] as string[]));
+    function paintCanon() {
+        document.querySelectorAll<HTMLInputElement>('[data-canon-toggle]').forEach(cb => {
+            cb.checked = done.has(cb.dataset.canonToggle!);
+            cb.closest('.canon-item')?.classList.toggle('is-done', cb.checked);
+        });
+        document.querySelectorAll<HTMLElement>('[data-canon-track]').forEach(sec => {
+            const ids = [...sec.querySelectorAll<HTMLElement>('[data-canon-id]')].map(x => x.dataset.canonId!);
+            const n = ids.filter(id => done.has(id)).length;
+            const count = sec.querySelector('[data-canon-count]');
+            const bar = sec.querySelector<HTMLElement>('[data-canon-bar]');
+            if (count) count.textContent = `${n} / ${ids.length}`;
+            if (bar) bar.style.width = `${ids.length ? (n / ids.length) * 100 : 0}%`;
+        });
+        // "Next up": show the first unfinished canon item for each track.
+        document.querySelectorAll<HTMLElement>('[data-next-track]').forEach(box => {
+            const candidates = [...box.querySelectorAll<HTMLElement>('[data-next-id]')];
+            const next = candidates.find(c => !done.has(c.dataset.nextId!));
+            candidates.forEach(c => (c.hidden = c !== next));
+            const finished = box.querySelector<HTMLElement>('[data-next-done]');
+            if (finished) finished.hidden = !!next;
+            const prog = box.querySelector('[data-next-progress]');
+            if (prog) prog.textContent = `${candidates.filter(c => done.has(c.dataset.nextId!)).length} of ${candidates.length} done`;
+        });
+    }
+    document.addEventListener('change', e => {
+        const cb = (e.target as HTMLElement).closest<HTMLInputElement>('[data-canon-toggle]');
+        if (!cb) return;
+        cb.checked ? done.add(cb.dataset.canonToggle!) : done.delete(cb.dataset.canonToggle!);
+        store.set('canon:done', [...done]);
+        paintCanon();
+    });
+    document.addEventListener('click', e => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-mark-done]');
+        if (!btn) return;
+        done.add(btn.dataset.markDone!);
+        store.set('canon:done', [...done]);
+        paintCanon();
+    });
+    paintCanon();
+
+    // ---------- "show more" toggles ----------
+    document.querySelectorAll<HTMLButtonElement>('[data-expand]').forEach(b => b.addEventListener('click', () => {
+        document.getElementById(b.dataset.expand!)?.classList.remove('collapsed');
+        b.remove();
+    }));
+
+    // ---------- local only: save a piece to the library ----------
+    const API = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/__notebook`;
+    document.addEventListener('click', e => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-save]');
+        if (!btn) return;
+        const host = btn.closest<HTMLElement>('[data-link]') ?? btn.parentElement!;
+        let form = host.querySelector<HTMLFormElement>('.save-form');
+        if (form) { form.remove(); return; }
+        form = document.createElement('form');
+        form.className = 'save-form';
+        form.innerHTML = `<input name="why" placeholder="Why keep this? (one line)" required />
+            <input name="tags" placeholder="tags, comma separated" />
+            <button type="submit">Save to library</button>`;
+        host.appendChild(form);
+        (form.elements.namedItem('why') as HTMLInputElement).focus();
+        form.addEventListener('submit', async ev => {
+            ev.preventDefault();
+            const fd = new FormData(form!);
+            const submit = form!.querySelector('button')!;
+            submit.textContent = 'Saving…';
+            try {
+                const res = await fetch(`${API}/library`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: btn.dataset.title, url: btn.dataset.url, author: btn.dataset.author,
+                        why: fd.get('why'), tags: String(fd.get('tags') ?? '').split(',').map(t => t.trim()).filter(Boolean),
+                    }),
+                });
+                const out = await res.json();
+                if (!res.ok) throw new Error(out.error);
+                form!.remove();
+                btn.textContent = 'Saved ✓';
+                btn.disabled = true;
+            } catch (err) {
+                submit.textContent = `Failed: ${(err as Error).message}`;
+            }
+        });
+    });
+</script>

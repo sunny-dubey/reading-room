@@ -10,7 +10,7 @@ const log = defineCollection({
         title: z.string(),
         date: z.coerce.date(),
         tags,
-        source: z.string().optional(), // e.g. "claude session · jobhunt-agent"
+        source: z.string().optional(), // optional, not shown on the site
         draft: z.boolean().default(false),
     }),
 });
@@ -53,4 +53,34 @@ const library = defineCollection({
     }),
 });
 
-export const collections = { log, notes, writing, library };
+// RSS/Atom feeds read on the Reading tab.
+const feeds = defineCollection({
+    loader: file('./src/content/feeds.yaml'),
+    schema: z.object({
+        title: z.string(),
+        url: z.string().url(),
+        site: z.string().url().optional(),
+        category: z.string().default('other'),
+        limit: z.number().int().positive().default(8),
+        maxAgeDays: z.number().int().positive().default(45),
+        type: z.enum(['rss', 'bluesky', 'reddit']).default('rss'),
+        perSub: z.number().int().positive().default(3), // reddit only: max posts per subreddit
+        minLikes: z.number().int().nonnegative().default(15), // bluesky only
+    }),
+});
+
+// The Canon: foundational reads per learning track.
+const canon = defineCollection({
+    loader: file('./src/content/canon.yaml'),
+    schema: z.object({
+        track: z.enum(['systems', 'backend', 'ai-eng', 'ml', 'postmortems']),
+        title: z.string(),
+        author: z.string(),
+        url: z.string().url(),
+        kind: z.enum(['paper', 'article', 'book', 'video', 'course', 'docs']),
+        minutes: z.number().int().positive(),
+        why: z.string(),
+    }),
+});
+
+export const collections = { log, notes, writing, library, feeds, canon };

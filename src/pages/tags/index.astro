@@ -1,12 +1,20 @@
 ---
 import { u } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
+import Tile from '../../components/Tile.astro';
 import { getTagCounts } from '../../lib/content';
 const tags = await getTagCounts();
 ---
-<Base title="Topics">
-    <header class="page-head"><h1>Topics</h1><p class="lead">Every tag across the log, notes, writing, and library.</p></header>
-    <div class="tag-cloud">
-        {tags.map(([t, n]) => <a class="tag" href={u(`/tags/${t}/`)}>#{t} <span class="dim">{n}</span></a>)}
+<Base title="Topics" accent="note">
+    <div class="narrow">
+        <header class="page-head">
+            <h1>Topics <span class="count-pill">{tags.length}</span></h1>
+            <p class="lead">Every tag across the log, notes, writing, and library.</p>
+        </header>
+        <Tile k="note">
+            <div class="tag-cloud">
+                {tags.map(([t, n]) => <a class="tag" href={u(`/tags/${t}/`)}>#{t} <span class="n">{n}</span></a>)}
+            </div>
+        </Tile>
     </div>
 </Base>

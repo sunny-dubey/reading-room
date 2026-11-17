@@ -1,0 +1,27 @@
+---
+import type { FeedItem } from '../lib/feeds';
+import { categoryShort } from '../lib/feeds';
+import { u } from '../lib/url';
+import StoryActions from './StoryActions.astro';
+interface Props { i: FeedItem; size?: 'hero' | 'card' | 'row'; showTrack?: boolean; }
+const { i, size = 'card', showTrack = true } = Astro.props;
+const b = i.brief;
+const depthLabel = { quick: 'Quick read', article: 'Article', deep: 'Deep dive' }[b?.depth ?? 'quick'];
+const slug = (c: string) => c.replace(/[^a-z0-9]+/g, '-');
+---
+<article class={`learn learn-${size}`} data-link={i.link} data-ts={+i.date} data-cat={i.category}>
+    <div class="learn-meta">
+        {showTrack && <span class="story-cat" data-cat={i.category}>{categoryShort(i.category)}</span>}
+        <span class="learn-src">{i.feedTitle}</span>
+        <time data-rel datetime={i.date.toISOString()}></time>
+        {b && b.minutes > 0 && <span class="learn-time">{b.minutes} min</span>}
+        {b && <span class={`depth depth-${b.depth}`}>{depthLabel}</span>}
+    </div>
+    <a class="learn-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+    <div class="learn-foot">
+        {b && b.concepts.length > 0 && (
+            <span class="concepts">{b.concepts.map(c => <a class="concept" href={u(`/concepts/#${slug(c)}`)}>{c}</a>)}</span>
+        )}
+        <StoryActions title={i.title} url={i.link} author={i.feedTitle} />
+    </div>
+</article>

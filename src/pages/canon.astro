@@ -1,0 +1,25 @@
+---
+import { u } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import CanonList from '../components/CanonList.astro';
+import { getCanon } from '../lib/reading';
+const tracks = (await getCanon()).filter(t => t.items.length);
+const total = tracks.reduce((a, t) => a + t.items.length, 0);
+---
+<Base title="The Canon" description="Foundational reads for each track, in order." accent="reading">
+    <div class="rd">
+        <ReadingMast compact title="The Canon" sub={`${total} foundational reads across ${tracks.length} tracks. New posts keep you current; these make you good.`} />
+        <div class="canon-tracks">
+            {tracks.map(t => (
+                <div class="canon-track" data-cat={t.id}>
+                    <h2 class="canon-track-title"><a href={u(`/${t.slug}/`)}><span class="cat-dot" data-cat={t.id}></span>{t.label}</a></h2>
+                    <CanonList items={t.items} track={t.id} />
+                </div>
+            ))}
+        </div>
+        <p class="rd-more">Edit the list in <code>src/content/canon.yaml</code>. Progress is saved in this browser.</p>
+    </div>
+    <ReadingClient />
+</Base>

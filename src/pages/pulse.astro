@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getReading } from '../lib/reading';
+const { pulse, fetchedAt } = await getReading();
+const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
+---
+<Base title="Pulse" description="The week in tech, in ten headlines." accent="reading">
+    <div class="rd">
+        <ReadingMast compact title="Pulse" sub="The week in tech, in ten headlines. Enough to know what's happening, then back to learning." updated={fetchedAt} />
+        <ol class="pulse-list">
+            {pulse.map(i => (
+                <li data-link={i.link}>
+                    <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                    <span class="dim">{host(i.link)}{i.points ? ` · ${i.points} points` : ''} · <time data-rel datetime={i.date.toISOString()}></time>{i.comments && <> · <a href={i.comments} target="_blank" rel="noopener noreferrer">discussion</a></>}</span>
+                </li>
+            ))}
+        </ol>
+    </div>
+    <ReadingClient />
+</Base>

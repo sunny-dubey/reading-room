@@ -2,10 +2,15 @@
 import Base from '../layouts/Base.astro';
 ---
 <Base title="Search">
-    <header class="page-head"><h1>Search</h1></header>
-    <input id="q" class="search-input" type="search" placeholder="postgres, idempotency, hooks…" autocomplete="off" autofocus />
-    <p id="status" class="dim"></p>
-    <ul id="results" class="items" role="list"></ul>
+    <div class="narrow">
+        <header class="page-head"><h1>Search</h1><p class="lead">Every story in the Reading Room, plus my notebook and saved links.</p></header>
+        <label class="tile search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" class="search-input" type="search" placeholder="outage, claude, postgres, layoffs…" autocomplete="off" autofocus aria-label="Search" />
+        </label>
+        <p id="status"></p>
+        <ul id="results" class="rows" role="list"></ul>
+    </div>
 </Base>
 <script>
     type Doc = { kind: string; title: string; href: string; tags: string[]; text: string };
@@ -43,10 +48,10 @@ import Base from '../layouts/Base.astro';
         }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
         status.textContent = `${scored.length} result${scored.length === 1 ? '' : 's'}`;
         list.innerHTML = scored.map(({ d }) => {
-            const ext = d.kind === 'library';
-            return `<li class="item"><div class="item-meta"><span class="kind kind-${d.kind}">${d.kind}</span></div>
-                <div class="item-body"><a class="item-title" href="${esc(d.href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(d.title)}${ext ? ' ↗' : ''}</a>
-                <p class="item-blurb">${esc(snippet(d.text, terms[0]))}</p></div></li>`;
+            const ext = d.kind === 'library' || d.kind === 'reading';
+            return `<li class="tile hoverable k-${d.kind}"><div class="row"><span class="kind">${d.kind}</span>
+                <a class="row-title stretched" href="${esc(d.href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(d.title)}${ext ? ' ↗' : ''}</a></div>
+                <p class="row-blurb">${esc(snippet(d.text, terms[0]))}</p></li>`;
         }).join('');
     }
 

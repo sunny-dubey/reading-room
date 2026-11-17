@@ -1,0 +1,26 @@
+---
+import { u } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import { getReading } from '../lib/reading';
+import { PULSE } from '../lib/feeds';
+const { tracks, status, fetchedAt } = await getReading();
+const groups = [...tracks.map(t => ({ id: t.id, label: t.label, href: u(`/${t.slug}/`), sources: t.sources })), { id: 'pulse', label: PULSE.label, href: u('/pulse/'), sources: status.filter(s => s.category === 'pulse') }];
+const failing = status.filter(s => !s.ok).length;
+---
+<Base title="Sources" accent="reading">
+    <div class="rd">
+        <ReadingMast compact title="Sources" sub={`${status.length} feeds${failing ? `, ${failing} failing right now` : ''}`} updated={fetchedAt} />
+        <div class="rd-sources">
+            {groups.map(g => (
+                <section class="tile">
+                    <h2 class="src-head"><a href={g.href}><span class="cat-dot" data-cat={g.id}></span>{g.label}</a></h2>
+                    <ul role="list">
+                        {g.sources.map(x => <li><span class={x.ok ? 'ok' : 'bad'}></span><a href={x.site ?? x.url} target="_blank" rel="noopener noreferrer">{x.title}</a><span class="n" title={x.error}>{x.ok ? x.count : 'failing'}</span></li>)}
+                    </ul>
+                </section>
+            ))}
+        </div>
+        <p class="side-note" style="text-align:center;margin-top:20px">Sources live in <code>src/content/feeds.yaml</code> · <a href={u('/feeds.opml')}>Download OPML</a></p>
+    </div>
+</Base>

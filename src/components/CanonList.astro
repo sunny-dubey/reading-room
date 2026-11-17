@@ -1,0 +1,36 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import StoryActions from './StoryActions.astro';
+interface Props { items: CollectionEntry<'canon'>[]; track: string; }
+const { items, track } = Astro.props;
+const total = items.reduce((a, x) => a + x.data.minutes, 0);
+const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
+---
+<section class="canon" data-canon-track={track}>
+    <header class="canon-head">
+        <div>
+            <h2>The Canon</h2>
+            <p>Foundational reads, in order. Tick them off as you go. About {hours(total)} in total.</p>
+        </div>
+        <div class="canon-progress" aria-live="polite">
+            <span data-canon-count>0 / {items.length}</span>
+            <span class="bar"><span data-canon-bar style="width:0%"></span></span>
+        </div>
+    </header>
+    <ol class="canon-list" role="list">
+        {items.map((c, n) => (
+            <li class="canon-item" data-canon-id={c.id} data-link={c.data.url}>
+                <label class="canon-check" title="Mark as done">
+                    <input type="checkbox" data-canon-toggle={c.id} aria-label={`Done: ${c.data.title}`} />
+                    <span class="num">{n + 1}</span>
+                </label>
+                <div class="canon-main">
+                    <a class="canon-title" href={c.data.url} target="_blank" rel="noopener noreferrer" data-read>{c.data.title}</a>
+                    <div class="canon-meta"><span>{c.data.author}</span><span class="kind-tag">{c.data.kind}</span><span>{hours(c.data.minutes)}</span></div>
+                    <p class="canon-why">{c.data.why}</p>
+                    <div class="learn-foot"><StoryActions title={c.data.title} url={c.data.url} author={c.data.author} /></div>
+                </div>
+            </li>
+        ))}
+    </ol>
+</section>

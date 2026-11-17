@@ -6,10 +6,12 @@ import { getWriting } from '../../lib/content';
 const posts = await getWriting();
 const items = posts.map(p => ({ kind: 'writing' as const, title: p.data.title, href: u(`/writing/${p.id}/`), date: p.data.date, tags: p.data.tags, blurb: p.data.description }));
 ---
-<Base title="Writing" description="Occasional long-form posts.">
-    <header class="page-head">
-        <h1>Writing</h1>
-        <p class="lead">Longer posts, written when a note has grown into a story.</p>
-    </header>
-    {items.length ? <ItemList items={items} showKind={false} /> : <p class="empty">No posts yet. The first one will come from a note that outgrows its page.</p>}
+<Base title="Writing" description="Occasional long-form posts." accent="writing">
+    <div class="narrow">
+        <header class="page-head">
+            <h1>Writing <span class="count-pill">{items.length}</span></h1>
+            <p class="lead">Longer posts, written when a note has grown into a story.</p>
+        </header>
+        {items.length ? <ItemList items={items} showKind={false} /> : <p class="notice">No posts yet. The first one will come from a note that outgrows its page.</p>}
+    </div>
 </Base>

@@ -1,42 +1,120 @@
 ---
 import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
-import ItemList from '../components/ItemList.astro';
-import { getAllItems, getLog, getNotes, getWriting, getLibrary, getTagCounts } from '../lib/content';
+import LearnCard from '../components/LearnCard.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getReading, getCanon, getRevisit } from '../lib/reading';
 
-const [items, log, notes, writing, library, tags] = await Promise.all([
-    getAllItems(), getLog(), getNotes(), getWriting(), getLibrary(), getTagCounts(),
-]);
-const counts = [
-    { href: u('/log/'), label: ['log entry', 'log entries'], n: log.length },
-    { href: u('/notes/'), label: ['note', 'notes'], n: notes.length },
-    { href: u('/writing/'), label: ['post', 'posts'], n: writing.length },
-    { href: u('/library/'), label: ['saved link', 'saved links'], n: library.length },
-];
+const { learning, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse } = await getReading();
+const canon = await getCanon();
+const revisit = await getRevisit(now);
+const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+const deepCount = tracks.reduce((a, t) => a + t.deep.length, 0);
+const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
+const dev = import.meta.env.DEV;
 ---
-<Base>
-    <section class="intro">
-        <h1>Notebook</h1>
-        <p class="lead">
-            What I'm learning while building backend systems and working with AI tools.
-            Entries land when there's something worth writing down, not on a schedule.
-        </p>
-        <ul class="counts" role="list">
-            {counts.map(c => <li><a href={c.href}><strong>{c.n}</strong> {c.label[c.n === 1 ? 0 : 1]}</a></li>)}
-        </ul>
-    </section>
+<Base description="Learn something real every day: distributed systems, backend, AI engineering and ML foundations." accent="reading">
+    <div class="rd">
+        <ReadingMast title="The Reading Room" kicker={today} sub={`${deepCount} deep reads across ${tracks.length} tracks, ranked for understanding`} updated={fetchedAt} />
 
-    <section>
-        <h2 class="section-title">Recently</h2>
-        {items.length ? <ItemList items={items.slice(0, 12)} /> : <p class="empty">Nothing here yet.</p>}
-    </section>
+        {deepRead && (
+            <section class="today-hero" data-cat={deepRead.category}>
+                <div class="today-label"><span aria-hidden="true">◆</span> Today's deep read</div>
+                <LearnCard i={deepRead} size="hero" />
+            </section>
+        )}
 
-    {tags.length > 0 && (
-        <section>
-            <h2 class="section-title">Topics</h2>
-            <div class="tag-cloud">
-                {tags.map(([t, n]) => <a class="tag" href={u(`/tags/${t}/`)}>#{t} <span class="dim">{n}</span></a>)}
+        <section class="home-block">
+            <header class="block-head">
+                <h2>Continue the Canon</h2>
+                <a href={u('/canon/')}>All tracks →</a>
+            </header>
+            <div class="next-grid">
+                {canon.filter(t => t.items.length).map(t => (
+                    <div class="next-card" data-next-track={t.id} data-cat={t.id}>
+                        <div class="next-top">
+                            <a class="story-cat" data-cat={t.id} href={u(`/${t.slug}/#canon`)}>{t.short}</a>
+                            <span class="next-progress" data-next-progress></span>
+                        </div>
+                        {t.items.map(c => (
+                            <div class="next-item" data-next-id={c.id} data-link={c.data.url} hidden>
+                                <a class="next-title" href={c.data.url} target="_blank" rel="noopener noreferrer" data-read>{c.data.title}</a>
+                                <p class="next-why">{c.data.why}</p>
+                                <div class="next-foot">
+                                    <span>{c.data.author} · {c.data.kind} · {hours(c.data.minutes)}</span>
+                                    <button type="button" class="mark-done" data-mark-done={c.id}>Mark done ✓</button>
+                                </div>
+                            </div>
+                        ))}
+                        <p class="next-item" data-next-done hidden>Track complete. Go deeper with the fresh reads in <a class="u" href={u(`/${t.slug}/`)}>{t.short}</a>.</p>
+                    </div>
+                ))}
             </div>
         </section>
-    )}
+
+        {picks.length > 0 && (
+            <section class="home-block">
+                <header class="block-head">
+                    <h2>More worth your time</h2>
+                    <span class="dim">ranked by depth, not recency</span>
+                </header>
+                <div class="pick-grid">{picks.map(i => <LearnCard i={i} />)}</div>
+            </section>
+        )}
+
+        <div class="home-split">
+            {postmortem && (
+                <section class="home-block">
+                    <header class="block-head">
+                        <h2>Learn from failure</h2>
+                        <a href={u('/postmortems/')}>More postmortems →</a>
+                    </header>
+                    <LearnCard i={postmortem} size="card" showTrack={false} />
+                </section>
+            )}
+            <section class="home-block">
+                <header class="block-head">
+                    <h2>Revisit</h2>
+                    <a href={u('/notebook/')}>Notebook →</a>
+                </header>
+                <div class="revisit">
+                    {revisit.week.length + revisit.month.length === 0 && !revisit.archive ? (
+                        <p class="dim">
+                            Things you write show up here again after a week and a month, because revisiting is what makes knowledge stick.
+                            {dev ? <> Start with <strong>Explain it back</strong> on anything you read.</> : ''}
+                        </p>
+                    ) : (
+                        <ul class="mini" role="list">
+                            {revisit.week.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">1 week ago</span></a></li>)}
+                            {revisit.month.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">1 month ago</span></a></li>)}
+                            {revisit.archive && <li><a href={u(revisit.archive.href)}><span class="mini-title">{revisit.archive.title}</span><span class="mini-meta">from the archive</span></a></li>}
+                        </ul>
+                    )}
+                </div>
+            </section>
+        </div>
+
+        <section class="home-block">
+            <header class="block-head"><h2>Tracks</h2></header>
+            <div class="track-grid">
+                {tracks.map(t => (
+                    <a class="track-card" href={u(`/${t.slug}/`)} data-cat={t.id}>
+                        <span class="track-name"><span class="cat-dot" data-cat={t.id}></span>{t.label}</span>
+                        <span class="track-blurb">{t.blurb}</span>
+                        <span class="track-stats">{t.deep.length} deep reads · {canon.find(c => c.id === t.id)?.items.length ?? 0} canon</span>
+                    </a>
+                ))}
+            </div>
+        </section>
+
+        {pulse.length > 0 && (
+            <a class="pulse-strip" href={u('/pulse/')}>
+                <span class="pulse-label">Pulse</span>
+                <span class="pulse-text">The week in tech, in ten headlines. Glance, then get back to learning.</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        )}
+    </div>
+    <ReadingClient />
 </Base>

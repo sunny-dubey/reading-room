@@ -1,0 +1,284 @@
+# Sources for The Reading Room. Fetched at build time; the deployed site rebuilds every 6 hours.
+# Every article is summarised at build time (extractive, no AI model) and given a "worth" score,
+# so announcements and news sink and deep explanations rise.
+#
+# category (labels/order in src/lib/feeds.ts):
+#   systems      Distributed Systems & Databases
+#   backend      Backend, APIs & Payments
+#   ai-eng       AI Engineering & Agents
+#   ml           ML & LLM Foundations
+#   postmortems  Postmortems: learning from failure
+#   pulse        Pulse: a small page of the week's headlines (not on the front page)
+# limit: max items kept from this feed · maxAgeDays: ignore older items
+# type: rss (default) | bluesky | reddit
+
+# ---------- systems ----------
+- id: marc-brooker
+  title: Marc Brooker
+  url: https://brooker.co.za/blog/rss.xml
+  site: https://brooker.co.za/blog/
+  category: systems
+  limit: 6
+  maxAgeDays: 120
+- id: murat
+  title: Murat Demirbas
+  url: https://muratbuffalo.blogspot.com/feeds/posts/default
+  site: https://muratbuffalo.blogspot.com/
+  category: systems
+  limit: 6
+  maxAgeDays: 120
+- id: eatonphil
+  title: Phil Eaton
+  url: https://notes.eatonphil.com/rss.xml
+  site: https://notes.eatonphil.com/
+  category: systems
+  limit: 6
+  maxAgeDays: 120
+- id: tigerbeetle
+  title: TigerBeetle
+  url: https://tigerbeetle.com/blog/atom.xml
+  site: https://tigerbeetle.com/blog/
+  category: systems
+  limit: 6
+  maxAgeDays: 120
+- id: planetscale
+  title: PlanetScale
+  url: https://planetscale.com/blog/rss.xml
+  site: https://planetscale.com/blog
+  category: systems
+  limit: 6
+  maxAgeDays: 120
+- id: planet-postgres
+  title: Planet PostgreSQL
+  url: https://planet.postgresql.org/rss20.xml
+  site: https://planet.postgresql.org/
+  category: systems
+  limit: 8
+  maxAgeDays: 30
+- id: hillel-wayne
+  title: Hillel Wayne
+  url: https://www.hillelwayne.com/index.xml
+  site: https://www.hillelwayne.com/
+  category: systems
+  limit: 6
+  maxAgeDays: 120
+- id: dan-luu
+  title: Dan Luu
+  url: https://danluu.com/atom.xml
+  site: https://danluu.com/
+  category: systems
+  limit: 6
+  maxAgeDays: 120
+
+# ---------- backend ----------
+- id: brandur
+  title: Brandur
+  url: https://brandur.org/articles.atom
+  site: https://brandur.org/
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: stripe
+  title: Stripe
+  url: https://stripe.com/blog/feed.rss
+  site: https://stripe.com/blog/engineering
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: cloudflare
+  title: Cloudflare
+  url: https://blog.cloudflare.com/rss/
+  site: https://blog.cloudflare.com/
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: netflix
+  title: Netflix Tech Blog
+  url: https://netflixtechblog.com/feed
+  site: https://netflixtechblog.com/
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: github-eng
+  title: GitHub Engineering
+  url: https://github.blog/engineering/feed/
+  site: https://github.blog/engineering/
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: slack-eng
+  title: Slack Engineering
+  url: https://slack.engineering/feed/
+  site: https://slack.engineering/
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: shopify-eng
+  title: Shopify Engineering
+  url: https://shopify.engineering/blog.atom
+  site: https://shopify.engineering/
+  category: backend
+  limit: 4
+  maxAgeDays: 90
+- id: bytebytego
+  title: ByteByteGo
+  url: https://blog.bytebytego.com/feed
+  site: https://blog.bytebytego.com/
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: pragmatic-engineer
+  title: The Pragmatic Engineer
+  url: https://newsletter.pragmaticengineer.com/feed
+  site: https://newsletter.pragmaticengineer.com/
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: julia-evans
+  title: Julia Evans
+  url: https://jvns.ca/atom.xml
+  site: https://jvns.ca/
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: infoq
+  title: InfoQ
+  url: https://www.infoq.com/feed/
+  site: https://www.infoq.com/
+  category: backend
+  limit: 6
+  maxAgeDays: 30
+
+# ---------- ai-eng ----------
+- id: simon-willison
+  title: Simon Willison
+  url: https://simonwillison.net/atom/everything/
+  site: https://simonwillison.net/
+  category: ai-eng
+  limit: 10
+  maxAgeDays: 30
+- id: hamel
+  title: Hamel Husain
+  url: https://hamel.dev/index.xml
+  site: https://hamel.dev/
+  category: ai-eng
+  limit: 6
+  maxAgeDays: 60
+- id: eugene-yan
+  title: Eugene Yan
+  url: https://eugeneyan.com/rss/
+  site: https://eugeneyan.com/
+  category: ai-eng
+  limit: 6
+  maxAgeDays: 60
+- id: chip-huyen
+  title: Chip Huyen
+  url: https://huyenchip.com/feed.xml
+  site: https://huyenchip.com/
+  category: ai-eng
+  limit: 6
+  maxAgeDays: 60
+- id: jxnl
+  title: Jason Liu
+  url: https://jxnl.co/feed_rss_created.xml
+  site: https://jxnl.co/
+  category: ai-eng
+  limit: 6
+  maxAgeDays: 60
+- id: philschmid
+  title: Philipp Schmid
+  url: https://www.philschmid.de/rss
+  site: https://www.philschmid.de/
+  category: ai-eng
+  limit: 4
+  maxAgeDays: 90
+- id: latent-space
+  title: Latent Space
+  url: https://www.latent.space/feed
+  site: https://www.latent.space/
+  category: ai-eng
+  limit: 6
+  maxAgeDays: 60
+
+# ---------- ml ----------
+- id: lilian-weng
+  title: Lilian Weng
+  url: https://lilianweng.github.io/index.xml
+  site: https://lilianweng.github.io/
+  category: ml
+  limit: 5
+  maxAgeDays: 180
+- id: raschka
+  title: Sebastian Raschka
+  url: https://magazine.sebastianraschka.com/feed
+  site: https://magazine.sebastianraschka.com/
+  category: ml
+  limit: 5
+  maxAgeDays: 180
+- id: interconnects
+  title: Interconnects (Nathan Lambert)
+  url: https://www.interconnects.ai/feed
+  site: https://www.interconnects.ai/
+  category: ml
+  limit: 5
+  maxAgeDays: 180
+- id: karpathy
+  title: Andrej Karpathy
+  url: https://karpathy.github.io/feed.xml
+  site: https://karpathy.github.io/
+  category: ml
+  limit: 5
+  maxAgeDays: 180
+- id: jalammar
+  title: Jay Alammar
+  url: https://jalammar.github.io/feed.xml
+  site: https://jalammar.github.io/
+  category: ml
+  limit: 5
+  maxAgeDays: 180
+- id: hugging-face
+  title: Hugging Face
+  url: https://huggingface.co/blog/feed.xml
+  site: https://huggingface.co/blog
+  category: ml
+  limit: 8
+  maxAgeDays: 60
+
+# ---------- postmortems ----------
+- id: github-availability
+  title: GitHub availability reports
+  url: https://github.blog/tag/github-availability-report/feed/
+  site: https://github.blog/tag/github-availability-report/
+  category: postmortems
+  limit: 6
+  maxAgeDays: 365
+- id: cloudflare-postmortems
+  title: Cloudflare post-mortems
+  url: https://blog.cloudflare.com/tag/post-mortem/rss/
+  site: https://blog.cloudflare.com/tag/post-mortem/
+  category: postmortems
+  limit: 6
+  maxAgeDays: 365
+- id: hn-postmortems
+  title: Postmortems on HN
+  url: https://hnrss.org/newest?q=postmortem&points=40
+  site: https://news.ycombinator.com/
+  category: postmortems
+  limit: 6
+  maxAgeDays: 365
+
+# ---------- pulse ----------
+- id: techmeme
+  title: Techmeme
+  url: https://www.techmeme.com/feed.xml
+  site: https://www.techmeme.com/
+  category: pulse
+  limit: 15
+  maxAgeDays: 7
+- id: hn-best
+  title: Hacker News
+  url: https://hnrss.org/best?count=30
+  site: https://news.ycombinator.com/
+  category: pulse
+  limit: 15
+  maxAgeDays: 7

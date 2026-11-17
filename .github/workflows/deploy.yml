@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'  # refresh the Reading tab every 6 hours
 
 permissions:
   contents: read
@@ -24,7 +26,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Cache fetched articles (summaries)
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: articles-${{ github.run_id }}
+          restore-keys: articles-
       - run: npm run build
+        env:
+          # Optional: free Reddit 'script' app for reliable Reddit + vote counts
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist

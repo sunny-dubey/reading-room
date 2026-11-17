@@ -4,35 +4,33 @@ import Tags from '../components/Tags.astro';
 import { getLibrary, fmtDate } from '../lib/content';
 const links = await getLibrary();
 const kinds = [...new Set(links.map(l => l.data.kind))].sort();
+const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
 ---
-<Base title="Library" description="Links worth keeping, with a line on why.">
+<Base title="Saved" description="Stories worth keeping, with a line on why." accent="library">
     <header class="page-head">
-        <h1>Library</h1>
-        <p class="lead">Articles, talks, and tools worth coming back to, each with a line on why.</p>
+        <h1>Saved <span class="count-pill">{links.length}</span></h1>
+        <p class="lead">Stories from the Reading Room worth coming back to, each with a line on why I kept it.</p>
     </header>
     {kinds.length > 1 && (
         <div class="filters" role="group" aria-label="Filter by kind">
-            <button class="filter" data-kind="all" aria-pressed="true">all</button>
+            <button class="filter" data-kind="all" aria-pressed="true">All</button>
             {kinds.map(k => <button class="filter" data-kind={k} aria-pressed="false">{k}</button>)}
         </div>
     )}
-    {links.length === 0 ? <p class="empty">Nothing saved yet.</p> : (
-        <ul class="items" role="list">
+    {links.length === 0 ? <p class="notice">Nothing saved yet.</p> : (
+        <div class="grid">
             {links.map(l => (
-                <li class="item" data-kind={l.data.kind}>
-                    <div class="item-meta">
-                        <time datetime={l.data.added.toISOString()}>{fmtDate(l.data.added)}</time>
-                        <span class="kind kind-library">{l.data.kind}</span>
-                    </div>
-                    <div class="item-body">
-                        <a class="item-title" href={l.data.url} target="_blank" rel="noopener noreferrer">{l.data.title}<span class="ext" aria-hidden="true"> ↗</span></a>
-                        {l.data.author && <span class="dim author"> · {l.data.author}</span>}
-                        <p class="item-blurb">{l.data.why}</p>
+                <article class="tile hoverable k-library" data-kind={l.data.kind}>
+                    <div class="domain"><span class="kind">{l.data.kind}</span> · {host(l.data.url)}</div>
+                    <a class="card-title stretched" href={l.data.url} target="_blank" rel="noopener noreferrer">{l.data.title} ↗</a>
+                    <p class="card-text">{l.data.why}</p>
+                    <div class="card-foot">
                         <Tags tags={l.data.tags} />
+                        <span class="card-date">{l.data.author ? `${l.data.author} · ` : ''}{fmtDate(l.data.added)}</span>
                     </div>
-                </li>
+                </article>
             ))}
-        </ul>
+        </div>
     )}
 </Base>
 <script>
@@ -40,8 +38,8 @@ const kinds = [...new Set(links.map(l => l.data.kind))].sort();
     buttons.forEach(b => b.addEventListener('click', () => {
         const kind = b.dataset.kind;
         buttons.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-        document.querySelectorAll<HTMLElement>('.item[data-kind]').forEach(li => {
-            li.hidden = kind !== 'all' && li.dataset.kind !== kind;
+        document.querySelectorAll<HTMLElement>('[data-kind].tile').forEach(el => {
+            el.hidden = kind !== 'all' && el.dataset.kind !== kind;
         });
     }));
 </script>

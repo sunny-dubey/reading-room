@@ -1,0 +1,55 @@
+---
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import LearnCard from '../components/LearnCard.astro';
+import CanonList from '../components/CanonList.astro';
+import { CATEGORIES } from '../lib/feeds';
+import { getReading, getCanon } from '../lib/reading';
+
+export function getStaticPaths() {
+    return CATEGORIES.map(c => ({ params: { section: c.slug }, props: { id: c.id } }));
+}
+const { id } = Astro.props;
+const { tracks, fetchedAt } = await getReading();
+const t = tracks.find(x => x.id === id)!;
+const canon = (await getCanon()).find(c => c.id === id)!;
+const SHOW = 12;
+---
+<Base title={t.label} description={t.blurb} accent="reading">
+    <div class="rd">
+        <ReadingMast compact cat={t.id} title={t.label} sub={t.blurb} updated={fetchedAt} />
+        <div class="track-layout">
+            <div class="track-main">
+                <section class="home-block">
+                    <header class="block-head">
+                        <h2>Deep reads</h2>
+                        <span class="dim">{t.deep.length} pieces worth studying, best first</span>
+                    </header>
+                    {t.deep.length === 0 ? <p class="notice">No deep reads right now. The Canon has plenty.</p> : (
+                        <div class="learn-list collapsed" id="deep-list">
+                            {t.deep.map((i, n) => <div class:list={{ more: n >= SHOW }}><LearnCard i={i} size="row" showTrack={false} /></div>)}
+                        </div>
+                    )}
+                    {t.deep.length > SHOW && <button class="show-more" data-expand="deep-list">Show {t.deep.length - SHOW} more</button>}
+                </section>
+                {t.light.length > 0 && (
+                    <details class="light-reads">
+                        <summary>Lighter reads and updates · {t.light.length}</summary>
+                        <div class="learn-list">{t.light.map(i => <LearnCard i={i} size="row" showTrack={false} />)}</div>
+                    </details>
+                )}
+            </div>
+            <aside class="track-side" id="canon">
+                {canon.items.length > 0 && <CanonList items={canon.items} track={t.id} />}
+                <div class="side-sources-box">
+                    <h3>Sources</h3>
+                    <ul role="list">
+                        {t.sources.map(s => <li><span class={s.ok ? 'ok' : 'bad'}></span><a href={s.site ?? s.url} target="_blank" rel="noopener noreferrer">{s.title}</a><span class="n">{s.ok ? s.count : 'err'}</span></li>)}
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+    <ReadingClient />
+</Base>

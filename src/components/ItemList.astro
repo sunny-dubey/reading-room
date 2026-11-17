@@ -5,20 +5,18 @@ import Tags from './Tags.astro';
 interface Props { items: Item[]; showKind?: boolean; }
 const { items, showKind = true } = Astro.props;
 ---
-<ul class="items" role="list">
+<ul class="rows" role="list">
     {items.map(i => (
-        <li class="item">
-            <div class="item-meta">
-                <time datetime={i.date.toISOString()}>{fmtDate(i.date)}</time>
-                {showKind && <span class={`kind kind-${i.kind}`}>{i.kind}</span>}
-            </div>
-            <div class="item-body">
-                <a class="item-title" href={i.href} {...(i.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-                    {i.title}{i.external && <span class="ext" aria-hidden="true"> ↗</span>}
+        <li class={`tile hoverable k-${i.kind}`}>
+            <div class="row">
+                {showKind && <span class="kind">{i.kind}</span>}
+                <a class="row-title stretched" href={i.href} {...(i.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                    {i.title}{i.external && ' ↗'}
                 </a>
-                {i.blurb && <p class="item-blurb">{i.blurb}</p>}
-                <Tags tags={i.tags} />
+                <time class="row-date" datetime={i.date.toISOString()}>{fmtDate(i.date)}</time>
             </div>
+            {i.blurb && <p class="row-blurb">{i.blurb}</p>}
+            <Tags tags={i.tags} />
         </li>
     ))}
 </ul>

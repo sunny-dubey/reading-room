@@ -1,0 +1,215 @@
+---
+import { u } from '../lib/url';
+import Base from '../layouts/Base.astro';
+const dev = import.meta.env.DEV;
+---
+<Base title="Write" accent="note">
+    {!dev ? (
+        <div class="narrow">
+            <header class="page-head">
+                <h1>Write</h1>
+                <p class="lead">Writing happens locally. Run <code>npm run dev</code> in <code>reading-room</code> and open this page there.</p>
+            </header>
+        </div>
+    ) : (
+        <form id="editor" class="editor" autocomplete="off">
+            <div class="editor-bar">
+                <div class="seg" role="radiogroup" aria-label="What are you writing?">
+                    <label class="k-log"><input type="radio" name="kind" value="log" checked /><span>Log</span></label>
+                    <label class="k-note"><input type="radio" name="kind" value="note" /><span>Note</span></label>
+                    <label class="k-writing"><input type="radio" name="kind" value="writing" /><span>Writing</span></label>
+                </div>
+                <span id="status" class="editor-status" aria-live="polite"></span>
+                <div class="editor-actions">
+                    <label class="draft-toggle"><input type="checkbox" name="draft" /> Draft</label>
+                    <button type="submit" class="btn" id="save">Save <kbd>⌘S</kbd></button>
+                </div>
+            </div>
+
+            <div class="tile editor-meta">
+                <input class="title-input" name="title" placeholder="Title" required />
+                <div class="meta-row">
+                    <label class="field" data-show="log writing">
+                        <span>Date</span>
+                        <input type="date" name="date" />
+                    </label>
+                    <label class="field grow">
+                        <span>Tags</span>
+                        <input name="tags" placeholder="postgres, queues" list="tag-list" />
+                        <datalist id="tag-list"></datalist>
+                    </label>
+                    <label class="field grow" data-show="note writing">
+                        <span id="summary-label">Summary</span>
+                        <input name="summary" placeholder="One line on what this is about" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="editor-tabs" role="tablist">
+                <button type="button" role="tab" data-pane="write" aria-selected="true">Write</button>
+                <button type="button" role="tab" data-pane="preview" aria-selected="false">Preview</button>
+            </div>
+            <div class="editor-panes" data-active="write">
+                <div class="tile pane pane-write">
+                    <textarea name="body" id="body" spellcheck="true" placeholder="Write in markdown. What happened, why it works that way, and when it matters. Code blocks welcome."></textarea>
+                </div>
+                <div class="tile pane pane-preview">
+                    <div class="prose" id="preview"><p class="dim">Preview shows up here.</p></div>
+                </div>
+            </div>
+            <p class="editor-hint">Saves to <code id="path-hint">src/content/log/</code> · Markdown supported · <a href={u('/')}>back to site</a></p>
+        </form>
+    )}
+</Base>
+
+<script>
+    import { marked } from 'marked';
+
+    const editorForm = document.getElementById('editor');
+    if (editorForm) initEditor();
+
+    function initEditor() {
+
+    const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+    const API = `${BASE}/__notebook`;
+    const form = document.getElementById('editor') as HTMLFormElement;
+    const f = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
+    const body = document.getElementById('body') as HTMLTextAreaElement;
+    const preview = document.getElementById('preview')!;
+    const status = document.getElementById('status')!;
+    const pathHint = document.getElementById('path-hint')!;
+    const DIRS: Record<string, string> = { log: 'src/content/log/', note: 'src/content/notes/', writing: 'src/content/writing/' };
+
+    const params = new URLSearchParams(location.search);
+    let editing: { kind: string; id: string } | null = null;
+    let dirty = false;
+    const DRAFT_KEY = 'write:unsaved';
+
+    const kind = () => (form.querySelector<HTMLInputElement>('input[name=kind]:checked')!).value;
+    const setKind = (k: string) => { (form.querySelector<HTMLInputElement>(`input[name=kind][value=${k}]`)!).checked = true; onKind(); };
+
+    function onKind() {
+        const k = kind();
+        form.querySelectorAll<HTMLElement>('[data-show]').forEach(el => { el.hidden = !el.dataset.show!.split(' ').includes(k); });
+        document.getElementById('summary-label')!.textContent = k === 'writing' ? 'Description' : 'Summary';
+        pathHint.textContent = DIRS[k] + (editing ? `${editing.id}.md` : '');
+        document.body.className = document.body.className.replace(/k-\w+/, `k-${k === 'note' ? 'note' : k}`);
+    }
+
+    function render() {
+        const md = body.value.trim();
+        preview.innerHTML = md ? (marked.parse(md, { async: false }) as string) : '<p class="dim">Preview shows up here.</p>';
+    }
+
+    function snapshot() {
+        return { kind: kind(), title: f('title').value, date: f('date').value, tags: f('tags').value, summary: f('summary').value, draft: f('draft').checked, body: body.value, editing };
+    }
+    function stash() {
+        dirty = true;
+        status.textContent = 'Unsaved changes';
+        try { localStorage.setItem(DRAFT_KEY, JSON.stringify(snapshot())); } catch {}
+    }
+
+    function autosize() { body.style.height = 'auto'; body.style.height = Math.max(body.scrollHeight, 420) + 'px'; }
+
+    async function load() {
+        // tag suggestions
+        fetch(`${API}/tags`).then(r => r.json()).then(({ tags }) => {
+            document.getElementById('tag-list')!.innerHTML = (tags as string[]).map(t => `<option value="${t}">`).join('');
+        }).catch(() => {});
+
+        const k = params.get('kind'), id = params.get('id');
+        if (k && id) {
+            const res = await fetch(`${API}/load?kind=${encodeURIComponent(k)}&id=${encodeURIComponent(id)}`);
+            if (res.ok) {
+                const { data, body: md } = await res.json();
+                editing = { kind: k, id };
+                setKind(k);
+                form.querySelectorAll<HTMLInputElement>('input[name=kind]').forEach(r => { r.disabled = r.value !== k; });
+                f('title').value = data.title ?? '';
+                f('date').value = (data.date ?? '').toString().slice(0, 10);
+                f('tags').value = (data.tags ?? []).join(', ');
+                f('summary').value = data.summary ?? data.description ?? '';
+                f('draft').checked = !!data.draft;
+                body.value = md;
+                status.textContent = `Editing ${k}/${id}`;
+            } else status.textContent = 'Could not load that entry';
+        } else {
+            if (k) setKind(k);
+            f('date').value = new Date().toLocaleDateString('en-CA');
+            // Started from "Write about this" on a story.
+            const ref = params.get('ref'), refTitle = params.get('title');
+            if (ref) {
+                if (params.get('explain')) {
+                    // Feynman technique: explain it back in your own words.
+                    f('title').value = refTitle ? `Understanding: ${refTitle}` : '';
+                    body.value = `> Source: [${refTitle ?? ref}](${ref})\n\n## In my own words\n\n\n## What surprised me\n\n\n## Where I'd use this\n\n\n## Still unclear\n\n`;
+                    status.textContent = 'Explain it back: if you can explain it simply, you understand it';
+                } else {
+                    body.value = `> [${refTitle ?? ref}](${ref})\n\n`;
+                    status.textContent = 'Writing about a story';
+                }
+                try { localStorage.removeItem(DRAFT_KEY); } catch {}
+            }
+            // restore an unsaved new draft
+            if (!ref) try {
+                const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? 'null');
+                if (saved && !saved.editing && (saved.title || saved.body)) {
+                    setKind(saved.kind); f('title').value = saved.title; f('date').value = saved.date || f('date').value;
+                    f('tags').value = saved.tags; f('summary').value = saved.summary; f('draft').checked = saved.draft; body.value = saved.body;
+                    status.textContent = 'Restored unsaved draft';
+                }
+            } catch {}
+        }
+        onKind(); render(); autosize();
+        (f('title').value ? body : f('title')).focus();
+    }
+
+    async function save(e?: Event) {
+        e?.preventDefault();
+        if (!f('title').value.trim()) { f('title').focus(); status.textContent = 'Add a title first'; return; }
+        status.textContent = 'Saving…';
+        const payload = {
+            kind: kind(), id: editing?.id,
+            title: f('title').value, date: f('date').value,
+            tags: f('tags').value.split(',').map(t => t.trim()).filter(Boolean),
+            summary: f('summary').value, draft: f('draft').checked, body: body.value,
+        };
+        try {
+            const res = await fetch(`${API}/save`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const out = await res.json();
+            if (!res.ok) throw new Error(out.error ?? res.statusText);
+            dirty = false;
+            try { localStorage.removeItem(DRAFT_KEY); } catch {}
+            status.textContent = `Saved ${out.path}`;
+            // give the content layer a moment to pick up the file, then open it
+            setTimeout(() => { location.href = out.url; }, 700);
+        } catch (err) {
+            status.textContent = `Save failed: ${(err as Error).message}`;
+        }
+    }
+
+    form.addEventListener('submit', save);
+    form.addEventListener('input', e => { if ((e.target as HTMLElement).id === 'body') { render(); autosize(); } stash(); });
+    form.querySelectorAll<HTMLInputElement>('input[name=kind]').forEach(r => r.addEventListener('change', onKind));
+    document.addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key === 's') save(e); });
+    window.addEventListener('beforeunload', e => { if (dirty) e.preventDefault(); });
+
+    // Tab key inserts two spaces inside the textarea.
+    body.addEventListener('keydown', e => {
+        if (e.key !== 'Tab') return;
+        e.preventDefault();
+        const { selectionStart: s, selectionEnd: t } = body;
+        body.setRangeText('  ', s, t, 'end');
+    });
+
+    // Mobile: Write / Preview tabs
+    const panes = document.querySelector<HTMLElement>('.editor-panes')!;
+    document.querySelectorAll<HTMLButtonElement>('.editor-tabs [role=tab]').forEach(t => t.addEventListener('click', () => {
+        document.querySelectorAll('.editor-tabs [role=tab]').forEach(x => x.setAttribute('aria-selected', String(x === t)));
+        panes.dataset.active = t.dataset.pane!;
+    }));
+
+    load();
+    }
+</script>

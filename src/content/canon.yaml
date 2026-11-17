@@ -1,0 +1,431 @@
+# The Canon: foundational reads per track, in suggested order.
+# Progress is tracked in your browser. Edit freely: add, remove, reorder.
+# track: systems | backend | ai-eng | ml | postmortems
+# kind: paper | article | book | video | course | docs
+# minutes: rough reading/watching time
+
+# ---------- Distributed Systems & Databases ----------
+- id: young-bloods
+  track: systems
+  title: Notes on Distributed Systems for Young Bloods
+  author: Jeff Hodges
+  url: https://www.somethingsimilar.com/2013/01/14/notes-on-distributed-systems-for-young-bloods/
+  kind: article
+  minutes: 20
+  why: The mindset shift. Why failure is the normal case and what that does to every design decision.
+- id: patterns-distributed
+  track: systems
+  title: Patterns of Distributed Systems
+  author: Unmesh Joshi
+  url: https://martinfowler.com/articles/patterns-of-distributed-systems/
+  kind: article
+  minutes: 90
+  why: Named building blocks (write-ahead log, leader and followers, quorum, high-water mark) you'll see everywhere.
+- id: lamport-clocks
+  track: systems
+  title: Time, Clocks, and the Ordering of Events in a Distributed System
+  author: Leslie Lamport
+  url: https://lamport.azurewebsites.net/pubs/time-clocks.pdf
+  kind: paper
+  minutes: 45
+  why: Why "what happened first?" is hard without a global clock, and logical clocks as the answer.
+- id: raft-visual
+  track: systems
+  title: The Secret Lives of Data, Raft visualised
+  author: Ben Johnson
+  url: https://thesecretlivesofdata.com/raft/
+  kind: course
+  minutes: 15
+  why: See consensus happen step by step before reading the paper.
+- id: raft
+  track: systems
+  title: "In Search of an Understandable Consensus Algorithm (Raft)"
+  author: Ongaro & Ousterhout
+  url: https://raft.github.io/raft.pdf
+  kind: paper
+  minutes: 60
+  why: How replicated systems agree on one log. The basis of etcd, Consul, CockroachDB.
+- id: dynamo
+  track: systems
+  title: "Dynamo: Amazon's Highly Available Key-value Store"
+  author: DeCandia et al.
+  url: https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
+  kind: paper
+  minutes: 60
+  why: Consistent hashing, vector clocks, sloppy quorums. The availability-first design behind Cassandra and DynamoDB.
+- id: cp-or-ap
+  track: systems
+  title: Please stop calling databases CP or AP
+  author: Martin Kleppmann
+  url: https://martin.kleppmann.com/2015/05/11/please-stop-calling-databases-cp-or-ap.html
+  kind: article
+  minutes: 20
+  why: What the CAP theorem actually says, and why it's the wrong tool for comparing databases.
+- id: jepsen-consistency
+  track: systems
+  title: Consistency Models
+  author: Jepsen
+  url: https://jepsen.io/consistency
+  kind: docs
+  minutes: 30
+  why: A precise map of linearizable, serializable, snapshot isolation and the rest.
+- id: db-inside-out
+  track: systems
+  title: Turning the database inside-out
+  author: Martin Kleppmann
+  url: https://martin.kleppmann.com/2015/03/04/turning-the-database-inside-out.html
+  kind: article
+  minutes: 40
+  why: The log as the source of truth and everything else as derived views. Explains Kafka-style architectures.
+- id: pg-mvcc
+  track: systems
+  title: "PostgreSQL: Concurrency Control (MVCC)"
+  author: PostgreSQL docs
+  url: https://www.postgresql.org/docs/current/mvcc.html
+  kind: docs
+  minutes: 45
+  why: Isolation levels and locking in the database you actually use. Read with a psql session open.
+- id: use-the-index
+  track: systems
+  title: Use The Index, Luke
+  author: Markus Winand
+  url: https://use-the-index-luke.com/
+  kind: book
+  minutes: 180
+  why: How B-tree indexes really work and why your query is slow.
+- id: ddia
+  track: systems
+  title: Designing Data-Intensive Applications
+  author: Martin Kleppmann
+  url: https://dataintensive.net/
+  kind: book
+  minutes: 900
+  why: The single best book for this whole track. Read a chapter a week.
+
+# ---------- Backend, APIs & Payments ----------
+- id: latency-numbers
+  track: backend
+  title: Latency numbers every programmer should know
+  author: Jeff Dean / Jonas Bonér
+  url: https://gist.github.com/jboner/2841832
+  kind: article
+  minutes: 5
+  why: The orders of magnitude that should drive every caching and architecture decision.
+- id: stripe-idempotency
+  track: backend
+  title: Designing robust and predictable APIs with idempotency
+  author: Stripe
+  url: https://stripe.com/blog/idempotency
+  kind: article
+  minutes: 15
+  why: Why retries are dangerous without idempotency keys, from the people who move the money.
+- id: brandur-idempotency
+  track: backend
+  title: Implementing Stripe-like Idempotency Keys in Postgres
+  author: Brandur Leach
+  url: https://brandur.org/idempotency-keys
+  kind: article
+  minutes: 40
+  why: A complete design with atomic phases and recovery points. Directly applicable to payments work.
+- id: job-drain
+  track: backend
+  title: Transactionally Staged Job Drains in Postgres
+  author: Brandur Leach
+  url: https://brandur.org/job-drain
+  kind: article
+  minutes: 20
+  why: The outbox pattern. How to enqueue background jobs without losing or duplicating them.
+- id: retries-jitter
+  track: backend
+  title: Timeouts, retries, and backoff with jitter
+  author: AWS Builders' Library
+  url: https://builder.aws.com/content/3EumjoZascWd1oZiEgL8ORlv3qE/timeouts-retries-and-backoff-with-jitter
+  kind: article
+  minutes: 20
+  why: How naive retries cause outages, and the exact recipe to retry safely.
+- id: queue-backlogs
+  track: backend
+  title: Avoiding insurmountable queue backlogs
+  author: AWS Builders' Library
+  url: https://builder.aws.com/content/3EuRcgkTP1MI0c7zM8W6HL3WIqA/avoiding-insurmountable-queue-backlogs
+  kind: article
+  minutes: 25
+  why: Why queues hide problems until they explode. Essential for Celery/worker-heavy systems.
+- id: load-shedding
+  track: backend
+  title: Using load shedding to avoid overload
+  author: AWS Builders' Library
+  url: https://builder.aws.com/content/3Eun1EEyX6p2e3VYNyRLSJzLuMV/using-load-shedding-to-avoid-overload
+  kind: article
+  minutes: 25
+  why: Staying up under too much traffic by deliberately rejecting some of it.
+- id: cascading-failures
+  track: backend
+  title: Addressing Cascading Failures
+  author: Google SRE book
+  url: https://sre.google/sre-book/addressing-cascading-failures/
+  kind: book
+  minutes: 40
+  why: How one slow dependency takes down everything, and the defences against it.
+- id: online-migrations
+  track: backend
+  title: Online migrations at scale
+  author: Stripe
+  url: https://stripe.com/blog/online-migrations
+  kind: article
+  minutes: 15
+  why: The dual-write, backfill, cut-over playbook for changing data models with zero downtime.
+- id: microservices
+  track: backend
+  title: Microservices
+  author: James Lewis & Martin Fowler
+  url: https://martinfowler.com/articles/microservices.html
+  kind: article
+  minutes: 30
+  why: The original definition, including the costs people forget.
+- id: twelve-factor
+  track: backend
+  title: The Twelve-Factor App
+  author: Adam Wiggins
+  url: https://12factor.net/
+  kind: article
+  minutes: 20
+  why: "The baseline contract for deployable services: config, logs, processes, disposability."
+
+# ---------- AI Engineering & Agents ----------
+- id: building-agents
+  track: ai-eng
+  title: Building effective agents
+  author: Anthropic
+  url: https://www.anthropic.com/research/building-effective-agents
+  kind: article
+  minutes: 20
+  why: Workflows vs agents, and the handful of patterns (routing, orchestrator-workers, evaluator loops) that work.
+- id: context-engineering
+  track: ai-eng
+  title: Effective context engineering for AI agents
+  author: Anthropic
+  url: https://www.anthropic.com/research/effective-context-engineering-for-ai-agents
+  kind: article
+  minutes: 20
+  why: Treating the context window as a scarce resource. The core skill for long-running agents.
+- id: llm-patterns
+  track: ai-eng
+  title: Patterns for Building LLM-based Systems & Products
+  author: Eugene Yan
+  url: https://eugeneyan.com/writing/llm-patterns/
+  kind: article
+  minutes: 60
+  why: Evals, RAG, fine-tuning, caching, guardrails, defensive UX, all in one map.
+- id: evals
+  track: ai-eng
+  title: Your AI Product Needs Evals
+  author: Hamel Husain
+  url: https://hamel.dev/blog/posts/evals/
+  kind: article
+  minutes: 30
+  why: Why most LLM products stall, and how a simple eval loop gets them moving again.
+- id: applied-llms
+  track: ai-eng
+  title: What We've Learned From A Year of Building with LLMs
+  author: Yan, Bischof, Frye, Husain, Liu, Shankar
+  url: https://applied-llms.org/
+  kind: article
+  minutes: 60
+  why: Tactical, operational and strategic lessons from people who shipped LLM products.
+- id: genai-platform
+  track: ai-eng
+  title: Building A Generative AI Platform
+  author: Chip Huyen
+  url: https://huyenchip.com/2024/07/25/genai-platform.html
+  kind: article
+  minutes: 45
+  why: "The full architecture: context, guardrails, routers, caching, observability."
+- id: chip-agents
+  track: ai-eng
+  title: Agents
+  author: Chip Huyen
+  url: https://huyenchip.com/2025/01/07/agents.html
+  kind: article
+  minutes: 45
+  why: Tools, planning and failure modes of agents, explained from first principles.
+- id: weng-agents
+  track: ai-eng
+  title: LLM Powered Autonomous Agents
+  author: Lilian Weng
+  url: https://lilianweng.github.io/posts/2023-06-23-agent/
+  kind: article
+  minutes: 40
+  why: Planning, memory and tool use. The research view of what an agent is.
+- id: contextual-retrieval
+  track: ai-eng
+  title: Introducing Contextual Retrieval
+  author: Anthropic
+  url: https://www.anthropic.com/research/contextual-retrieval
+  kind: article
+  minutes: 15
+  why: A concrete, measurable RAG improvement and how it was evaluated.
+- id: mcp
+  track: ai-eng
+  title: Model Context Protocol, introduction
+  author: MCP docs
+  url: https://modelcontextprotocol.io/introduction
+  kind: docs
+  minutes: 20
+  why: The standard way agents connect to tools and data.
+
+# ---------- ML & LLM Foundations ----------
+- id: zero-to-hero
+  track: ml
+  title: "Neural Networks: Zero to Hero"
+  author: Andrej Karpathy
+  url: https://karpathy.ai/zero-to-hero.html
+  kind: course
+  minutes: 900
+  why: Build backprop, language models and GPT yourself. The best path from engineer to understanding.
+- id: illustrated-transformer
+  track: ml
+  title: The Illustrated Transformer
+  author: Jay Alammar
+  url: https://jalammar.github.io/illustrated-transformer/
+  kind: article
+  minutes: 30
+  why: Attention, step by step, with pictures. Read before the paper.
+- id: attention-paper
+  track: ml
+  title: Attention Is All You Need
+  author: Vaswani et al.
+  url: https://arxiv.org/abs/1706.03762
+  kind: paper
+  minutes: 60
+  why: The paper behind every modern LLM.
+- id: annotated-transformer
+  track: ml
+  title: The Annotated Transformer
+  author: Harvard NLP
+  url: https://nlp.seas.harvard.edu/annotated-transformer/
+  kind: article
+  minutes: 90
+  why: The paper again, as runnable PyTorch, line by line.
+- id: lets-build-gpt
+  track: ml
+  title: "Let's build GPT: from scratch, in code, spelled out"
+  author: Andrej Karpathy
+  url: https://www.youtube.com/watch?v=kCc8FmEb1nY
+  kind: video
+  minutes: 120
+  why: Write a transformer end to end in two hours.
+- id: deep-dive-llms
+  track: ml
+  title: Deep Dive into LLMs like ChatGPT
+  author: Andrej Karpathy
+  url: https://www.youtube.com/watch?v=7xTGNNLPyMI
+  kind: video
+  minutes: 210
+  why: Pretraining, tokenization, post-training, RL and hallucinations, the full pipeline.
+- id: instructgpt
+  track: ml
+  title: Training language models to follow instructions with human feedback
+  author: Ouyang et al. (OpenAI)
+  url: https://arxiv.org/abs/2203.02155
+  kind: paper
+  minutes: 60
+  why: RLHF, the step that turns a text predictor into an assistant.
+- id: chinchilla
+  track: ml
+  title: Training Compute-Optimal Large Language Models
+  author: Hoffmann et al. (DeepMind)
+  url: https://arxiv.org/abs/2203.15556
+  kind: paper
+  minutes: 45
+  why: Scaling laws. How model size, data and compute trade off.
+- id: lora
+  track: ml
+  title: "LoRA: Low-Rank Adaptation of Large Language Models"
+  author: Hu et al.
+  url: https://arxiv.org/abs/2106.09685
+  kind: paper
+  minutes: 40
+  why: Why fine-tuning a tiny low-rank update works. Underpins your own LoRA project.
+- id: rag-paper
+  track: ml
+  title: Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks
+  author: Lewis et al.
+  url: https://arxiv.org/abs/2005.11401
+  kind: paper
+  minutes: 45
+  why: The original RAG idea, before it became a buzzword.
+- id: inference-optimization
+  track: ml
+  title: Large Transformer Model Inference Optimization
+  author: Lilian Weng
+  url: https://lilianweng.github.io/posts/2023-01-10-inference-optimization/
+  kind: article
+  minutes: 60
+  why: KV cache, quantization, distillation, sparsity. Why inference is expensive and how it's made cheaper.
+- id: monosemanticity
+  track: ml
+  title: "Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet"
+  author: Anthropic
+  url: https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html
+  kind: paper
+  minutes: 90
+  why: What is actually going on inside a model, and how interpretability research finds out.
+
+# ---------- Postmortems: learn from failure ----------
+- id: postmortem-culture
+  track: postmortems
+  title: "Postmortem Culture: Learning from Failure"
+  author: Google SRE book
+  url: https://sre.google/sre-book/postmortem-culture/
+  kind: book
+  minutes: 25
+  why: How to read (and write) a postmortem so it teaches something.
+- id: aws-s3-2017
+  track: postmortems
+  title: Summary of the Amazon S3 Service Disruption (Feb 2017)
+  author: AWS
+  url: https://aws.amazon.com/message/41926/
+  kind: article
+  minutes: 10
+  why: One mistyped command, a subsystem that hadn't restarted in years, and half the internet down.
+- id: gitlab-2017
+  track: postmortems
+  title: Postmortem of database outage of January 31
+  author: GitLab
+  url: https://about.gitlab.com/blog/2017/02/10/postmortem-of-database-outage-of-january-31/
+  kind: article
+  minutes: 25
+  why: Accidental deletion plus five backup methods that didn't work. A lesson in testing restores.
+- id: cloudflare-2019
+  track: postmortems
+  title: Details of the Cloudflare outage on July 2, 2019
+  author: Cloudflare
+  url: https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/
+  kind: article
+  minutes: 30
+  why: A single regex that took CPU to 100% worldwide, and a great explanation of regex backtracking.
+- id: slack-2021
+  track: postmortems
+  title: Slack's Outage on January 4th, 2021
+  author: Slack Engineering
+  url: https://slack.engineering/slacks-outage-on-january-4th-2021/
+  kind: article
+  minutes: 20
+  why: Autoscaling, cold caches and network saturation compounding on the first workday of the year.
+- id: facebook-2021
+  track: postmortems
+  title: More details about the October 4 outage
+  author: Meta Engineering
+  url: https://engineering.fb.com/2021/10/05/networking-traffic/outage-details/
+  kind: article
+  minutes: 15
+  why: BGP and DNS explained through the outage that locked Facebook out of its own buildings.
+- id: danluu-postmortems
+  track: postmortems
+  title: A collection of postmortems
+  author: Dan Luu
+  url: https://github.com/danluu/post-mortems
+  kind: docs
+  minutes: 60
+  why: Hundreds more, grouped by cause. Pick one a week.

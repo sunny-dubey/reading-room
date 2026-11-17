@@ -1,37 +1,53 @@
 ---
-import { u } from '../lib/url';
-import '@fontsource-variable/inter';
-import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 
-interface Props { title?: string; description?: string; }
-const { title, description = "Sunny Dubey's notebook: things learned, notes, writing, and links worth keeping." } = Astro.props;
-const fullTitle = title ? `${title} · Sunny's notebook` : "Sunny's notebook";
+interface Props { title?: string; description?: string; accent?: string; }
+const { title, description = 'A daily front page for staying ahead in tech and AI, curated by Sunny Dubey.', accent = 'neutral' } = Astro.props;
+const fullTitle = title ? `${title} · The Reading Room` : 'The Reading Room';
 ---
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="darkreader-lock" /><!-- site has its own dark mode -->
+    <meta name="theme-color" content="#f4f3f1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d0c0b" media="(prefers-color-scheme: dark)" />
+    <title>{fullTitle}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='2' width='13' height='13' rx='4' fill='%23ea580c'/><rect x='17' y='2' width='13' height='13' rx='4' fill='%237c3aed'/><rect x='2' y='17' width='13' height='13' rx='4' fill='%232563eb'/><rect x='17' y='17' width='13' height='13' rx='4' fill='%23059669'/></svg>" />
     <script is:inline>
-        try {
-            const t = localStorage.getItem('theme');
-            if (t) document.documentElement.dataset.theme = t;
-        } catch {}
+        (function () {
+            try {
+                var stored = localStorage.getItem('theme');
+                var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+            } catch (e) {}
+        })();
     </script>
 </head>
-<body>
+<body class={`k-${accent}`}>
     <Header />
-    <main>
-        <slot />
-    </main>
-    <footer class="site-footer">
-        <span>Written for myself, readable by anyone.</span>
-        <a href={u('/search/')}>search</a>
-    </footer>
+    <main class="shell"><slot /></main>
+    <Footer />
+    <script>
+        document.querySelectorAll('.theme-toggle').forEach(btn => btn.addEventListener('click', () => {
+            const root = document.documentElement;
+            const dark = root.getAttribute('data-theme') === 'dark';
+            if (dark) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', 'dark');
+            try { localStorage.setItem('theme', dark ? 'light' : 'dark'); } catch {}
+        }));
+        const timeEl = document.getElementById('local-time');
+        if (timeEl) {
+            const fmt = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
+            const tick = () => { timeEl.textContent = fmt.format(new Date()); };
+            tick(); setInterval(tick, 30_000);
+        }
+    </script>
 </body>
 </html>

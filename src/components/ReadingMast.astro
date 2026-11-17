@@ -1,0 +1,12 @@
+---
+interface Props { title: string; kicker?: string; sub?: string; updated?: Date; compact?: boolean; cat?: string; }
+const { title, kicker, sub, updated, compact = false, cat } = Astro.props;
+---
+<header class:list={['rd-mast', { compact }]}>
+    {kicker && <p class="rd-date" data-today>{kicker}</p>}
+    <h1 class="rd-title">{cat && <span class="cat-dot big" data-cat={cat}></span>}{title}</h1>
+    {(sub || updated) && (
+        <p class="rd-sub">{sub}{updated && <> · updated <time data-rel datetime={updated.toISOString()}></time></>}</p>
+    )}
+    <slot />
+</header>

@@ -3,5 +3,7 @@ import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
 ---
 <Base title="Not found">
-    <header class="page-head"><h1>Not here</h1><p class="lead">That page doesn't exist. Try <a href={u('/search/')}>search</a>.</p></header>
+    <div class="narrow">
+        <header class="page-head"><h1>Not here</h1><p class="lead">That page doesn't exist. Try <a href={u('/search/')} style="text-decoration:underline">search</a>.</p></header>
+    </div>
 </Base>
