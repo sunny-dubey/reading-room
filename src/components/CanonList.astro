@@ -27,6 +27,20 @@ const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
                     <a class="canon-title" href={c.data.url} target="_blank" rel="noopener noreferrer" data-read>{c.data.title}</a>
                     <div class="canon-meta"><span>{c.data.author}</span><span class="kind-tag">{c.data.kind}</span><span>{hours(c.data.minutes)}</span></div>
                     <p class="canon-why">{c.data.why}</p>
+                    {c.data.parts && (
+                        <details class="canon-parts">
+                            <summary><span data-parts-of={c.id}>{c.data.parts.length} chapters</span></summary>
+                            <ol role="list">
+                                {c.data.parts.map((p, j) => (
+                                    <li>
+                                        <label><input type="checkbox" data-part-toggle={`${c.id}/${j + 1}`} aria-label={`Done: ${p.title}`} /></label>
+                                        <a href={p.url ?? c.data.url} target="_blank" rel="noopener noreferrer">{p.title}</a>
+                                        <span class="dim">{p.minutes} min</span>
+                                    </li>
+                                ))}
+                            </ol>
+                        </details>
+                    )}
                 </div>
             </li>
         ))}

@@ -19,7 +19,7 @@ It covers the areas a strong engineer needs:
 
 | Page | What it's for |
 |---|---|
-| **Today** (`/`) | A ~1-hour daily plan (one deep read, one foundational Canon read, a moment to reflect or revisit), today's deep read, and more worth your time |
+| **Today** (`/`) | A ~1-hour daily plan (one deep read, one foundational Canon read, then revisit something you read a week or a month ago, or reflect), this week's system design practice, and more worth your time |
 | **Track pages** (`/systems/`, `/architecture/`, …) | The best recent deep reads for that track, plus its Canon |
 | **Roadmap** (`/roadmap/`) | 31 areas and ~485 topics to master (a full system design roadmap plus AI, ML, payments, maths, testing and engineering judgment), with progress ticks and the reads that teach each topic |
 | **Canon** (`/canon/`) | 78 hand-picked foundational reads in order: papers, books, courses and classic articles |
@@ -27,7 +27,7 @@ It covers the areas a strong engineer needs:
 | **Saved** (`/library/`) | Links worth keeping, each with a line on why |
 | **Startups** (`/startups/`) | What the best new companies are building (Launch HN, Show HN, Product Hunt, funding news) |
 | **Pulse** (`/pulse/`) | The week's ten headlines, kept off the front page on purpose |
-| **Search** | Every article, note and saved link |
+| **Search** | Roadmap topics, the Canon, articles, notes and saved links |
 
 Every matched article carries a **"Why read"** line, e.g. *"You'll get better at **Failover Strategies** (Reliability & Fault Tolerance). Teaches you to plan for the moment the primary disappears…"*, so you always know what a piece will do for you.
 
@@ -63,9 +63,10 @@ The site is **read-only**: there's no editing in the browser. Add content as fil
 | A note | `npm run new "What I understood about MVCC" postgres,mvcc`, or `/til` in a Claude Code session. Notes live in `src/content/notes/` |
 | A saved link | Add an entry to `src/content/library.yaml` |
 | A source | Add it to `src/content/feeds.yaml` (pick a track; optional `weight` to rank it up or down) |
-| A foundational read | Add it to `src/content/canon.yaml` |
+| A foundational read | Add it to `src/content/canon.yaml` (for a book or course, list its chapters under `parts`) |
 | A topic to learn | Add it to `src/content/roadmap.yaml` |
 | Progress on every device | List Canon ids or topic ids in `src/content/progress.yaml` (ticks on the site are kept per browser) |
+| Change the weekly design prompts | Edit `src/content/practice.yaml` (topics, reads, the hard question) |
 | Fix a bad "Why read" match | Pin a topic (or `none`) for a URL in `src/content/overrides.yaml` |
 
 ## Project layout

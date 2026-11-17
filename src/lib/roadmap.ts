@@ -18,6 +18,14 @@ export interface Topic {
     track: string;
 }
 
+export interface Practice {
+    id: string;
+    name: string;              // e.g. "Design a Rate Limiter"
+    topics: Topic[];           // closest topics in other areas: what the exercise exercises
+    canon: CollectionEntry<'canon'>[];  // foundational reads that help
+    twist?: string;            // the hard question
+}
+
 export interface SkillMatch {
     topic: Topic;
     sim: number;
@@ -65,7 +73,8 @@ async function build(articles: FeedItem[]) {
         ...library.map(l => `${l.data.title}. ${l.data.why}`),
     ]);
 
-    const empty = { areas, topics, enabled: false, itemsByTopic: new Map<string, FeedItem[]>(), canonByTopic: new Map<string, CollectionEntry<'canon'>[]>(), notesByTopic: new Map<string, number>(), savedByTopic: new Map<string, number>() };
+    const practiceTopics = areas.filter(a => a.data.n === 24).flatMap(a => a.data.topics.filter(t => /^Design a /i.test(t.name)));
+    const empty = { areas, topics, enabled: false, practice: practiceTopics.map(t => ({ id: t.id, name: t.name, topics: [] as Topic[], canon: [] as CollectionEntry<'canon'>[] })), itemsByTopic: new Map<string, FeedItem[]>(), canonByTopic: new Map<string, CollectionEntry<'canon'>[]>(), notesByTopic: new Map<string, number>(), savedByTopic: new Map<string, number>() };
     if (!all) return empty;
 
     let k = 0;
@@ -132,5 +141,35 @@ async function build(articles: FeedItem[]) {
         itemsByTopic.get(top.t.id)!.push(i);
     });
 
-    return { areas, topics, enabled: true, itemsByTopic, canonByTopic, notesByTopic, savedByTopic };
+    // Weekly design practice: pair each "Design a …" prompt with the closest topics and Canon reads.
+    // Match on the subject ("rate limiter", "news feed"), not the generic "design a", so the
+    // pairings are specific: fan-out and caching for a feed, token buckets for a rate limiter.
+    const subject = (name: string) => name.replace(/^Design an? /i, '').replace(/ (Platform|Service|System|Application)$/i, '');
+    const practiceVecs = await embed(practiceTopics.map(t => `${subject(t.name)}: how it works at scale, its components, data and bottlenecks`));
+    // Hand-curated pairings (src/content/practice.yaml) win; embeddings fill in anything not listed.
+    let curated: { id: string; topics?: string[]; reads?: string[]; twist?: string }[] = [];
+    try { curated = parse(await readFile('src/content/practice.yaml', 'utf8')) ?? []; } catch {}
+    const byName = new Map(topicList.map(tp => [tp.name.toLowerCase(), tp]));
+    // "Read first" means something you can finish before the exercise: no whole books or courses.
+    const focused = (c: CollectionEntry<'canon'>) => !(['book', 'course'].includes(c.data.kind) && c.data.minutes > 120);
+    const canonById = new Map(canon.map(c => [c.id, c]));
+    const practice: Practice[] = practiceTopics.map((t, idx) => {
+        const c = curated.find(x => x.id === t.id);
+        if (c) {
+            const tps = (c.topics ?? []).map(n => byName.get(n.toLowerCase()) ?? (console.warn(`[practice] unknown topic "${n}"`), undefined)).filter(Boolean) as Topic[];
+            const reads = (c.reads ?? []).map(id => canonById.get(id) ?? (console.warn(`[practice] unknown canon id "${id}"`), undefined))
+                .filter((x): x is CollectionEntry<'canon'> => !!x && (focused(x) || (console.warn(`[practice] "${x.id}" is a whole ${x.data.kind}; pick a focused read`), false)));
+            return { id: t.id, name: t.name, topics: tps, canon: reads, twist: c.twist };
+        }
+        const v = practiceVecs?.[idx];
+        if (!v) return { id: t.id, name: t.name, topics: [], canon: [] };
+        const near = topicList.map((tp, j) => ({ tp, sim: cosine(v, tv[j]) }))
+            // Skip general/meta areas (fundamentals, requirements, HLD/LLD, case studies, tools, practice, career).
+            .filter(m => ![2, 3, 20, 21, 22, 23, 24, 25, 31].includes(m.tp.areaN) && !/^what is/i.test(m.tp.name) && m.tp.id !== t.id)
+            .sort((a, b) => b.sim - a.sim).slice(0, 5).map(m => m.tp);
+        const reads = canon.map((c, j) => ({ c, sim: cosine(v, cv[j]) })).filter(m => focused(m.c)).sort((a, b) => b.sim - a.sim).slice(0, 3).map(m => m.c);
+        return { id: t.id, name: t.name, topics: near, canon: reads };
+    });
+
+    return { areas, topics, enabled: true, itemsByTopic, canonByTopic, notesByTopic, savedByTopic, practice };
 }

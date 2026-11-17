@@ -4,9 +4,9 @@ import Base from '../layouts/Base.astro';
 import LearnCard from '../components/LearnCard.astro';
 import ReadingMast from '../components/ReadingMast.astro';
 import ReadingClient from '../components/ReadingClient.astro';
-import { getReading, getCanon, getRevisit } from '../lib/reading';
+import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
 
-const { learning, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, startups } = await getReading();
+const { learning, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
 const revisit = await getRevisit(now);
 const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -21,6 +21,15 @@ const canonPlan = canon.filter(t => t.items.length).map(t => ({
 }));
 const revisitItem = revisit.week[0] ?? revisit.month[0] ?? revisit.archive;
 const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
+
+// ---------- This week's design practice (rotates every Monday, IST) ----------
+const IST = 5.5 * 3600e3;
+const week = Math.floor((now + IST + 3 * 864e5) / (7 * 864e5)); // weeks since epoch, Monday-based
+const practice = roadmap.practice.length ? roadmap.practice[week % roadmap.practice.length] : undefined;
+// Plus the best recent article that teaches one of the exercise's topics.
+const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.id) ?? [])
+    .filter(i => isDeep(i) && (i.skill?.sim ?? 0) >= 0.5)
+    .sort((a, b) => rank(b, now) - rank(a, now))[0];
 ---
 <Base description="Learn something real every day: distributed systems, backend, AI engineering and ML foundations." accent="reading">
     <div class="rd">
@@ -38,7 +47,12 @@ const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
                         <div>
                             <span class="plan-kind">1 · Read deeply</span>
                             <a class="plan-title" href={deepRead.link} target="_blank" rel="noopener noreferrer" data-read>{deepRead.title}</a>
-                            <span class="plan-meta">{deepRead.feedTitle}{deepRead.brief?.minutes ? ` · ${deepRead.brief.minutes} min` : ''}{deepRead.skill ? ` · builds ${deepRead.skill.topic.name}` : ''}</span>
+                            <span class="plan-meta">{deepRead.feedTitle}{deepRead.brief?.minutes ? ` · ${deepRead.brief.minutes} min` : ''}{deepRead.brief?.depth === 'deep' ? ' · deep dive' : ''}</span>
+                            {deepRead.skill && (
+                                <p class="plan-why">
+                                    You'll get better at <a href={u(`/roadmap/#${deepRead.skill.topic.id}`)}>{deepRead.skill.topic.name}</a>. {deepRead.skill.topic.why}
+                                </p>
+                            )}
                         </div>
                     </li>
                 )}
@@ -60,11 +74,11 @@ const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
                                 <span class="plan-meta">Re-read it, then fix or extend it. Revisiting is what makes knowledge stick.</span>
                             </>
                         ) : (
-                            <>
+                            <div data-reflect>
                                 <span class="plan-kind">3 · Reflect</span>
                                 <span class="plan-title">Could you explain today's read to a teammate?</span>
                                 <span class="plan-meta">Take 10 minutes to say the core idea in your own words, out loud or on paper. If you can explain it simply, you understand it.</span>
-                            </>
+                            </div>
                         )}
                     </div>
                 </li>
@@ -73,10 +87,31 @@ const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
             <script type="application/json" id="plan-canon" set:html={JSON.stringify(canonPlan)} />
         </section>
 
-        {deepRead && (
-            <section class="today-hero" data-cat={deepRead.category}>
-                <div class="today-label"><span aria-hidden="true">◆</span> Today's deep read</div>
-                <LearnCard i={deepRead} size="hero" />
+        {practice && (
+            <section class="practice" data-practice={`${practice.id}-w${week}`}>
+                <div class="practice-head">
+                    <span class="practice-label">This week's design practice</span>
+                    <label class="practice-done"><input type="checkbox" data-practice-check /> Done</label>
+                </div>
+                <h2 class="practice-title">{practice.name}</h2>
+                {practice.twist && <p class="practice-twist"><span>The hard part</span>{practice.twist}</p>}
+                <p class="practice-how">30–45 minutes, on paper or a whiteboard. Work through it in order:</p>
+                <ol class="practice-steps">
+                    <li><strong>Requirements:</strong> who uses it, what must it do, what must it never do</li>
+                    <li><strong>Estimates:</strong> requests per second, data size, read/write ratio</li>
+                    <li><strong>API and data model</strong></li>
+                    <li><strong>High-level design:</strong> boxes and arrows, the request path end to end</li>
+                    <li><strong>Bottlenecks and trade-offs:</strong> what breaks at 10×, what you'd change</li>
+                </ol>
+                {practice.topics.length > 0 && (
+                    <p class="practice-links"><span>Exercises</span>{practice.topics.map(t => <a href={u(`/roadmap/#${t.id}`)}>{t.name}</a>)}</p>
+                )}
+                {(practice.canon.length > 0 || practiceFresh) && (
+                    <p class="practice-links"><span>Read first</span>
+                        {practice.canon.map(c => <a href={c.data.url} target="_blank" rel="noopener noreferrer" title={`${c.data.author} · ${c.data.minutes} min`}>{c.data.title}</a>)}
+                        {practiceFresh && <a href={practiceFresh.link} target="_blank" rel="noopener noreferrer" title={`New · ${practiceFresh.feedTitle}${practiceFresh.brief?.minutes ? ` · ${practiceFresh.brief.minutes} min` : ''}`}>{practiceFresh.title}</a>}
+                    </p>
+                )}
             </section>
         )}
 
@@ -96,6 +131,7 @@ const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
                             <div class="next-item" data-next-id={c.id} data-link={c.data.url} hidden>
                                 <a class="next-title" href={c.data.url} target="_blank" rel="noopener noreferrer" data-read>{c.data.title}</a>
                                 <p class="next-why">{c.data.why}</p>
+                                {c.data.parts && <p class="next-part" data-next-part={c.id} hidden></p>}
                                 <div class="next-foot">
                                     <span>{c.data.author} · {c.data.kind} · {hours(c.data.minutes)}</span>
                                     <button type="button" class="mark-done" data-mark-done={c.id}>Mark done ✓</button>
@@ -128,24 +164,17 @@ const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
                     <LearnCard i={postmortem} size="card" showTrack={false} />
                 </section>
             )}
-            <section class="home-block">
+            <section class="home-block" data-revisit hidden={revisit.week.length + revisit.month.length === 0 && !revisit.archive}>
                 <header class="block-head">
                     <h2>Revisit</h2>
-                    <a href={u('/notebook/')}>Notebook →</a>
+                    <span class="dim">a week and a month later</span>
                 </header>
-                <div class="revisit">
-                    {revisit.week.length + revisit.month.length === 0 && !revisit.archive ? (
-                        <p class="dim">
-                            Things you write show up here again after a week and a month, because revisiting is what makes knowledge stick.
-                        </p>
-                    ) : (
-                        <ul class="mini" role="list">
-                            {revisit.week.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">1 week ago</span></a></li>)}
-                            {revisit.month.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">1 month ago</span></a></li>)}
-                            {revisit.archive && <li><a href={u(revisit.archive.href)}><span class="mini-title">{revisit.archive.title}</span><span class="mini-meta">from the archive</span></a></li>}
-                        </ul>
-                    )}
-                </div>
+                <ul class="mini revisit" role="list" data-revisit-list>
+                    {revisit.week.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">your note · 1 week ago</span></a></li>)}
+                    {revisit.month.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">your note · 1 month ago</span></a></li>)}
+                    {revisit.archive && <li><a href={u(revisit.archive.href)}><span class="mini-title">{revisit.archive.title}</span><span class="mini-meta">your note · from the archive</span></a></li>}
+                </ul>
+                <p class="revisit-hint">Open it and ask yourself: can I still explain the core idea? If not, skim it again.</p>
             </section>
         </div>
 
@@ -182,6 +211,40 @@ const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
 
 <script>
     import { getSet } from '../lib/progress-client';
+    import { dueForRevisit } from '../lib/history-client';
+    import { nextPart, partId } from '../lib/canon-parts-client';
+
+    // ---------- Revisit from your reading history (spaced repetition, no writing needed) ----------
+    const due = dueForRevisit();
+    const esc = (t: string) => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+    const list = document.querySelector<HTMLElement>('[data-revisit-list]');
+    const items = [...due.week.slice(0, 2).map(r => ({ r, when: 'you read it a week ago' })), ...due.month.slice(0, 2).map(r => ({ r, when: 'you read it a month ago' }))];
+    if (list && items.length) {
+        list.insertAdjacentHTML('afterbegin', items.map(({ r, when }) =>
+            `<li><a href="${esc(r.u)}" target="_blank" rel="noopener noreferrer"><span class="mini-title">${esc(r.t)}</span><span class="mini-meta">${when}</span></a></li>`).join(''));
+        document.querySelector<HTMLElement>('[data-revisit]')!.hidden = false;
+    }
+    // Plan step 3: if there's nothing of yours to revisit, offer something you read a week ago.
+    const reflect = document.querySelector<HTMLElement>('[data-reflect]');
+    const first = due.week[0] ?? due.month[0];
+    if (reflect && first) {
+        const ago = due.week[0] ? 'a week' : 'a month';
+        reflect.innerHTML = `<span class="plan-kind">3 · Revisit</span>
+            <a class="plan-title" href="${esc(first.u)}" target="_blank" rel="noopener noreferrer">${esc(first.t)}</a>
+            <span class="plan-meta">You read this ${ago} ago. Can you still explain the core idea? Skim it again if not.</span>`;
+    }
+
+    // ---------- This week's practice: a tick per week ----------
+    const practice = document.querySelector<HTMLElement>('[data-practice]');
+    const pcheck = document.querySelector<HTMLInputElement>('[data-practice-check]');
+    if (practice && pcheck) {
+        const pkey = `practice:${practice.dataset.practice}`;
+        const paint = () => practice.classList.toggle('is-done', pcheck.checked);
+        try { pcheck.checked = localStorage.getItem(pkey) === '1'; } catch {}
+        paint();
+        pcheck.addEventListener('change', () => { try { localStorage.setItem(pkey, pcheck.checked ? '1' : '0'); } catch {} paint(); });
+    }
+
     // Today's plan: pick the next unfinished Canon item, rotating through tracks day by day,
     // and remember today's ticks (reset tomorrow).
     const key = `plan:${new Date().toLocaleDateString('en-CA')}`;
@@ -194,13 +257,26 @@ const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
     const next = pickTrack?.items.find(c => !canonDone.has(c.id));
     const link = document.querySelector<HTMLAnchorElement>('[data-plan-canon]');
     const meta = document.querySelector<HTMLElement>('[data-plan-canon-meta]');
-    if (next && link && meta) {
-        link.href = next.url;
-        link.textContent = next.title;
-        const t = next.minutes > 60 ? `${Math.round(next.minutes / 60)} h total, read 25 minutes of it today` : `${next.minutes} min`;
-        meta.textContent = `${pickTrack!.track} · ${t}`;
-        link.closest('li')?.setAttribute('data-link', next.url);
+    // A long work (book, course, long video) shows its next chapter, not the whole thing.
+    function renderCanonStep() {
+        if (!next || !link || !meta) return;
+        const ch = nextPart(next.id);
+        const url = ch ? ch.url : next.url;
+        link.href = url;
+        link.textContent = ch ? `${next.title}: ${ch.part.title}` : next.title;
+        const m = ch ? ch.part.minutes : next.minutes;
+        const len = m > 60 ? `${m} min, fine to split over a few days` : `${m} min`;
+        meta.textContent = ch ? `${pickTrack!.track} · chapter ${ch.i + 1} of ${ch.n} · ${len} · ` : `${pickTrack!.track} · ${len}`;
+        if (ch) {
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'mark-done'; b.dataset.markDone = next.id; b.dataset.partDone = partId(next.id, ch.i);
+            b.textContent = 'Finished chapter ✓';
+            meta.append(b);
+        }
+        link.closest('li')?.setAttribute('data-link', url);
     }
+    renderCanonStep();
+    document.addEventListener('canon:changed', renderCanonStep);
 
     let done = readSet(key);
     const boxes = document.querySelectorAll<HTMLInputElement>('[data-plan-step]');

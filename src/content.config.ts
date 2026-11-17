@@ -54,6 +54,8 @@ const canon = defineCollection({
         kind: z.enum(['paper', 'article', 'book', 'video', 'course', 'docs']),
         minutes: z.number().int().positive(),
         why: z.string(),
+        // Chapters or sittings of a long work, in reading order.
+        parts: z.array(z.object({ title: z.string(), minutes: z.number().int().positive(), url: z.string().url().optional() })).optional(),
     }),
 });
 

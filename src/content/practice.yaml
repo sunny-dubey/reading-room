@@ -1,0 +1,57 @@
+# Weekly design practice on Today: one prompt per week, in this order.
+# id:    the roadmap topic id of the prompt (area 24, "Design a …")
+# topics: roadmap topic names this exercise trains (shown as links)
+# reads: Canon ids worth reading first: focused pieces (articles, papers, chapters), never a whole book or course
+# twist: the hard question that makes it a real exercise
+- id: design-a-url-shortener
+  topics: [Key-Value Stores, Cache-Aside Pattern, Hashing & Probabilistic Data Structures, Read-Heavy vs Write-Heavy Workloads, Capacity Estimation]
+  reads: [latency-numbers, bloom-filters]
+  twist: How do many servers generate short codes at once without ever colliding?
+- id: design-a-rate-limiter
+  topics: [API Rate Limiting, Redis, Load Shedding, Consistent Hashing, Distributed Locking]
+  reads: [load-shedding, retries-jitter]
+  twist: Your limiter runs on 50 servers. How do they agree on one user's count without a network round trip per request?
+- id: design-a-notification-service
+  topics: [Message Queue Fundamentals, At-Least-Once, Idempotency, Retry Mechanisms, Fan-Out Strategies]
+  reads: [job-drain, queue-backlogs]
+  twist: The push provider is down for 20 minutes. What happens to the backlog when it comes back, and does anyone get notified twice?
+- id: design-a-chat-application
+  topics: [WebSockets, Presence Systems, Message Ordering, Heartbeats, Database Sharding]
+  reads: [slack-shared-channels, lamport-clocks]
+  twist: How do you keep messages in order per conversation when phones keep dropping and reconnecting?
+- id: design-a-news-feed
+  topics: [Fan-Out Strategies, Cache-Aside Pattern, Pagination, Database Sharding, Hotspot Mitigation]
+  reads: [db-inside-out, vogels-eventually-consistent]
+  twist: An account with 50 million followers posts. Do you push to every feed, pull on read, or mix both, and where's the cut-off?
+- id: design-a-video-streaming-platform
+  topics: [Content Delivery Networks, Object Storage (S3), Multipart Upload, CDN Caching, Data Compression]
+  reads: [s3-pretty-big, sre-load-balancing]
+  twist: How do you serve the same video smoothly to a phone on a weak network and a TV on fibre?
+- id: design-a-ride-hailing-platform
+  topics: [Real-Time Data Processing, WebSockets, Database Sharding, Hotspot Mitigation, Consistent Hashing]
+  reads: [load-shedding, cp-or-ap]
+  twist: A concert ends and 20,000 people request rides from one square kilometre. What breaks first?
+- id: design-a-payment-service
+  topics: [Idempotent Payment APIs, Ledgers & Double-Entry Bookkeeping, Reconciliation, Payment Webhooks, Saga Pattern]
+  reads: [stripe-idempotency, brandur-idempotency, floating-point]
+  twist: The request to the card network times out after you sent it. Did the charge happen? How do you find out without charging twice?
+- id: design-a-distributed-cache
+  topics: [Consistent Hashing, LRU, Cache Stampede, Leader-Follower Replication, Cache Invalidation]
+  reads: [dynamo, bloom-filters]
+  twist: A hot key expires and 10,000 requests miss at the same moment. What protects the database?
+- id: design-a-search-engine
+  topics: [Indexing, Partitioning Strategies, Application-Level Caching, Web Crawler, Latency & Throughput]
+  reads: [latency-sneaks, db-inside-out]
+  twist: How do you keep the index fresh as pages change without rebuilding it from scratch?
+- id: design-a-file-storage-service
+  topics: [Object Storage, Multipart Upload, Resumable Uploads, Data Deduplication, Metadata Management]
+  reads: [s3-pretty-big, dynamo]
+  twist: Two devices edit the same file offline. What happens when both sync?
+- id: design-a-ticket-booking-system
+  topics: [Transactions, Isolation Levels, Distributed Locking, Locking, Idempotency]
+  reads: [pg-mvcc, jepsen-consistency]
+  twist: 10,000 people try to buy the last 100 seats in the same second. How do you never sell a seat twice?
+- id: design-a-real-time-analytics-system
+  topics: [Stream Processing, Apache Kafka, Topics & Partitions, Batching, Percentiles & Tail Behaviour]
+  reads: [db-inside-out, latency-sneaks]
+  twist: Events arrive late and out of order. How do you count them correctly per minute?

@@ -1,15 +1,18 @@
 ---
 // Shared behaviour for every Reading Room page. Include once per page.
+import { getCollection } from 'astro:content';
 import { getProgress } from '../lib/progress';
 const progress = await getProgress();
+// Chapters of long Canon works, for "next chapter" everywhere.
+const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.data.parts?.length)
+    .map(c => [c.id, { title: c.data.title, url: c.data.url, parts: c.data.parts }]));
 ---
 <script type="application/json" id="repo-progress" set:html={JSON.stringify(progress)} />
+<script type="application/json" id="canon-parts" set:html={JSON.stringify(parts)} />
 <script>
     import { getSet, setProgress } from '../lib/progress-client';
-    const store = {
-        get<T>(k: string, d: T): T { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
-        set(k: string, v: unknown) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
-    };
+    import { getHistory, recordRead } from '../lib/history-client';
+    import { nextPart, markPart, partId, works } from '../lib/canon-parts-client';
 
     // ---------- relative times, in the reader's own timezone ----------
     const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
@@ -59,22 +62,51 @@ const progress = await getProgress();
         el.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     });
 
-    // ---------- read tracking (dims things you've opened) ----------
-    const read = new Set<string>(store.get('reading:read', [] as string[]));
-    const paintRead = () => document.querySelectorAll<HTMLElement>('[data-link]').forEach(el => el.classList.toggle('is-read', read.has(el.dataset.link!)));
+    // ---------- read tracking: dims what you've opened, remembers when (for revisits) ----------
+    const paintRead = () => {
+        const read = new Set(getHistory().map(r => r.u));
+        document.querySelectorAll<HTMLElement>('[data-link]').forEach(el => el.classList.toggle('is-read', read.has(el.dataset.link!)));
+    };
     paintRead();
     document.addEventListener('click', e => {
-        const a = (e.target as HTMLElement).closest('a[data-read]');
-        const link = a?.closest<HTMLElement>('[data-link]')?.dataset.link;
-        if (!link) return;
-        read.add(link);
-        store.set('reading:read', [...read].slice(-3000));
+        const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-read]');
+        const host = a?.closest<HTMLElement>('[data-link]');
+        if (!a || !host) return;
+        recordRead(host.dataset.link!, a.textContent?.trim() ?? '');
         paintRead();
     });
 
     // ---------- the Canon: progress per track ----------
-    const done = getSet('canon');
+    let done = getSet('canon');
     function paintCanon() {
+        done = getSet('canon');
+        // Chapters on the Canon page.
+        document.querySelectorAll<HTMLInputElement>('[data-part-toggle]').forEach(cb => {
+            cb.checked = done.has(cb.dataset.partToggle!);
+            cb.closest('li')?.classList.toggle('is-done', cb.checked);
+        });
+        document.querySelectorAll<HTMLElement>('[data-parts-of]').forEach(el => {
+            const id = el.dataset.partsOf!, w = works[id];
+            if (!w) return;
+            const n = w.parts.filter((_, j) => done.has(partId(id, j))).length;
+            const next = nextPart(id, done);
+            el.textContent = next ? `${n} of ${w.parts.length} done · next: ${next.part.title}` : `All ${w.parts.length} done`;
+        });
+        // Next-up cards: a long work shows its next chapter, and "done" finishes the chapter.
+        document.querySelectorAll<HTMLElement>('[data-next-part]').forEach(el => {
+            const id = el.dataset.nextPart!, next = nextPart(id, done);
+            const btn = el.closest('.next-item')?.querySelector<HTMLButtonElement>('[data-mark-done]');
+            if (!next) { el.hidden = true; return; }
+            el.hidden = false;
+            el.innerHTML = '';
+            const label = document.createElement('span');
+            label.textContent = `Next chapter (${next.i + 1} of ${next.n}): `;
+            const a = document.createElement('a');
+            a.href = next.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+            a.textContent = next.part.title;
+            el.append(label, a, document.createTextNode(` · ${next.part.minutes} min`));
+            if (btn) { btn.dataset.partDone = partId(id, next.i); btn.textContent = 'Finished chapter ✓'; }
+        });
         document.querySelectorAll<HTMLInputElement>('[data-canon-toggle]').forEach(cb => {
             cb.checked = done.has(cb.dataset.canonToggle!);
             cb.closest('.canon-item')?.classList.toggle('is-done', cb.checked);
@@ -108,10 +140,16 @@ const progress = await getProgress();
     document.addEventListener('click', e => {
         const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-mark-done]');
         if (!btn) return;
+        if (btn.dataset.partDone) { markPart(btn.dataset.partDone, true); return; }
         done.add(btn.dataset.markDone!);
         setProgress('canon', btn.dataset.markDone!, true);
         paintCanon();
     });
+    document.addEventListener('change', e => {
+        const cb = (e.target as HTMLElement).closest<HTMLInputElement>('[data-part-toggle]');
+        if (cb) markPart(cb.dataset.partToggle!, cb.checked);
+    });
+    document.addEventListener('canon:changed', paintCanon);
     paintCanon();
 
     // ---------- "show more" toggles ----------

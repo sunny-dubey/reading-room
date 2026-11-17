@@ -3,6 +3,8 @@
 # track: systems | backend | ai-eng | ml | math | postmortems
 # kind: paper | article | book | video | course | docs
 # minutes: rough reading/watching time
+# parts: chapters (or sittings) of a long work, in reading order. Today's plan and the Canon
+#        point at the next unfinished part instead of the whole book. url is optional.
 
 # ---------- Distributed Systems & Databases ----------
 - id: young-bloods
@@ -93,6 +95,15 @@
   kind: book
   minutes: 180
   why: How B-tree indexes really work and why your query is slow.
+  parts:
+    - { title: "Anatomy of an SQL Index", minutes: 20, url: "https://use-the-index-luke.com/sql/anatomy" }
+    - { title: "The Where Clause", minutes: 50, url: "https://use-the-index-luke.com/sql/where-clause" }
+    - { title: "Performance and Scalability", minutes: 15, url: "https://use-the-index-luke.com/sql/testing-scalability" }
+    - { title: "The Join Operation", minutes: 25, url: "https://use-the-index-luke.com/sql/join" }
+    - { title: "Clustering Data", minutes: 25, url: "https://use-the-index-luke.com/sql/clustering" }
+    - { title: "Sorting and Grouping", minutes: 25, url: "https://use-the-index-luke.com/sql/sorting-grouping" }
+    - { title: "Partial Results", minutes: 20, url: "https://use-the-index-luke.com/sql/partial-results" }
+    - { title: "Insert, Delete and Update", minutes: 15, url: "https://use-the-index-luke.com/sql/dml" }
 - id: ddia
   track: systems
   title: Designing Data-Intensive Applications
@@ -101,6 +112,19 @@
   kind: book
   minutes: 900
   why: The single best book for this whole track. Read a chapter a week.
+  parts:
+    - { title: "Ch 1 · Reliable, Scalable, and Maintainable Applications", minutes: 50 }
+    - { title: "Ch 2 · Data Models and Query Languages", minutes: 70 }
+    - { title: "Ch 3 · Storage and Retrieval", minutes: 80 }
+    - { title: "Ch 4 · Encoding and Evolution", minutes: 60 }
+    - { title: "Ch 5 · Replication", minutes: 90 }
+    - { title: "Ch 6 · Partitioning", minutes: 50 }
+    - { title: "Ch 7 · Transactions", minutes: 90 }
+    - { title: "Ch 8 · The Trouble with Distributed Systems", minutes: 90 }
+    - { title: "Ch 9 · Consistency and Consensus", minutes: 110 }
+    - { title: "Ch 10 · Batch Processing", minutes: 90 }
+    - { title: "Ch 11 · Stream Processing", minutes: 90 }
+    - { title: "Ch 12 · The Future of Data Systems", minutes: 100 }
 - id: latency-numbers
   track: backend
   title: Latency numbers every programmer should know
@@ -117,6 +141,17 @@
   kind: course
   minutes: 600
   why: A complete map of scalability building blocks (caching, load balancing, sharding, queues) with worked designs.
+  parts:
+    - { title: "Performance vs scalability, latency vs throughput, availability vs consistency", minutes: 30, url: "https://github.com/donnemartin/system-design-primer#performance-vs-scalability" }
+    - { title: "Consistency and availability patterns", minutes: 30, url: "https://github.com/donnemartin/system-design-primer#consistency-patterns" }
+    - { title: "DNS and CDNs", minutes: 30, url: "https://github.com/donnemartin/system-design-primer#domain-name-system" }
+    - { title: "Load balancers and reverse proxies", minutes: 30, url: "https://github.com/donnemartin/system-design-primer#load-balancer" }
+    - { title: "The application layer and microservices", minutes: 25, url: "https://github.com/donnemartin/system-design-primer#application-layer" }
+    - { title: "Databases: replication, federation, sharding, SQL or NoSQL", minutes: 60, url: "https://github.com/donnemartin/system-design-primer#database" }
+    - { title: "Caching", minutes: 40, url: "https://github.com/donnemartin/system-design-primer#cache" }
+    - { title: "Asynchronism: queues and back pressure", minutes: 25, url: "https://github.com/donnemartin/system-design-primer#asynchronism" }
+    - { title: "Communication: TCP, UDP, RPC and REST", minutes: 40, url: "https://github.com/donnemartin/system-design-primer#communication" }
+    - { title: "How to approach a system design question", minutes: 30, url: "https://github.com/donnemartin/system-design-primer#how-to-approach-a-system-design-interview-question" }
 - id: fowler-architecture-guide
   track: backend
   title: Software Architecture Guide
@@ -133,6 +168,14 @@
   kind: book
   minutes: 900
   why: The authors of real systems (nginx, Git, Graphite and more) explain why they designed them the way they did.
+  parts:
+    - { title: "Scalable Web Architecture and Distributed Systems", minutes: 60, url: "https://aosabook.org/en/v2/distsys.html" }
+    - { title: "Berkeley DB", minutes: 60, url: "https://aosabook.org/en/v1/bdb.html" }
+    - { title: "The Hadoop Distributed File System", minutes: 50, url: "https://aosabook.org/en/v1/hdfs.html" }
+    - { title: "Riak and Erlang/OTP", minutes: 50, url: "https://aosabook.org/en/v1/riak.html" }
+    - { title: "The NoSQL Ecosystem", minutes: 50, url: "https://aosabook.org/en/v1/nosql.html" }
+    - { title: "nginx", minutes: 50, url: "https://aosabook.org/en/v2/nginx.html" }
+    - { title: "ZeroMQ", minutes: 60, url: "https://aosabook.org/en/v2/zeromq.html" }
 - id: microservices
   track: backend
   title: Microservices
@@ -365,6 +408,14 @@
   kind: course
   minutes: 900
   why: Build backprop, language models and GPT yourself. The best path from engineer to understanding.
+  parts:
+    - { title: "Building micrograd: neural networks and backpropagation", minutes: 145 }
+    - { title: "makemore 1: a bigram language model", minutes: 117 }
+    - { title: "makemore 2: an MLP", minutes: 75 }
+    - { title: "makemore 3: activations, gradients and BatchNorm", minutes: 115 }
+    - { title: "makemore 4: becoming a backprop ninja", minutes: 115 }
+    - { title: "makemore 5: building a WaveNet", minutes: 56 }
+    - { title: "Let's build the GPT tokenizer", minutes: 133 }
 - id: illustrated-transformer
   track: ml
   title: The Illustrated Transformer
@@ -405,6 +456,10 @@
   kind: video
   minutes: 210
   why: Pretraining, tokenization, post-training, RL and hallucinations, the full pipeline.
+  parts:
+    - { title: "Part 1 of 3 (0:00 to 1:10)", minutes: 70, url: "https://www.youtube.com/watch?v=7xTGNNLPyMI&t=0s" }
+    - { title: "Part 2 of 3 (1:10 to 2:20)", minutes: 70, url: "https://www.youtube.com/watch?v=7xTGNNLPyMI&t=4200s" }
+    - { title: "Part 3 of 3 (2:20 to the end)", minutes: 71, url: "https://www.youtube.com/watch?v=7xTGNNLPyMI&t=8400s" }
 - id: instructgpt
   track: ml
   title: Training language models to follow instructions with human feedback
@@ -517,6 +572,18 @@
   kind: book
   minutes: 1200
   why: Proofs, induction, graphs, counting and probability, the discrete math every algorithm and system rests on. Dip in by chapter.
+  parts:
+    - { title: "What is a Proof?", minutes: 60 }
+    - { title: "Induction", minutes: 90 }
+    - { title: "State Machines (invariants)", minutes: 90 }
+    - { title: "Number Theory", minutes: 120 }
+    - { title: "Simple Graphs", minutes: 120 }
+    - { title: "Sums and Asymptotics", minutes: 90 }
+    - { title: "Cardinality Rules (counting)", minutes: 90 }
+    - { title: "Events and Probability Spaces", minutes: 90 }
+    - { title: "Conditional Probability", minutes: 90 }
+    - { title: "Random Variables", minutes: 90 }
+    - { title: "Deviation from the Mean", minutes: 90 }
 - id: essence-linear-algebra
   track: math
   title: Essence of Linear Algebra
@@ -525,6 +592,15 @@
   kind: video
   minutes: 180
   why: Vectors, matrices and transformations as pictures, so the formulas in ML papers finally mean something.
+  parts:
+    - { title: "Vectors; linear combinations, span and basis", minutes: 20, url: "https://www.3blue1brown.com/lessons/vectors" }
+    - { title: "Linear transformations and matrix multiplication", minutes: 30, url: "https://www.3blue1brown.com/lessons/linear-transformations" }
+    - { title: "The determinant", minutes: 12, url: "https://www.3blue1brown.com/lessons/determinant" }
+    - { title: "Inverse matrices, column space and null space", minutes: 20, url: "https://www.3blue1brown.com/lessons/inverse-matrices" }
+    - { title: "Dot products and cross products", minutes: 35, url: "https://www.3blue1brown.com/lessons/dot-products" }
+    - { title: "Change of basis", minutes: 15, url: "https://www.3blue1brown.com/lessons/change-of-basis" }
+    - { title: "Eigenvectors and eigenvalues", minutes: 18, url: "https://www.3blue1brown.com/lessons/eigenvalues" }
+    - { title: "Abstract vector spaces", minutes: 17, url: "https://www.3blue1brown.com/lessons/abstract-vector-spaces" }
 - id: essence-calculus
   track: math
   title: Essence of Calculus
@@ -533,6 +609,14 @@
   kind: video
   minutes: 180
   why: Derivatives and the chain rule from intuition up, which is all backpropagation really is.
+  parts:
+    - { title: "The essence of calculus", minutes: 17, url: "https://www.3blue1brown.com/lessons/essence-of-calculus" }
+    - { title: "The paradox of the derivative", minutes: 30, url: "https://www.3blue1brown.com/lessons/derivatives" }
+    - { title: "Chain rule and product rule", minutes: 16, url: "https://www.3blue1brown.com/lessons/chain-rule-and-product-rule" }
+    - { title: "What's so special about Euler's number e?", minutes: 30, url: "https://www.3blue1brown.com/lessons/eulers-number" }
+    - { title: "Limits, L'Hôpital's rule and epsilon-delta", minutes: 18, url: "https://www.3blue1brown.com/lessons/limits" }
+    - { title: "Integration and the fundamental theorem of calculus", minutes: 30, url: "https://www.3blue1brown.com/lessons/integration" }
+    - { title: "Taylor series", minutes: 25, url: "https://www.3blue1brown.com/lessons/taylor-series" }
 - id: seeing-theory
   track: math
   title: Seeing Theory, a visual introduction to probability and statistics
@@ -557,6 +641,20 @@
   kind: book
   minutes: 600
   why: Statistics for programmers, learned by writing code on real data instead of memorising formulas.
+  parts:
+    - { title: "1. Exploratory Data Analysis", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap01.html" }
+    - { title: "2. Distributions", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap02.html" }
+    - { title: "3. Probability Mass Functions", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap03.html" }
+    - { title: "4. Cumulative Distribution Functions", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap04.html" }
+    - { title: "5. Modeling Distributions", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap05.html" }
+    - { title: "6. Probability Density Functions", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap06.html" }
+    - { title: "7. Relationships between Variables", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap07.html" }
+    - { title: "8. Estimation", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap08.html" }
+    - { title: "9. Hypothesis Testing", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap09.html" }
+    - { title: "10. Least Squares", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap10.html" }
+    - { title: "11. Multiple Regression", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap11.html" }
+    - { title: "12. Time Series Analysis", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap12.html" }
+    - { title: "13. Survival Analysis", minutes: 45, url: "https://allendowney.github.io/ThinkStats/chap13.html" }
 - id: jeff-algorithms
   track: math
   title: Algorithms
@@ -565,6 +663,17 @@
   kind: book
   minutes: 1200
   why: A free, rigorous and readable algorithms book. Recursion, dynamic programming, graphs and how to analyse them.
+  parts:
+    - { title: "Recursion", minutes: 90, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/01-recursion.pdf" }
+    - { title: "Backtracking", minutes: 75, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/02-backtracking.pdf" }
+    - { title: "Dynamic Programming", minutes: 120, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/03-dynprog.pdf" }
+    - { title: "Greedy Algorithms", minutes: 60, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/04-greedy.pdf" }
+    - { title: "Basic Graph Algorithms", minutes: 75, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/05-graphs.pdf" }
+    - { title: "Depth-First Search", minutes: 75, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/06-dfs.pdf" }
+    - { title: "Minimum Spanning Trees", minutes: 60, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/07-mst.pdf" }
+    - { title: "Shortest Paths", minutes: 90, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/08-sssp.pdf" }
+    - { title: "Maximum Flows and Minimum Cuts", minutes: 75, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/10-maxflow.pdf" }
+    - { title: "NP-Hardness", minutes: 90, url: "https://jeffe.cs.illinois.edu/teaching/algorithms/book/12-nphard.pdf" }
 - id: latency-sneaks
   track: math
   title: Latency Sneaks Up On You
@@ -581,6 +690,14 @@
   kind: book
   minutes: 1200
   why: Queueing theory for engineers. The maths behind capacity planning, load balancing and tail latency.
+  parts:
+    - { title: "Motivating Examples of the Power of Analytical Modeling", minutes: 40 }
+    - { title: "Queueing Theory Terminology", minutes: 40 }
+    - { title: "Little's Law and Other Operational Laws", minutes: 60 }
+    - { title: "Modification Analysis: \"What-If\" for Closed Systems", minutes: 50 }
+    - { title: "Discrete-Time Markov Chains", minutes: 90 }
+    - { title: "M/M/1 and PASTA", minutes: 60 }
+    - { title: "Server Farms: M/M/k and M/M/k/k", minutes: 60 }
 - id: bloom-filters
   track: math
   title: Bloom Filters by Example
@@ -621,6 +738,15 @@
   kind: book
   minutes: 1500
   why: Linear algebra, calculus, probability and optimisation, exactly the parts ML uses, in one free book.
+  parts:
+    - { title: "Linear Algebra", minutes: 120 }
+    - { title: "Analytic Geometry", minutes: 90 }
+    - { title: "Matrix Decompositions", minutes: 120 }
+    - { title: "Vector Calculus", minutes: 120 }
+    - { title: "Probability and Distributions", minutes: 150 }
+    - { title: "Continuous Optimization", minutes: 90 }
+    - { title: "Linear Regression", minutes: 90 }
+    - { title: "Dimensionality Reduction with PCA", minutes: 90 }
 - id: strang-1806
   track: math
   title: MIT 18.06 Linear Algebra
@@ -629,3 +755,19 @@
   kind: course
   minutes: 1800
   why: The classic linear algebra course. Go here after 3Blue1Brown when you want depth.
+  parts:
+    - { title: "Lecture 1: The geometry of linear equations", minutes: 50 }
+    - { title: "Lecture 2: Elimination with matrices", minutes: 50 }
+    - { title: "Lecture 3: Multiplication and inverse matrices", minutes: 50 }
+    - { title: "Lecture 4: Factorization into A = LU", minutes: 50 }
+    - { title: "Lecture 6: Column space and nullspace", minutes: 50 }
+    - { title: "Lecture 9: Independence, basis, and dimension", minutes: 50 }
+    - { title: "Lecture 10: The four fundamental subspaces", minutes: 50 }
+    - { title: "Lecture 14: Orthogonal vectors and subspaces", minutes: 50 }
+    - { title: "Lecture 15: Projections onto subspaces", minutes: 50 }
+    - { title: "Lecture 16: Projection matrices and least squares", minutes: 50 }
+    - { title: "Lecture 17: Orthogonal matrices and Gram-Schmidt", minutes: 50 }
+    - { title: "Lecture 21: Eigenvalues and eigenvectors", minutes: 50 }
+    - { title: "Lecture 22: Diagonalization and powers of A", minutes: 50 }
+    - { title: "Lecture 25: Symmetric matrices and positive definiteness", minutes: 50 }
+    - { title: "Lecture 29: Singular value decomposition", minutes: 50 }
