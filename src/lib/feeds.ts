@@ -40,7 +40,7 @@ export type Signal = 'outage' | 'model' | 'migration' | 'security' | 'controvers
 
 export const CATEGORIES = [
     { id: 'systems', slug: 'systems', label: 'Distributed Systems & Databases', short: 'Systems & DBs', blurb: 'Consensus, replication, consistency, storage engines, Postgres internals' },
-    { id: 'backend', slug: 'backend', label: 'Backend, APIs & Payments', short: 'Backend', blurb: 'API design, idempotency, reliability, queues, scaling, payments' },
+    { id: 'backend', slug: 'architecture', label: 'Scalability & Architecture', short: 'Architecture', blurb: 'Scaling systems, architectural design and trade-offs, reliability patterns, APIs' },
     { id: 'ai-eng', slug: 'ai-engineering', label: 'AI Engineering & Agents', short: 'AI Engineering', blurb: 'Agents, evals, RAG, tool use, LLMs in production' },
     { id: 'ml', slug: 'foundations', label: 'ML & LLM Foundations', short: 'ML Foundations', blurb: 'How transformers, training, fine-tuning and inference actually work' },
     { id: 'math', slug: 'math', label: 'Mathematics', short: 'Math', blurb: 'Discrete math, probability, linear algebra and the maths behind systems and ML' },

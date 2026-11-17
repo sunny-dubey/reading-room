@@ -39,7 +39,7 @@
   why: See consensus happen step by step before reading the paper.
 - id: raft
   track: systems
-  title: "In Search of an Understandable Consensus Algorithm (Raft)"
+  title: In Search of an Understandable Consensus Algorithm (Raft)
   author: Ongaro & Ousterhout
   url: https://raft.github.io/raft.pdf
   kind: paper
@@ -47,7 +47,7 @@
   why: How replicated systems agree on one log. The basis of etcd, Consul, CockroachDB.
 - id: dynamo
   track: systems
-  title: "Dynamo: Amazon's Highly Available Key-value Store"
+  title: 'Dynamo: Amazon''s Highly Available Key-value Store'
   author: DeCandia et al.
   url: https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
   kind: paper
@@ -79,7 +79,7 @@
   why: The log as the source of truth and everything else as derived views. Explains Kafka-style architectures.
 - id: pg-mvcc
   track: systems
-  title: "PostgreSQL: Concurrency Control (MVCC)"
+  title: 'PostgreSQL: Concurrency Control (MVCC)'
   author: PostgreSQL docs
   url: https://www.postgresql.org/docs/current/mvcc.html
   kind: docs
@@ -101,8 +101,6 @@
   kind: book
   minutes: 900
   why: The single best book for this whole track. Read a chapter a week.
-
-# ---------- Backend, APIs & Payments ----------
 - id: latency-numbers
   track: backend
   title: Latency numbers every programmer should know
@@ -111,6 +109,78 @@
   kind: article
   minutes: 5
   why: The orders of magnitude that should drive every caching and architecture decision.
+- id: system-design-primer
+  track: backend
+  title: The System Design Primer
+  author: Donne Martin
+  url: https://github.com/donnemartin/system-design-primer
+  kind: course
+  minutes: 600
+  why: A complete map of scalability building blocks (caching, load balancing, sharding, queues) with worked designs.
+- id: fowler-architecture-guide
+  track: backend
+  title: Software Architecture Guide
+  author: Martin Fowler
+  url: https://martinfowler.com/architecture/
+  kind: article
+  minutes: 60
+  why: What architecture actually is (the decisions that are hard to change) and how good teams make them.
+- id: aosa
+  track: backend
+  title: The Architecture of Open Source Applications
+  author: Brown & Wilson (eds.)
+  url: https://aosabook.org/en/
+  kind: book
+  minutes: 900
+  why: The authors of real systems (nginx, Git, Graphite and more) explain why they designed them the way they did.
+- id: microservices
+  track: backend
+  title: Microservices
+  author: James Lewis & Martin Fowler
+  url: https://martinfowler.com/articles/microservices.html
+  kind: article
+  minutes: 30
+  why: The original definition, including the costs people forget.
+- id: twelve-factor
+  track: backend
+  title: The Twelve-Factor App
+  author: Adam Wiggins
+  url: https://12factor.net/
+  kind: article
+  minutes: 20
+  why: 'The baseline contract for deployable services: config, logs, processes, disposability.'
+- id: vogels-eventually-consistent
+  track: backend
+  title: Eventually Consistent, Revisited
+  author: Werner Vogels
+  url: https://www.allthingsdistributed.com/2008/12/eventually_consistent.html
+  kind: article
+  minutes: 20
+  why: Amazon's CTO on the consistency trade-offs behind systems that have to stay up at any scale.
+- id: strangler-fig
+  track: backend
+  title: Strangler Fig Application
+  author: Martin Fowler
+  url: https://martinfowler.com/bliki/StranglerFigApplication.html
+  kind: article
+  minutes: 15
+  why: How to replace a legacy system gradually instead of a risky big-bang rewrite.
+- id: cqrs
+  track: backend
+  title: CQRS
+  author: Martin Fowler
+  url: https://martinfowler.com/bliki/CQRS.html
+  kind: article
+  minutes: 10
+  why: Separating reads from writes, when it helps scale and when it just adds complexity.
+- id: saga
+  track: backend
+  title: 'Pattern: Saga'
+  author: Chris Richardson (microservices.io)
+  url: https://microservices.io/patterns/data/saga.html
+  kind: article
+  minutes: 15
+  why: How to keep data consistent across services without distributed transactions.
 - id: stripe-idempotency
   track: backend
   title: Designing robust and predictable APIs with idempotency
@@ -167,6 +237,14 @@
   kind: book
   minutes: 40
   why: How one slow dependency takes down everything, and the defences against it.
+- id: sre-load-balancing
+  track: backend
+  title: Load Balancing at the Frontend
+  author: Google SRE book
+  url: https://sre.google/sre-book/load-balancing-datacenter/
+  kind: book
+  minutes: 30
+  why: How Google spreads traffic across data centres, from DNS to the edge.
 - id: online-migrations
   track: backend
   title: Online migrations at scale
@@ -175,24 +253,30 @@
   kind: article
   minutes: 15
   why: The dual-write, backfill, cut-over playbook for changing data models with zero downtime.
-- id: microservices
+- id: aws-10-lessons
   track: backend
-  title: Microservices
-  author: James Lewis & Martin Fowler
-  url: https://martinfowler.com/articles/microservices.html
+  title: 10 Lessons from 10 Years of Amazon Web Services
+  author: Werner Vogels
+  url: https://www.allthingsdistributed.com/2016/03/10-lessons-from-10-years-of-aws.html
+  kind: article
+  minutes: 15
+  why: 'Architecture lessons from building the largest cloud: design for failure, primitives over frameworks, automation.'
+- id: s3-pretty-big
+  track: backend
+  title: Building and operating a pretty big storage system called S3
+  author: Andy Warfield (All Things Distributed)
+  url: https://www.allthingsdistributed.com/2023/07/building-and-operating-a-pretty-big-storage-system.html
   kind: article
   minutes: 30
-  why: The original definition, including the costs people forget.
-- id: twelve-factor
+  why: 'What scale really means: heat management, durability and the human side of running S3.'
+- id: slack-shared-channels
   track: backend
-  title: The Twelve-Factor App
-  author: Adam Wiggins
-  url: https://12factor.net/
+  title: How Slack Built Shared Channels
+  author: Slack Engineering
+  url: https://slack.engineering/how-slack-built-shared-channels/
   kind: article
   minutes: 20
-  why: "The baseline contract for deployable services: config, logs, processes, disposability."
-
-# ---------- AI Engineering & Agents ----------
+  why: A real architecture change at scale, with the trade-offs and data model decisions spelled out.
 - id: building-agents
   track: ai-eng
   title: Building effective agents
@@ -240,7 +324,7 @@
   url: https://huyenchip.com/2024/07/25/genai-platform.html
   kind: article
   minutes: 45
-  why: "The full architecture: context, guardrails, routers, caching, observability."
+  why: 'The full architecture: context, guardrails, routers, caching, observability.'
 - id: chip-agents
   track: ai-eng
   title: Agents
@@ -273,11 +357,9 @@
   kind: docs
   minutes: 20
   why: The standard way agents connect to tools and data.
-
-# ---------- ML & LLM Foundations ----------
 - id: zero-to-hero
   track: ml
-  title: "Neural Networks: Zero to Hero"
+  title: 'Neural Networks: Zero to Hero'
   author: Andrej Karpathy
   url: https://karpathy.ai/zero-to-hero.html
   kind: course
@@ -309,7 +391,7 @@
   why: The paper again, as runnable PyTorch, line by line.
 - id: lets-build-gpt
   track: ml
-  title: "Let's build GPT: from scratch, in code, spelled out"
+  title: 'Let''s build GPT: from scratch, in code, spelled out'
   author: Andrej Karpathy
   url: https://www.youtube.com/watch?v=kCc8FmEb1nY
   kind: video
@@ -341,7 +423,7 @@
   why: Scaling laws. How model size, data and compute trade off.
 - id: lora
   track: ml
-  title: "LoRA: Low-Rank Adaptation of Large Language Models"
+  title: 'LoRA: Low-Rank Adaptation of Large Language Models'
   author: Hu et al.
   url: https://arxiv.org/abs/2106.09685
   kind: paper
@@ -365,17 +447,15 @@
   why: KV cache, quantization, distillation, sparsity. Why inference is expensive and how it's made cheaper.
 - id: monosemanticity
   track: ml
-  title: "Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet"
+  title: 'Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet'
   author: Anthropic
   url: https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html
   kind: paper
   minutes: 90
   why: What is actually going on inside a model, and how interpretability research finds out.
-
-# ---------- Postmortems: learn from failure ----------
 - id: postmortem-culture
   track: postmortems
-  title: "Postmortem Culture: Learning from Failure"
+  title: 'Postmortem Culture: Learning from Failure'
   author: Google SRE book
   url: https://sre.google/sre-book/postmortem-culture/
   kind: book
@@ -429,8 +509,6 @@
   kind: docs
   minutes: 60
   why: Hundreds more, grouped by cause. Pick one a week.
-
-# ---------- Mathematics ----------
 - id: mcs
   track: math
   title: Mathematics for Computer Science
@@ -545,7 +623,7 @@
   why: Linear algebra, calculus, probability and optimisation, exactly the parts ML uses, in one free book.
 - id: strang-1806
   track: math
-  title: "MIT 18.06 Linear Algebra"
+  title: MIT 18.06 Linear Algebra
   author: Gilbert Strang
   url: https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/
   kind: course

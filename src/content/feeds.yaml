@@ -4,7 +4,7 @@
 #
 # category (labels/order in src/lib/feeds.ts):
 #   systems      Distributed Systems & Databases
-#   backend      Backend, APIs & Payments
+#   backend      Scalability & Architecture (page: /architecture/)
 #   ai-eng       AI Engineering & Agents
 #   ml           ML & LLM Foundations
 #   math         Mathematics
@@ -143,12 +143,40 @@
   limit: 5
   maxAgeDays: 90
 - id: infoq
-  title: InfoQ
-  url: https://www.infoq.com/feed/
-  site: https://www.infoq.com/
+  title: InfoQ Architecture & Design
+  url: https://feed.infoq.com/architecture-design/
+  site: https://www.infoq.com/architecture-design/
   category: backend
   limit: 6
   maxAgeDays: 30
+- id: martin-fowler
+  title: Martin Fowler
+  url: https://martinfowler.com/feed.atom
+  site: https://martinfowler.com/
+  category: backend
+  limit: 6
+  maxAgeDays: 90
+- id: all-things-distributed
+  title: All Things Distributed (Werner Vogels)
+  url: https://www.allthingsdistributed.com/index.xml
+  site: https://www.allthingsdistributed.com/
+  category: backend
+  limit: 4
+  maxAgeDays: 180
+- id: airbnb-eng
+  title: Airbnb Engineering
+  url: https://medium.com/feed/airbnb-engineering
+  site: https://medium.com/airbnb-engineering
+  category: backend
+  limit: 4
+  maxAgeDays: 90
+- id: meta-eng
+  title: Meta Engineering
+  url: https://engineering.fb.com/feed/
+  site: https://engineering.fb.com/
+  category: backend
+  limit: 5
+  maxAgeDays: 60
 
 # ---------- ai-eng ----------
 - id: simon-willison
