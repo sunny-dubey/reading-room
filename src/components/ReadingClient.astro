@@ -89,42 +89,4 @@ const progress = await getProgress();
         b.remove();
     }));
 
-    // ---------- local only: save a piece to the library ----------
-    const API = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/__notebook`;
-    document.addEventListener('click', e => {
-        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-save]');
-        if (!btn) return;
-        const host = btn.closest<HTMLElement>('[data-link]') ?? btn.parentElement!;
-        let form = host.querySelector<HTMLFormElement>('.save-form');
-        if (form) { form.remove(); return; }
-        form = document.createElement('form');
-        form.className = 'save-form';
-        form.innerHTML = `<input name="why" placeholder="Why keep this? (one line)" required />
-            <input name="tags" placeholder="tags, comma separated" />
-            <button type="submit">Save to library</button>`;
-        host.appendChild(form);
-        (form.elements.namedItem('why') as HTMLInputElement).focus();
-        form.addEventListener('submit', async ev => {
-            ev.preventDefault();
-            const fd = new FormData(form!);
-            const submit = form!.querySelector('button')!;
-            submit.textContent = 'Saving…';
-            try {
-                const res = await fetch(`${API}/library`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: btn.dataset.title, url: btn.dataset.url, author: btn.dataset.author,
-                        why: fd.get('why'), tags: String(fd.get('tags') ?? '').split(',').map(t => t.trim()).filter(Boolean),
-                    }),
-                });
-                const out = await res.json();
-                if (!res.ok) throw new Error(out.error);
-                form!.remove();
-                btn.textContent = 'Saved ✓';
-                btn.disabled = true;
-            } catch (err) {
-                submit.textContent = `Failed: ${(err as Error).message}`;
-            }
-        });
-    });
 </script>

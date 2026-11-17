@@ -2,16 +2,14 @@
 import { u } from '../lib/url';
 import ThemeToggle from './ThemeToggle.astro';
 import { CATEGORIES } from '../lib/feeds';
-import { ghNewNote } from '../lib/site';
 const path = Astro.url.pathname.replace(/\/?$/, '/');
-const dev = import.meta.env.DEV;
 const sections = [
     { href: u('/'), label: 'Today', cat: '' },
     ...CATEGORIES.map(c => ({ href: u(`/${c.slug}/`), label: c.short, cat: c.id })),
     { href: u('/roadmap/'), label: 'Roadmap', cat: '' },
     { href: u('/canon/'), label: 'Canon', cat: '' },
 ];
-const notebookPaths = ['/notebook/', '/write/'].map(p => u(p));
+const notebookPaths = ['/notebook/'].map(p => u(p));
 const isNotebook = notebookPaths.some(p => path.startsWith(p));
 const isSaved = path.startsWith(u('/library/'));
 ---
@@ -28,9 +26,6 @@ const isSaved = path.startsWith(u('/library/'));
             <a href={u('/library/')} aria-current={isSaved ? 'page' : undefined}>Saved</a>
         </div>
         <div class="nav-tools">
-            {dev
-                ? <a href={u('/write/')} class="write-btn" title="Write a note">+ Write</a>
-                : <a href={ghNewNote} class="write-btn" data-gh-new target="_blank" rel="noopener" title="Write a note (opens GitHub)">+ Write</a>}
             <a href={u('/search/')} class="icon-btn" aria-label="Search" title="Search">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             </a>

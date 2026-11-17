@@ -2,7 +2,6 @@
 import type { FeedItem } from '../lib/feeds';
 import { categoryShort } from '../lib/feeds';
 import { u } from '../lib/url';
-import StoryActions from './StoryActions.astro';
 interface Props { i: FeedItem; size?: 'hero' | 'card' | 'row'; showTrack?: boolean; }
 const { i, size = 'card', showTrack = true } = Astro.props;
 const b = i.brief;
@@ -28,6 +27,5 @@ const depthLabel = { quick: 'Quick read', article: 'Article', deep: 'Deep dive' 
         {b && b.concepts.length > 0 && (
             <span class="concepts">{b.concepts.map(c => <a class="concept" href={`${u('/search/')}?q=${encodeURIComponent(c)}`} title={`Search everything about ${c}`}>{c}</a>)}</span>
         )}
-        <StoryActions title={i.title} url={i.link} author={i.feedTitle} />
     </div>
 </article>

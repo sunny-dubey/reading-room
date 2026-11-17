@@ -10,6 +10,6 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 ---
-<Entry k="note" edit={entry.id} title={entry.data.title} meta={fmtDate(entry.data.date)} tags={entry.data.tags} source={entry.data.source} back={{ href: u('/notebook/'), label: 'Notebook' }}>
+<Entry k="note" title={entry.data.title} meta={fmtDate(entry.data.date)} tags={entry.data.tags} source={entry.data.source} back={{ href: u('/notebook/'), label: 'Notebook' }}>
     <Content />
 </Entry>

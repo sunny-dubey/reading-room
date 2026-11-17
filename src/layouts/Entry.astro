@@ -2,20 +2,16 @@
 import Base from './Base.astro';
 import Tags from '../components/Tags.astro';
 import { u } from '../lib/url';
-import { ghEditFile } from '../lib/site';
 interface Props {
     title: string;
     meta: string;
     tags: string[];
     back: { href: string; label: string };
     k: string;
-    edit?: string;      // note id (local-only Edit link)
     source?: string;    // the piece this note is about
     description?: string;
 }
-const { title, meta, tags, back, k, edit, source, description } = Astro.props;
-const dev = import.meta.env.DEV;
-const editHref = edit ? (dev ? `${u('/write/')}?id=${edit}` : ghEditFile(`src/content/notes/${edit}.md`)) : '';
+const { title, meta, tags, back, k, source, description } = Astro.props;
 const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; } };
 ---
 <Base title={title} description={description} accent={k}>
@@ -23,7 +19,6 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
         <header class="entry-head">
             <div class="entry-top">
                 <a class="back" href={back.href}>← {back.label}</a>
-                {editHref && <a class="back edit-link" href={editHref} {...(dev ? {} : { target: '_blank', rel: 'noopener' })}>Edit</a>}
             </div>
             <h1>{title}</h1>
             <div class="entry-meta">

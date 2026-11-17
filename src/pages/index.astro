@@ -12,20 +12,18 @@ const revisit = await getRevisit(now);
 const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 const deepCount = tracks.reduce((a, t) => a + t.deep.length, 0);
 const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
-const dev = import.meta.env.DEV;
 
-// ---------- Today's plan: read → canon → explain/revisit ----------
+// ---------- Today's plan: read → canon → reflect/revisit ----------
 const canonPlan = canon.filter(t => t.items.length).map(t => ({
     track: t.short, cat: t.id,
     items: t.items.map(c => ({ id: c.id, title: c.data.title, url: c.data.url, minutes: c.data.minutes })),
 }));
 const revisitItem = revisit.week[0] ?? revisit.month[0] ?? revisit.archive;
 const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
-const explainLocal = deepRead ? `${u('/write/')}?title=${encodeURIComponent(deepRead.title)}&ref=${encodeURIComponent(deepRead.link)}` : u('/write/');
 ---
 <Base description="Learn something real every day: distributed systems, backend, AI engineering and ML foundations." accent="reading">
     <div class="rd">
-        <ReadingMast title="The Reading Room" kicker={today} sub="Become a sharper engineer: read deeply, explain it back, revisit." updated={fetchedAt} />
+        <ReadingMast title="The Reading Room" kicker={today} sub="Become a sharper engineer: read deeply, reflect, revisit." updated={fetchedAt} />
 
         <section class="plan" data-plan>
             <header class="plan-head">
@@ -52,7 +50,7 @@ const explainLocal = deepRead ? `${u('/write/')}?title=${encodeURIComponent(deep
                     </div>
                 </li>
                 <li class="plan-step" data-step="explain">
-                    <label class="plan-check"><input type="checkbox" data-plan-step="explain" aria-label="Done: explain or revisit" /><span></span></label>
+                    <label class="plan-check"><input type="checkbox" data-plan-step="explain" aria-label="Done: reflect or revisit" /><span></span></label>
                     <div>
                         {revisitItem ? (
                             <>
@@ -62,11 +60,9 @@ const explainLocal = deepRead ? `${u('/write/')}?title=${encodeURIComponent(deep
                             </>
                         ) : (
                             <>
-                                <span class="plan-kind">3 · Explain it back</span>
-                                {dev
-                                    ? <a class="plan-title" href={explainLocal}>Explain today's read in your own words</a>
-                                    : <a class="plan-title" href="#" data-gh-explain data-title={deepRead?.title ?? 'Today'} data-url={deepRead?.link ?? ''} target="_blank" rel="noopener">Explain today's read in your own words</a>}
-                                <span class="plan-meta">10 minutes. If you can explain it simply, you understand it.</span>
+                                <span class="plan-kind">3 · Reflect</span>
+                                <span class="plan-title">Could you explain today's read to a teammate?</span>
+                                <span class="plan-meta">Take 10 minutes to say the core idea in your own words, out loud or on paper. If you can explain it simply, you understand it.</span>
                             </>
                         )}
                     </div>
@@ -140,7 +136,6 @@ const explainLocal = deepRead ? `${u('/write/')}?title=${encodeURIComponent(deep
                     {revisit.week.length + revisit.month.length === 0 && !revisit.archive ? (
                         <p class="dim">
                             Things you write show up here again after a week and a month, because revisiting is what makes knowledge stick.
-                            {dev ? <> Start with <strong>Explain it back</strong> on anything you read.</> : ''}
                         </p>
                     ) : (
                         <ul class="mini" role="list">

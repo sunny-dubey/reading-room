@@ -1,6 +1,6 @@
 # reading-room
 
-**The Reading Room**: a site for *understanding* (not news) across four tracks: Distributed Systems & Databases, Backend/APIs/Payments, AI Engineering & Agents, ML & LLM Foundations, plus Postmortems. A small `/pulse/` page holds the week's headlines. Sunny's notebook (log/notes/writing/saved) is where reading gets explained back. Astro 5 static site, GitHub Pages, rebuilt every 6h.
+**The Reading Room**: a site for *understanding* (not news) across four tracks: Distributed Systems & Databases, Backend/APIs/Payments, AI Engineering & Agents, ML & LLM Foundations, plus Postmortems. A small `/pulse/` page holds the week's headlines. Sunny's notebook (notes + saved links, written as files) is displayed read-only. Astro 5 static site, GitHub Pages, rebuilt every 6h.
 
 - Sources: `src/content/feeds.yaml`. Tracks: `CATEGORIES` in `src/lib/feeds.ts`. Ranking and Today page selection: `src/lib/reading.ts`.
 - **Build-time article analysis, no AI model, no summaries:** `src/lib/summarize.ts` uses feed full-text or fetches the page (cached in `.cache/articles`, 30 days), then extracts concepts (VOCAB list), reading time, depth and a 1-5 `worth` score used for ranking. Deep reads = worth ≥ 3.5.
@@ -8,9 +8,9 @@
 - **Roadmap** (`src/content/roadmap.yaml`, page `/roadmap/`): Sunny's 25-area system design roadmap + AI engineering, ML foundations, payments, mathematics (29 areas, ~470 topics). `src/lib/embed.ts` runs a local embedding model (all-MiniLM-L6-v2 via @huggingface/transformers; cached in `.cache/models`, vectors in `.cache/embeddings.json`) at build time. `src/lib/roadmap.ts` matches each article to its closest topic (restricted by source track, see `ALLOWED`), giving cards a "Why read: you'll get better at <topic>" line and a rank boost for topics not yet covered by notes/saved links. If the model can't load, ranking falls back to the rules.
 - **Overrides** (`src/content/overrides.yaml`): pin a roadmap topic for an article URL, or `none`.
 - **Ranking:** `rank = worth×2 + freshness + topic boost + source weight` (`weight` per feed in feeds.yaml; roundup/newsletter titles lose worth in summarize.ts).
-- **Progress** (`src/content/progress.yaml`: finished Canon ids, learned topic ids): merged into the browser on every page (`src/lib/progress-client.ts`); local ticks write the file via the dev API; on the live site a "Sync progress" button copies it and opens GitHub. Build-time coverage uses it, so covered topics rank lower.
-- **Writing from anywhere:** on the live site, Explain it back / + Write / Edit / Save open GitHub's web editor (`src/lib/gh-actions.ts`, repo in `src/lib/site.ts`). Committing there publishes.
-- **Today** (`src/pages/index.astro`): Today's plan (deep read → next Canon item, rotating tracks daily → explain it back or revisit), then the deep read, Canon next-ups, picks, postmortem, revisit.
+- **Progress** is read-only on the site: Canon/Roadmap/plan ticks live in the browser (`src/lib/progress-client.ts`). Ids listed in `src/content/progress.yaml` (edit by hand) are merged in on every device and used by build-time ranking.
+- **The site is read-only:** no in-site editor, saving, syncing or Explain-it-back. Notes and saved links are added as files (`npm run new`, `/til`, or editing `src/content/`).
+- **Today** (`src/pages/index.astro`): Today's plan (deep read → next Canon item, rotating tracks daily → reflect or revisit), then the deep read, Canon next-ups, picks, postmortem, revisit.
 - `npm run check:links` checks Canon URLs (runs after each deploy, non-blocking).
 - Tracks: systems, backend (shown as "Scalability & Architecture" at /architecture/), ai-eng, ml, math, postmortems (+ side pages pulse, startups).
 
@@ -29,7 +29,6 @@
 
 - Site is served under `/reading-room/` (GitHub Pages project site). Wrap every internal link in `u()` from `src/lib/url.ts`, never a bare `/path`.
 
-- In-site editor: `/write/` (new note, `?id=` to edit, `?ref=&title=` for Explain it back) + dev-only API in `integrations/notebook-editor.mjs` (notes save/load/tags, library add/remove under `/reading-room/__notebook/`). Never exists in the static build.
 
 ## Commands
 

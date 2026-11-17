@@ -1,6 +1,5 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import StoryActions from './StoryActions.astro';
 interface Props { items: CollectionEntry<'canon'>[]; track: string; }
 const { items, track } = Astro.props;
 const total = items.reduce((a, x) => a + x.data.minutes, 0);
@@ -28,7 +27,6 @@ const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
                     <a class="canon-title" href={c.data.url} target="_blank" rel="noopener noreferrer" data-read>{c.data.title}</a>
                     <div class="canon-meta"><span>{c.data.author}</span><span class="kind-tag">{c.data.kind}</span><span>{hours(c.data.minutes)}</span></div>
                     <p class="canon-why">{c.data.why}</p>
-                    <div class="learn-foot"><StoryActions title={c.data.title} url={c.data.url} author={c.data.author} /></div>
                 </div>
             </li>
         ))}
