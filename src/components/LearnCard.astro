@@ -18,6 +18,13 @@ const slug = (c: string) => c.replace(/[^a-z0-9]+/g, '-');
         {b && <span class={`depth depth-${b.depth}`}>{depthLabel}</span>}
     </div>
     <a class="learn-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+    {i.skill && (
+        <p class="why-read">
+            <span class="why-label">Why read</span>
+            You'll get better at <a class="why-topic" href={u(`/roadmap/#${i.skill.topic.id}`)}>{i.skill.topic.name}</a>
+            <span class="why-area">({i.skill.topic.areaTitle})</span>. {i.skill.topic.why}
+        </p>
+    )}
     <div class="learn-foot">
         {b && b.concepts.length > 0 && (
             <span class="concepts">{b.concepts.map(c => <a class="concept" href={u(`/concepts/#${slug(c)}`)}>{c}</a>)}</span>

@@ -49,7 +49,7 @@ const feeds = defineCollection({
 const canon = defineCollection({
     loader: file('./src/content/canon.yaml'),
     schema: z.object({
-        track: z.enum(['systems', 'backend', 'ai-eng', 'ml', 'postmortems']),
+        track: z.enum(['systems', 'backend', 'ai-eng', 'ml', 'math', 'postmortems']),
         title: z.string(),
         author: z.string(),
         url: z.string().url(),
@@ -59,4 +59,22 @@ const canon = defineCollection({
     }),
 });
 
-export const collections = { notes, library, feeds, canon };
+// The Roadmap: areas and topics to learn; articles are matched to topics at build time.
+const roadmap = defineCollection({
+    loader: file('./src/content/roadmap.yaml'),
+    schema: z.object({
+        n: z.number().int(),
+        title: z.string(),
+        track: z.string(),
+        why: z.string(),
+        topics: z.array(z.object({
+            id: z.string(),
+            name: z.string(),
+            group: z.string().optional(),
+            why: z.string().optional(),
+            about: z.string().optional(),
+        })),
+    }),
+});
+
+export const collections = { notes, library, feeds, canon, roadmap };

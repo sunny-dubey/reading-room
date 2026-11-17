@@ -1,0 +1,156 @@
+---
+import { u } from '../lib/url';
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getReading, rank } from '../lib/reading';
+
+const { roadmap, now } = await getReading();
+const { areas, itemsByTopic, canonByTopic, notesByTopic, savedByTopic } = roadmap;
+const unique = new Set(areas.flatMap(a => a.data.topics.map(t => t.id)));
+
+// Group each area's topics under their sub-headings, keeping order.
+const grouped = (topics: typeof areas[number]['data']['topics']) => {
+    const out: { group?: string; items: typeof topics }[] = [];
+    for (const t of topics) {
+        const last = out[out.length - 1];
+        if (last && last.group === t.group) last.items.push(t);
+        else out.push({ group: t.group, items: [t] });
+    }
+    return out;
+};
+const reads = (id: string) => (itemsByTopic.get(id) ?? []).sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 3);
+const freshCount = (a: typeof areas[number]) => new Set(a.data.topics.flatMap(t => (itemsByTopic.get(t.id) ?? []).map(i => i.link))).size;
+---
+<Base title="Roadmap" description="What I'm learning to become an exceptional engineer, topic by topic." accent="reading">
+    <div class="rd">
+        <ReadingMast compact title="Roadmap" sub={`${areas.length} areas · ${unique.size} topics. Tick what you've learned; every article is matched to the topic it teaches.`}>
+            <div class="rm-overall" data-rm-overall>
+                <span class="bar"><span data-rm-bar style="width:0%"></span></span>
+                <span data-rm-count>0 / {unique.size} learned</span>
+            </div>
+            <p class="rm-goal"><strong>Final goal:</strong> design scalable applications, build reliable distributed systems, understand large-scale architectures, make strong trade-offs, and design systems used by millions.</p>
+        </ReadingMast>
+
+        <nav class="rm-index" aria-label="Areas">
+            {areas.map(a => (
+                <a href={`#${a.id}`} data-cat={a.data.track} data-rm-area-link={a.id}>
+                    <span class="rm-n">{a.data.n}</span>
+                    <span class="rm-t">{a.data.title}</span>
+                    <span class="rm-mini"><span data-rm-mini={a.id}></span></span>
+                </a>
+            ))}
+        </nav>
+
+        <div class="rm-areas">
+            {areas.map(a => (
+                <details class="rm-area" id={a.id} data-cat={a.data.track} data-rm-area={a.id}>
+                    <summary>
+                        <span class="rm-area-n">{a.data.n}</span>
+                        <span class="rm-area-main">
+                            <span class="rm-area-title">{a.data.title}</span>
+                            <span class="rm-area-why">{a.data.why}</span>
+                        </span>
+                        <span class="rm-area-meta">
+                            <span data-rm-area-count>0 / {new Set(a.data.topics.map(t => t.id)).size}</span>
+                            {freshCount(a) > 0 && <span class="rm-fresh">{freshCount(a)} fresh {freshCount(a) === 1 ? 'read' : 'reads'}</span>}
+                        </span>
+                    </summary>
+                    <div class="rm-topics">
+                        {grouped(a.data.topics).map(g => (
+                            <div class="rm-group">
+                                {g.group && <h3 class="rm-group-title">{g.group}</h3>}
+                                <ul role="list">
+                                    {g.items.map(t => {
+                                        const r = reads(t.id);
+                                        const c = canonByTopic.get(t.id) ?? [];
+                                        const nNotes = notesByTopic.get(t.id) ?? 0;
+                                        const nSaved = savedByTopic.get(t.id) ?? 0;
+                                        return (
+                                            <li class="rm-topic" id={t.id} data-topic={t.id} data-canon={c.map(x => x.id).join(' ')} data-touched={nNotes + nSaved > 0 ? '1' : undefined}>
+                                                <label class="rm-check" title="Mark as learned">
+                                                    <input type="checkbox" data-learn={t.id} aria-label={`Learned: ${t.name}`} />
+                                                    <span class="rm-box"></span>
+                                                </label>
+                                                <div class="rm-topic-main">
+                                                    <span class="rm-topic-name">{t.name}</span>
+                                                    {(r.length > 0 || c.length > 0 || nNotes > 0 || nSaved > 0) && (
+                                                        <div class="rm-links">
+                                                            {c.map(x => <a class="rm-canon" href={x.data.url} target="_blank" rel="noopener noreferrer" title={x.data.why}>Canon: {x.data.title}</a>)}
+                                                            {r.map(i => <a class="rm-read" href={i.link} target="_blank" rel="noopener noreferrer" title={`${i.feedTitle}${i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}`}>{i.title}</a>)}
+                                                            {nNotes > 0 && <a class="rm-note" href={u('/notebook/')}>{nNotes} {nNotes === 1 ? 'note' : 'notes'}</a>}
+                                                            {nSaved > 0 && <a class="rm-note" href={u('/library/')}>{nSaved} saved</a>}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </details>
+            ))}
+        </div>
+    </div>
+    <ReadingClient />
+</Base>
+
+<script>
+    const KEY = 'roadmap:learned';
+    const read = (k: string) => { try { return new Set<string>(JSON.parse(localStorage.getItem(k) ?? '[]')); } catch { return new Set<string>(); } };
+    let learned = read(KEY);
+    const canonDone = read('canon:done');
+
+    function paint() {
+        // Topic state: learned (ticked) > in progress (notes, saved, or a finished Canon read) > not started.
+        document.querySelectorAll<HTMLElement>('[data-topic]').forEach(li => {
+            const id = li.dataset.topic!;
+            const isLearned = learned.has(id);
+            const started = !!li.dataset.touched || (li.dataset.canon ?? '').split(' ').some(c => c && canonDone.has(c));
+            li.classList.toggle('is-learned', isLearned);
+            li.classList.toggle('is-started', !isLearned && started);
+            const cb = li.querySelector<HTMLInputElement>('[data-learn]');
+            if (cb) cb.checked = isLearned;
+        });
+        let total = 0, done = 0;
+        const seen = new Set<string>();
+        document.querySelectorAll<HTMLElement>('[data-rm-area]').forEach(area => {
+            const ids = [...new Set([...area.querySelectorAll<HTMLElement>('[data-topic]')].map(x => x.dataset.topic!))];
+            const n = ids.filter(id => learned.has(id)).length;
+            area.querySelector('[data-rm-area-count]')!.textContent = `${n} / ${ids.length}`;
+            const mini = document.querySelector<HTMLElement>(`[data-rm-mini="${area.dataset.rmArea}"]`);
+            if (mini) mini.style.width = `${ids.length ? (n / ids.length) * 100 : 0}%`;
+            ids.forEach(id => { if (!seen.has(id)) { seen.add(id); total++; if (learned.has(id)) done++; } });
+        });
+        document.querySelector('[data-rm-count]')!.textContent = `${done} / ${total} learned`;
+        (document.querySelector('[data-rm-bar]') as HTMLElement).style.width = `${total ? (done / total) * 100 : 0}%`;
+    }
+
+    document.addEventListener('change', e => {
+        const cb = (e.target as HTMLElement).closest<HTMLInputElement>('[data-learn]');
+        if (!cb) return;
+        cb.checked ? learned.add(cb.dataset.learn!) : learned.delete(cb.dataset.learn!);
+        try { localStorage.setItem(KEY, JSON.stringify([...learned])); } catch {}
+        paint();
+    });
+
+    // Deep links: /roadmap/#topic-id or #area-id opens the right area and highlights the topic.
+    function openFromHash() {
+        const id = decodeURIComponent(location.hash.slice(1));
+        if (!id) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        const area = el.closest('details') ?? (el.tagName === 'DETAILS' ? el : null);
+        if (area) (area as HTMLDetailsElement).open = true;
+        if (el.classList.contains('rm-topic')) {
+            el.classList.add('is-target');
+            setTimeout(() => el.classList.remove('is-target'), 2500);
+        }
+        el.scrollIntoView({ block: 'center' });
+    }
+    window.addEventListener('hashchange', openFromHash);
+    openFromHash();
+    paint();
+</script>

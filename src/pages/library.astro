@@ -18,6 +18,9 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
             {kinds.map(k => <button class="filter" data-kind={k} aria-pressed="false">{k}</button>)}
         </div>
     )}
+    <p class="hidden-bar" id="hidden-bar" hidden>
+        <span id="hidden-text"></span> <button type="button" id="show-hidden">Show them again</button>
+    </p>
     {links.length === 0 ? <p class="notice">Nothing saved yet.</p> : (
         <div class="grid">
             {links.map(l => (
@@ -29,7 +32,8 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
                         <Tags tags={l.data.tags} />
                         <span class="card-date">{l.data.author ? `${l.data.author} · ` : ''}{fmtDate(l.data.added)}</span>
                     </div>
-                    {dev && <button type="button" class="unsave-btn" data-unsave={l.id} title="Remove from Saved (local only)">Unsave</button>}
+                    <button type="button" class="unsave-btn" data-unsave={l.id} data-mode={dev ? 'file' : 'hide'}
+                        title={dev ? 'Remove from library.yaml' : 'Hide from Saved in this browser'}>Unsave</button>
                 </article>
             ))}
         </div>
@@ -45,11 +49,41 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
         });
     }));
 
-    // Local only: remove an item from library.yaml. Two clicks to confirm, no dialog.
+    // Unsave. Locally (npm run dev) it removes the entry from library.yaml.
+    // On the live site it hides the entry in this browser only (the repo is unchanged).
     const API = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/__notebook`;
+    const HIDE_KEY = 'saved:hidden';
+    const readHidden = (): string[] => { try { return JSON.parse(localStorage.getItem(HIDE_KEY) ?? '[]'); } catch { return []; } };
+    const writeHidden = (ids: string[]) => { try { localStorage.setItem(HIDE_KEY, JSON.stringify(ids)); } catch {} };
+    const count = document.getElementById('saved-count');
+    const bar = document.getElementById('hidden-bar')!;
+    const barText = document.getElementById('hidden-text')!;
+
+    function paintHidden() {
+        const hidden = new Set(readHidden());
+        let n = 0;
+        document.querySelectorAll<HTMLElement>('article[data-id]').forEach(card => {
+            const isHidden = hidden.has(card.dataset.id!) && card.querySelector<HTMLElement>('[data-mode="hide"]') !== null;
+            card.classList.toggle('is-hidden', isHidden);
+            if (isHidden) n++;
+        });
+        const visible = document.querySelectorAll('article[data-id]:not(.is-hidden)').length;
+        if (count) count.textContent = String(visible);
+        bar.hidden = n === 0;
+        barText.textContent = `${n} hidden in this browser.`;
+    }
+    document.getElementById('show-hidden')?.addEventListener('click', () => { writeHidden([]); paintHidden(); });
+
     document.querySelectorAll<HTMLButtonElement>('[data-unsave]').forEach(btn => {
         let armed: number | undefined;
         btn.addEventListener('click', async () => {
+            const id = btn.dataset.unsave!;
+            if (btn.dataset.mode === 'hide') {
+                writeHidden([...new Set([...readHidden(), id])]);
+                paintHidden();
+                return;
+            }
+            // Local file removal: two clicks to confirm, no dialog.
             if (!armed) {
                 btn.textContent = 'Click again to remove';
                 btn.classList.add('armed');
@@ -60,16 +94,16 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
             btn.disabled = true;
             btn.textContent = 'Removing…';
             try {
-                const res = await fetch(`${API}/library/remove`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: btn.dataset.unsave }) });
+                const res = await fetch(`${API}/library/remove`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
                 const out = await res.json();
                 if (!res.ok) throw new Error(out.error);
                 btn.closest('article')?.remove();
-                const count = document.getElementById('saved-count');
-                if (count) count.textContent = String(document.querySelectorAll('[data-unsave]').length);
+                paintHidden();
             } catch (err) {
                 btn.disabled = false;
                 btn.textContent = `Failed: ${(err as Error).message}`;
             }
         });
     });
+    paintHidden();
 </script>

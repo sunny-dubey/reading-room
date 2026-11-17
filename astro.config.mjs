@@ -11,6 +11,8 @@ export default defineConfig({
             wrap: true,
         },
     },
-    build: { format: 'directory' },
+    // Inline CSS into every page: a browser holding a cached page from an older deploy
+    // would otherwise request a stylesheet that the new deploy has deleted (unstyled page).
+    build: { format: 'directory', inlineStylesheets: 'always' },
     integrations: [notebookEditor()], // dev-only editor API for /write/
 });

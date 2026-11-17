@@ -7,6 +7,7 @@
 #   backend      Backend, APIs & Payments
 #   ai-eng       AI Engineering & Agents
 #   ml           ML & LLM Foundations
+#   math         Mathematics
 #   postmortems  Postmortems: learning from failure
 #   pulse        Pulse: a small page of the week's headlines (not on the front page)
 # limit: max items kept from this feed · maxAgeDays: ignore older items
@@ -282,3 +283,70 @@
   category: pulse
   limit: 15
   maxAgeDays: 7
+
+# ---------- startups (a small side page, like pulse; not a learning track) ----------
+- id: launch-hn
+  title: Launch HN
+  url: https://hnrss.org/launches
+  site: https://news.ycombinator.com/launches
+  category: startups
+  limit: 12
+  maxAgeDays: 21
+- id: show-hn
+  title: Show HN
+  url: https://hnrss.org/show?points=150
+  site: https://news.ycombinator.com/show
+  category: startups
+  limit: 8
+  maxAgeDays: 10
+- id: product-hunt
+  title: Product Hunt
+  url: https://www.producthunt.com/feed
+  site: https://www.producthunt.com/
+  category: startups
+  limit: 8
+  maxAgeDays: 4
+- id: tc-startups
+  title: TechCrunch Startups
+  url: https://techcrunch.com/category/startups/feed/
+  site: https://techcrunch.com/category/startups/
+  category: startups
+  limit: 8
+  maxAgeDays: 7
+
+# ---------- math ----------
+- id: jeremy-kun
+  title: Math ∩ Programming (Jeremy Kun)
+  url: https://www.jeremykun.com/index.xml
+  site: https://www.jeremykun.com/
+  category: math
+  limit: 5
+  maxAgeDays: 180
+- id: 3blue1brown
+  title: 3Blue1Brown
+  url: https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
+  site: https://www.3blue1brown.com/
+  category: math
+  limit: 5
+  maxAgeDays: 180
+- id: quanta-math
+  title: Quanta Magazine (Mathematics)
+  url: https://www.quantamagazine.org/mathematics/feed/
+  site: https://www.quantamagazine.org/mathematics/
+  category: math
+  limit: 4
+  maxAgeDays: 90
+- id: allen-downey
+  title: Allen Downey (Probably Overthinking It)
+  url: https://www.allendowney.com/blog/feed/
+  site: https://www.allendowney.com/blog/
+  category: math
+  limit: 4
+  maxAgeDays: 180
+- id: john-d-cook
+  title: John D. Cook
+  url: https://www.johndcook.com/blog/feed/
+  site: https://www.johndcook.com/blog/
+  category: math
+  limit: 6
+  maxAgeDays: 30

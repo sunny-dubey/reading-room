@@ -1,6 +1,7 @@
 import { getCollection } from 'astro:content';
-import { getFeeds, CATEGORIES, type FeedItem } from './feeds';
+import { getFeeds, CATEGORIES, SIDE, type FeedItem } from './feeds';
 import { getNotes } from './content';
+import { getRoadmap } from './roadmap';
 
 const DAY = 864e5;
 
@@ -8,7 +9,7 @@ const DAY = 864e5;
 export const rank = (i: FeedItem, now: number) => {
     const age = (now - +i.date) / DAY;
     const fresh = age < 2 ? 1.2 : age < 7 ? 0.8 : age < 21 ? 0.3 : 0;
-    return (i.brief?.worth ?? 2) * 2 + fresh;
+    return (i.brief?.worth ?? 2) * 2 + fresh + (i.skill?.boost ?? 0);
 };
 
 export const isDeep = (i: FeedItem) => (i.brief?.worth ?? 0) >= 3.5;
@@ -19,10 +20,15 @@ export async function getCanon() {
     return CATEGORIES.map(c => ({ ...c, items: all.filter(x => x.data.track === c.id) }));
 }
 
-export async function getReading() {
+let readingCache: ReturnType<typeof buildReading> | undefined;
+/** Everything the reading pages need, computed once per build. */
+export const getReading = () => (readingCache ??= buildReading());
+
+async function buildReading() {
     const { items, status, fetchedAt } = await getFeeds();
     const now = +fetchedAt;
-    const learning = items.filter(i => i.category !== 'pulse');
+    const learning = items.filter(i => !SIDE.has(i.category));
+    const roadmap = await getRoadmap(learning); // attaches .skill to matched articles
     const byRank = [...learning].sort((a, b) => rank(b, now) - rank(a, now) || +b.date - +a.date);
 
     const used = new Set<string>();
@@ -56,6 +62,16 @@ export async function getReading() {
         .sort((a, b) => (b.points ?? 0) - (a.points ?? 0) || +b.date - +a.date)
         .slice(0, 10);
 
+    // Startups: grouped by where the signal comes from.
+    const startup = (id: string) => items.filter(i => i.feedId === id);
+    const startups = {
+        launches: startup('launch-hn').map(i => ({ i, ...parseLaunch(i.title) })),
+        show: startup('show-hn').sort((a, b) => (b.points ?? 0) - (a.points ?? 0)),
+        // Product Hunt descriptions end with "Discussion | Link" boilerplate.
+        producthunt: startup('product-hunt').map(i => ({ ...i, summary: i.summary.replace(/\s*Discussion\s*\|\s*Link\s*$/i, '') })),
+        funding: startup('tc-startups'),
+    };
+
     // Concept index across everything summarised.
     const concepts = new Map<string, FeedItem[]>();
     for (const i of learning) for (const c of i.brief?.concepts ?? []) {
@@ -65,7 +81,7 @@ export async function getReading() {
     const conceptIndex = [...concepts].map(([name, list]) => ({ name, slug: name.replace(/[^a-z0-9]+/g, '-'), items: list.sort((a, b) => rank(b, now) - rank(a, now)) }))
         .sort((a, b) => b.items.length - a.items.length);
 
-    return { items, learning, status, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, conceptIndex };
+    return { items, learning, status, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, startups, conceptIndex, roadmap };
 }
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */
@@ -78,4 +94,12 @@ export async function getRevisit(now: number) {
     // One deterministic "from the archive" pick per day.
     const archive = older.length ? older[Math.floor(now / DAY) % older.length] : undefined;
     return { week, month, archive, total: entries.length };
+}
+
+/** "Launch HN: Acme (YC W26) – Agents that file your taxes" → name, batch, tagline. */
+export function parseLaunch(title: string) {
+    const m = title.match(/^Launch HN:\s*(.+?)\s*\((YC\s*[A-Z]\d{2,4})\)\s*[–—-]\s*(.+)$/i)
+        ?? title.match(/^Launch HN:\s*(.+?)\s*[–—-]\s*(.+)$/i);
+    if (!m) return { name: title.replace(/^Launch HN:\s*/i, ''), batch: '', tagline: '' };
+    return m.length === 4 ? { name: m[1], batch: m[2].replace(/\s+/, ' '), tagline: m[3] } : { name: m[1], batch: '', tagline: m[2] };
 }

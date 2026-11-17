@@ -6,7 +6,7 @@ import ReadingMast from '../components/ReadingMast.astro';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, getCanon, getRevisit } from '../lib/reading';
 
-const { learning, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse } = await getReading();
+const { learning, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, startups } = await getReading();
 const canon = await getCanon();
 const revisit = await getRevisit(now);
 const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -108,6 +108,13 @@ const dev = import.meta.env.DEV;
             </div>
         </section>
 
+        {startups.launches.length > 0 && (
+            <a class="pulse-strip" href={u('/startups/')}>
+                <span class="pulse-label">Startups</span>
+                <span class="pulse-text">{startups.launches.length} recent YC launches, plus Show HN and Product Hunt. See what's being built.</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        )}
         {pulse.length > 0 && (
             <a class="pulse-strip" href={u('/pulse/')}>
                 <span class="pulse-label">Pulse</span>

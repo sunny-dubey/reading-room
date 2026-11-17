@@ -7,6 +7,7 @@ const dev = import.meta.env.DEV;
 const sections = [
     { href: u('/'), label: 'Today', cat: '' },
     ...CATEGORIES.map(c => ({ href: u(`/${c.slug}/`), label: c.short, cat: c.id })),
+    { href: u('/roadmap/'), label: 'Roadmap', cat: '' },
     { href: u('/canon/'), label: 'Canon', cat: '' },
     { href: u('/concepts/'), label: 'Concepts', cat: '' },
 ];
@@ -21,6 +22,7 @@ const isSaved = path.startsWith(u('/library/'));
             <span class="brand-name">The Reading Room</span>
         </a>
         <div class="nav-links">
+            <a href={u('/startups/')} aria-current={path.startsWith(u('/startups/')) ? 'page' : undefined}>Startups</a>
             <a href={u('/pulse/')} aria-current={path.startsWith(u('/pulse/')) ? 'page' : undefined}>Pulse</a>
             <a href={u('/notebook/')} aria-current={isNotebook ? 'page' : undefined}>Notebook</a>
             <a href={u('/library/')} aria-current={isSaved ? 'page' : undefined}>Saved</a>

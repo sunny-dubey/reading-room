@@ -11,6 +11,8 @@ export interface FeedItem {
     date: Date;
     summary: string;
     signals: Signal[];
+    embedText?: string;  // title + start of article, for topic matching
+    skill?: import('./roadmap').SkillMatch; // closest Roadmap topic (build time)
     brief?: Brief;       // build-time summary (learning tracks only)
     content?: string;    // full feed HTML, used for summarising then dropped
     comments?: string;   // discussion link (Hacker News)
@@ -41,10 +43,14 @@ export const CATEGORIES = [
     { id: 'backend', slug: 'backend', label: 'Backend, APIs & Payments', short: 'Backend', blurb: 'API design, idempotency, reliability, queues, scaling, payments' },
     { id: 'ai-eng', slug: 'ai-engineering', label: 'AI Engineering & Agents', short: 'AI Engineering', blurb: 'Agents, evals, RAG, tool use, LLMs in production' },
     { id: 'ml', slug: 'foundations', label: 'ML & LLM Foundations', short: 'ML Foundations', blurb: 'How transformers, training, fine-tuning and inference actually work' },
+    { id: 'math', slug: 'math', label: 'Mathematics', short: 'Math', blurb: 'Discrete math, probability, linear algebra and the maths behind systems and ML' },
     { id: 'postmortems', slug: 'postmortems', label: 'Postmortems', short: 'Postmortems', blurb: 'Real failures, explained. The fastest way to learn how systems break' },
 ] as const;
 export const PULSE = { id: 'pulse', slug: 'pulse', label: 'Pulse', short: 'Pulse', blurb: "The week's headlines, in one short page" };
-export const categoryLabel = (id: string) => CATEGORIES.find(c => c.id === id)?.label ?? (id === 'pulse' ? PULSE.label : id);
+export const STARTUPS = { id: 'startups', slug: 'startups', label: 'Startups', short: 'Startups', blurb: 'What the best new companies are building' };
+/** Side pages that aren't learning tracks: no summaries, not on Today. */
+export const SIDE = new Set(['pulse', 'startups']);
+export const categoryLabel = (id: string) => CATEGORIES.find(c => c.id === id)?.label ?? (id === 'pulse' ? PULSE.label : id === 'startups' ? STARTUPS.label : id);
 export const categoryShort = (id: string) => CATEGORIES.find(c => c.id === id)?.short ?? (id === 'pulse' ? PULSE.short : id);
 
 export const SIGNALS: { id: Signal; label: string; hint: string }[] = [
@@ -313,11 +319,18 @@ async function load(): Promise<{ items: FeedItem[]; status: FeedStatus[]; fetche
     }));
 
     // Summarise learning items at build time (cached on disk), then drop raw HTML.
-    const all = results.flatMap(r => r.items);
-    const learning = all.filter(i => i.category !== 'pulse');
+    // Drop duplicate links (the same post can appear in two feeds).
+    const seenLinks = new Set<string>();
+    const all = results.flatMap(r => r.items).filter(i => !seenLinks.has(i.link) && !!seenLinks.add(i.link));
+    const learning = all.filter(i => !SIDE.has(i.category));
     const started = Date.now();
     await mapLimit(learning, 8, async i => {
-        try { i.brief = await makeBrief(i); } catch (err) { console.warn(`[brief] ${i.link}: ${err}`); }
+        try {
+            const b = await makeBrief(i);
+            i.embedText = `${i.title}. ${b.text || i.summary}`.slice(0, 1400);
+            delete b.text;
+            i.brief = b;
+        } catch (err) { console.warn(`[brief] ${i.link}: ${err}`); }
     });
     for (const i of all) delete i.content;
     console.log(`[brief] summarised ${learning.length} articles in ${((Date.now() - started) / 1000).toFixed(1)}s`);

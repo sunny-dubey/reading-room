@@ -3,9 +3,9 @@ import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
 import ReadingMast from '../components/ReadingMast.astro';
 import { getReading } from '../lib/reading';
-import { PULSE } from '../lib/feeds';
+import { PULSE, STARTUPS } from '../lib/feeds';
 const { tracks, status, fetchedAt } = await getReading();
-const groups = [...tracks.map(t => ({ id: t.id, label: t.label, href: u(`/${t.slug}/`), sources: t.sources })), { id: 'pulse', label: PULSE.label, href: u('/pulse/'), sources: status.filter(s => s.category === 'pulse') }];
+const groups = [...tracks.map(t => ({ id: t.id, label: t.label, href: u(`/${t.slug}/`), sources: t.sources })), { id: 'startups', label: STARTUPS.label, href: u('/startups/'), sources: status.filter(s => s.category === 'startups') }, { id: 'pulse', label: PULSE.label, href: u('/pulse/'), sources: status.filter(s => s.category === 'pulse') }];
 const failing = status.filter(s => !s.ok).length;
 ---
 <Base title="Sources" accent="reading">

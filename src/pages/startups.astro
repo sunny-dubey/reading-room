@@ -1,0 +1,75 @@
+---
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getReading } from '../lib/reading';
+const { startups, fetchedAt } = await getReading();
+const { launches, show, producthunt, funding } = startups;
+const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
+---
+<Base title="Startups" description="What the best new companies are building." accent="reading">
+    <div class="rd">
+        <ReadingMast compact title="Startups" sub="What the best new companies are building. Skim for ideas and patterns, not hype." updated={fetchedAt} />
+
+        <div class="su-grid">
+            <section class="su-block su-wide">
+                <header class="block-head"><h2>Launched by YC startups</h2><a href="https://news.ycombinator.com/launches" target="_blank" rel="noopener noreferrer">Launch HN ↗</a></header>
+                {launches.length === 0 ? <p class="dim">No recent launches.</p> : (
+                    <ul class="su-launches" role="list">
+                        {launches.map(({ i, name, batch, tagline }) => (
+                            <li data-link={i.link}>
+                                <div class="su-name">
+                                    <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{name}</a>
+                                    {batch && <span class="su-batch">{batch}</span>}
+                                </div>
+                                {tagline && <p class="su-tagline">{tagline}</p>}
+                                <div class="su-meta">
+                                    <time data-rel datetime={i.date.toISOString()}></time>
+                                    {i.points ? <span>{i.points} points</span> : null}
+                                    {i.comments && <a href={i.comments} target="_blank" rel="noopener noreferrer">founders answer questions ↗</a>}
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </section>
+
+            <section class="su-block">
+                <header class="block-head"><h2>Show HN</h2><span class="dim">150+ points</span></header>
+                <ol class="su-list" role="list">
+                    {show.map(i => (
+                        <li data-link={i.link}>
+                            <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title.replace(/^Show HN:\s*/i, '')}</a>
+                            <span class="dim">{i.points ? `${i.points} points · ` : ''}{host(i.link)}{i.comments && <> · <a href={i.comments} target="_blank" rel="noopener noreferrer">discussion</a></>}</span>
+                        </li>
+                    ))}
+                </ol>
+            </section>
+
+            <section class="su-block">
+                <header class="block-head"><h2>Product Hunt</h2><span class="dim">recent launches</span></header>
+                <ol class="su-list" role="list">
+                    {producthunt.map(i => (
+                        <li data-link={i.link}>
+                            <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                            {i.summary && <span class="su-sum">{i.summary}</span>}
+                        </li>
+                    ))}
+                </ol>
+            </section>
+
+            <section class="su-block su-wide">
+                <header class="block-head"><h2>Who's raising to build what</h2><span class="dim">TechCrunch Startups</span></header>
+                <ol class="su-list su-two" role="list">
+                    {funding.map(i => (
+                        <li data-link={i.link}>
+                            <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                            <span class="dim"><time data-rel datetime={i.date.toISOString()}></time></span>
+                        </li>
+                    ))}
+                </ol>
+            </section>
+        </div>
+    </div>
+    <ReadingClient />
+</Base>

@@ -12,6 +12,7 @@ export interface Brief {
     depth: 'quick' | 'article' | 'deep';
     worth: number;        // 1-5: how much it builds lasting understanding (news ≈ 1)
     fetched: boolean;     // false = only the feed's short summary was available
+    text?: string;        // start of the article text, used for topic matching then dropped
 }
 
 const CACHE_DIR = join(process.cwd(), '.cache', 'articles');
@@ -89,7 +90,13 @@ const VOCAB: [RegExp, string][] = ([
     ['rlhf', 'rlhf|reinforcement learning from human feedback'], ['reinforcement learning', 'reinforcement learning|\\brl\\b|grpo|ppo'], ['lora', 'lora|low-rank adaptation'],
     ['quantization', 'quantiz\\w+'], ['kv cache', 'kv[- ]cache'], ['scaling laws', 'scaling laws?'], ['mixture of experts', 'mixture[- ]of[- ]experts|\\bmoe\\b'],
     ['distillation', 'distillation'], ['interpretability', 'interpretability|mechanistic'], ['reasoning models', 'reasoning models?|chain[- ]of[- ]thought'],
-    ['gpus', 'gpus?|cuda|kernels?'], ['diffusion', 'diffusion models?'], ['benchmarks', 'benchmarks?'], ['synthetic data', 'synthetic data'],
+    ['gpus', 'gpus?|cuda|kernels?'],
+    // mathematics
+    ['probability', 'probabilit(y|ies)|bayes\\w*|random variables?'], ['statistics', 'statistic(s|al)|hypothesis test\\w*|p-values?|confidence intervals?'],
+    ['linear algebra', 'linear algebra|matri(x|ces)|eigen\\w+|vectors?'], ['calculus', 'calculus|derivatives?|integrals?'],
+    ['optimization', 'convex|optimi[sz]ation|gradient descent'], ['queueing theory', "queue?ing theory|little'?s law|utili[sz]ation"],
+    ['graph theory', 'graph theory|graphs?\\b'], ['proofs', 'proofs?|theorems?|lemmas?'], ['information theory', 'entropy|information theory'],
+    ['floating point', 'floating[- ]point|ieee 754'], ['diffusion', 'diffusion models?'], ['benchmarks', 'benchmarks?'], ['synthetic data', 'synthetic data'],
 ] as [string, string?][]).map(([label, pat]) => [new RegExp(`\\b(${pat ?? label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, 'gi'), label]);
 
 function concepts(text: string, title: string, max = 5): string[] {
@@ -130,7 +137,7 @@ export async function makeBrief(i: { title: string; link: string; summary: strin
     if (!fetched) worth -= 0.5;
     worth = Math.max(1, Math.min(5, Math.round(worth * 2) / 2));
 
-    return { concepts: found, minutes: fetched ? minutes : 0, depth, worth, fetched };
+    return { concepts: found, minutes: fetched ? minutes : 0, depth, worth, fetched, text: text.slice(0, 1200) };
 }
 
 /** Run an async mapper with limited concurrency. */

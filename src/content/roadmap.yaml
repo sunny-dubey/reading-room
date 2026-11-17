@@ -1,0 +1,1408 @@
+# The Roadmap: what you want to learn, area by area.
+# Areas 1-25 are your system design roadmap; 26-29 cover AI engineering, ML foundations, payments and mathematics.
+# Every article is matched to its closest topics by meaning (embeddings, at build time) and cards show
+# "Why read: you'll get better at <topic> (<area>). <why>". Topic ids are used for progress, so keep them
+# stable; a topic that appears in several areas shares one id.
+#
+# area:  id, n (order), title, track (colour), why (used when a topic has no why of its own)
+# topic: id, name, optional group (sub-heading), optional why, optional about (extra words for matching)
+- id: computer-science-fundamentals
+  n: 1
+  title: Computer Science Fundamentals
+  track: backend
+  why: Everything else is built on networks, processes and memory. Gaps here show up as bugs you can't explain.
+  topics:
+  - id: how-the-internet-works
+    name: How the Internet Works
+  - id: client-server-architecture
+    name: Client-Server Architecture
+  - id: http-and-https
+    name: HTTP & HTTPS
+  - id: dns-domain-name-system
+    name: DNS (Domain Name System)
+  - id: tcp-and-udp
+    name: TCP & UDP
+  - id: ip-addresses-and-ports
+    name: IP Addresses & Ports
+  - id: osi-model
+    name: OSI Model
+  - id: network-protocols
+    name: Network Protocols
+  - id: rest-architecture
+    name: REST Architecture
+  - id: websockets
+    name: WebSockets
+  - id: operating-system-fundamentals
+    name: Operating System Fundamentals
+  - id: processes-and-threads
+    name: Processes & Threads
+  - id: concurrency-and-parallelism
+    name: Concurrency & Parallelism
+  - id: memory-management
+    name: Memory Management
+  - id: cpu-and-i-o-basics
+    name: CPU & I/O Basics
+  - id: linux-fundamentals
+    name: Linux Fundamentals
+- id: system-design-fundamentals
+  n: 2
+  title: System Design Fundamentals
+  track: backend
+  why: Architecture styles are the vocabulary of every design discussion, review and interview.
+  topics:
+  - id: what-is-system-design
+    name: What is System Design?
+  - id: what-is-software-architecture
+    name: What is Software Architecture?
+  - id: monolithic-architecture
+    name: Monolithic Architecture
+  - id: microservices-architecture
+    name: Microservices Architecture
+  - id: service-oriented-architecture-soa
+    name: Service-Oriented Architecture (SOA)
+  - id: client-server-architecture
+    name: Client-Server Architecture
+  - id: three-tier-architecture
+    name: Three-Tier Architecture
+  - id: layered-architecture
+    name: Layered Architecture
+  - id: event-driven-architecture
+    name: Event-Driven Architecture
+  - id: serverless-architecture
+    name: Serverless Architecture
+  - id: distributed-systems-basics
+    name: Distributed Systems Basics
+  - id: stateful-vs-stateless-systems
+    name: Stateful vs Stateless Systems
+  - id: synchronous-vs-asynchronous-communication
+    name: Synchronous vs Asynchronous Communication
+  - id: architectural-trade-offs
+    name: Architectural Trade-offs
+- id: requirements-and-design-fundamentals
+  n: 3
+  title: Requirements & Design Fundamentals
+  track: backend
+  why: Good designs start from the right requirements and numbers. Estimation stops you from over- or under-building.
+  topics:
+  - id: functional-requirements
+    name: Functional Requirements
+  - id: non-functional-requirements
+    name: Non-Functional Requirements
+  - id: scalability
+    name: Scalability
+  - id: availability
+    name: Availability
+  - id: reliability
+    name: Reliability
+  - id: maintainability
+    name: Maintainability
+  - id: fault-tolerance
+    name: Fault Tolerance
+  - id: performance
+    name: Performance
+  - id: latency-and-throughput
+    name: Latency & Throughput
+  - id: consistency
+    name: Consistency
+  - id: durability
+    name: Durability
+  - id: security
+    name: Security
+  - id: capacity-estimation
+    name: Capacity Estimation
+  - id: back-of-the-envelope-calculations
+    name: Back-of-the-Envelope Calculations
+  - id: traffic-estimation
+    name: Traffic Estimation
+  - id: storage-estimation
+    name: Storage Estimation
+  - id: bandwidth-estimation
+    name: Bandwidth Estimation
+- id: networking-and-communication
+  n: 4
+  title: Networking & Communication
+  track: backend
+  why: How services talk decides latency, failure modes and what clients can do.
+  topics:
+  - id: http-methods
+    name: HTTP Methods
+  - id: http-status-codes
+    name: HTTP Status Codes
+  - id: http-headers
+    name: HTTP Headers
+  - id: cookies-and-sessions
+    name: Cookies & Sessions
+  - id: tls-ssl
+    name: TLS / SSL
+  - id: rest-apis
+    name: REST APIs
+  - id: graphql
+    name: GraphQL
+  - id: grpc
+    name: gRPC
+  - id: websockets
+    name: WebSockets
+  - id: server-sent-events-sse
+    name: Server-Sent Events (SSE)
+  - id: long-polling
+    name: Long Polling
+  - id: api-versioning
+    name: API Versioning
+  - id: api-rate-limiting
+    name: API Rate Limiting
+  - id: connection-pooling
+    name: Connection Pooling
+  - id: keep-alive-connections
+    name: Keep-Alive Connections
+- id: database-fundamentals
+  n: 5
+  title: Database Fundamentals
+  track: systems
+  why: Data is the hardest thing to change later. Choosing and using databases well is a core senior skill.
+  topics:
+  - id: postgresql
+    name: PostgreSQL
+    group: Relational Databases
+  - id: mysql
+    name: MySQL
+    group: Relational Databases
+  - id: tables-and-relationships
+    name: Tables & Relationships
+    group: Relational Databases
+  - id: primary-and-foreign-keys
+    name: Primary & Foreign Keys
+    group: Relational Databases
+  - id: indexing
+    name: Indexing
+    group: Relational Databases
+  - id: b-tree-and-bplus-tree
+    name: B-Tree & B+ Tree
+    group: Relational Databases
+  - id: query-optimization
+    name: Query Optimization
+    group: Relational Databases
+  - id: joins
+    name: Joins
+    group: Relational Databases
+  - id: transactions
+    name: Transactions
+    group: Relational Databases
+  - id: acid-properties
+    name: ACID Properties
+    group: Relational Databases
+  - id: normalization-and-denormalization
+    name: Normalization & Denormalization
+    group: Relational Databases
+  - id: document-databases
+    name: Document Databases
+    group: NoSQL Databases
+  - id: key-value-stores
+    name: Key-Value Stores
+    group: NoSQL Databases
+  - id: wide-column-stores
+    name: Wide-Column Stores
+    group: NoSQL Databases
+  - id: graph-databases
+    name: Graph Databases
+    group: NoSQL Databases
+  - id: mongodb-cassandra-dynamodb
+    name: MongoDB / Cassandra / DynamoDB
+    group: NoSQL Databases
+  - id: storage-engines
+    name: Storage Engines
+    group: Database Internals
+  - id: write-ahead-logging-wal
+    name: Write-Ahead Logging (WAL)
+    group: Database Internals
+  - id: mvcc
+    name: MVCC
+    group: Database Internals
+  - id: locking
+    name: Locking
+    group: Database Internals
+  - id: isolation-levels
+    name: Isolation Levels
+    group: Database Internals
+  - id: sql-vs-nosql
+    name: SQL vs NoSQL
+    group: Database Design Decisions
+  - id: schema-design
+    name: Schema Design
+    group: Database Design Decisions
+  - id: read-heavy-vs-write-heavy-workloads
+    name: Read-Heavy vs Write-Heavy Workloads
+    group: Database Design Decisions
+  - id: data-modeling
+    name: Data Modeling
+    group: Database Design Decisions
+- id: caching
+  n: 6
+  title: Caching
+  track: systems
+  why: Caching is the cheapest big speedup and the most common source of stale-data bugs.
+  topics:
+  - id: what-is-caching
+    name: What is Caching?
+  - id: cache-hierarchy
+    name: Cache Hierarchy
+  - id: client-side-caching
+    name: Client-Side Caching
+  - id: browser-caching
+    name: Browser Caching
+  - id: cdn-caching
+    name: CDN Caching
+  - id: application-level-caching
+    name: Application-Level Caching
+  - id: database-caching
+    name: Database Caching
+  - id: redis
+    name: Redis
+  - id: memcached
+    name: Memcached
+  - id: cache-aside-pattern
+    name: Cache-Aside Pattern
+  - id: read-through-cache
+    name: Read-Through Cache
+  - id: write-through-cache
+    name: Write-Through Cache
+  - id: write-back-cache
+    name: Write-Back Cache
+  - id: cache-invalidation
+    name: Cache Invalidation
+  - id: ttl-time-to-live
+    name: TTL (Time To Live)
+  - id: lru
+    name: LRU
+    group: Cache Eviction Policies
+  - id: lfu
+    name: LFU
+    group: Cache Eviction Policies
+  - id: fifo
+    name: FIFO
+    group: Cache Eviction Policies
+  - id: cache-stampede
+    name: Cache Stampede
+  - id: distributed-caching
+    name: Distributed Caching
+- id: load-balancing-and-traffic-management
+  n: 7
+  title: Load Balancing & Traffic Management
+  track: backend
+  why: How traffic is spread decides whether you scale smoothly or fall over under load.
+  topics:
+  - id: what-is-load-balancing
+    name: What is Load Balancing?
+  - id: layer-4-vs-layer-7-load-balancing
+    name: Layer 4 vs Layer 7 Load Balancing
+  - id: reverse-proxy
+    name: Reverse Proxy
+  - id: forward-proxy
+    name: Forward Proxy
+  - id: nginx
+    name: Nginx
+  - id: haproxy
+    name: HAProxy
+  - id: cloud-load-balancers
+    name: Cloud Load Balancers
+  - id: round-robin
+    name: Round Robin
+  - id: least-connections
+    name: Least Connections
+  - id: ip-hash
+    name: IP Hash
+  - id: consistent-hashing
+    name: Consistent Hashing
+  - id: health-checks
+    name: Health Checks
+  - id: sticky-sessions
+    name: Sticky Sessions
+  - id: horizontal-scaling
+    name: Horizontal Scaling
+  - id: vertical-scaling
+    name: Vertical Scaling
+  - id: auto-scaling
+    name: Auto Scaling
+- id: distributed-systems-fundamentals
+  n: 8
+  title: Distributed Systems Fundamentals
+  track: systems
+  why: With more than one machine, consistency, replication and consensus stop being optional.
+  topics:
+  - id: what-is-a-distributed-system
+    name: What is a Distributed System?
+  - id: distributed-system-challenges
+    name: Distributed System Challenges
+  - id: cap-theorem
+    name: CAP Theorem
+  - id: pacelc-theorem
+    name: PACELC Theorem
+  - id: strong-consistency
+    name: Strong Consistency
+    group: Consistency Models
+  - id: eventual-consistency
+    name: Eventual Consistency
+    group: Consistency Models
+  - id: causal-consistency
+    name: Causal Consistency
+    group: Consistency Models
+  - id: read-your-writes-consistency
+    name: Read-Your-Writes Consistency
+    group: Consistency Models
+  - id: leader-follower-replication
+    name: Leader-Follower Replication
+    group: Replication
+  - id: multi-leader-replication
+    name: Multi-Leader Replication
+    group: Replication
+  - id: leaderless-replication
+    name: Leaderless Replication
+    group: Replication
+  - id: sharding-and-partitioning
+    name: Sharding & Partitioning
+  - id: data-replication-strategies
+    name: Data Replication Strategies
+  - id: distributed-transactions
+    name: Distributed Transactions
+  - id: two-phase-commit-2pc
+    name: Two-Phase Commit (2PC)
+  - id: paxos
+    name: Paxos
+    group: Consensus Algorithms
+  - id: raft
+    name: Raft
+    group: Consensus Algorithms
+  - id: split-brain-problem
+    name: Split Brain Problem
+  - id: quorum
+    name: Quorum
+  - id: distributed-locking
+    name: Distributed Locking
+  - id: clock-synchronization
+    name: Clock Synchronization
+  - id: idempotency
+    name: Idempotency
+- id: message-queues-and-event-streaming
+  n: 9
+  title: Message Queues & Event Streaming
+  track: systems
+  why: Async messaging decouples systems and absorbs spikes, and delivery guarantees decide correctness.
+  topics:
+  - id: message-queue-fundamentals
+    name: Message Queue Fundamentals
+  - id: synchronous-vs-asynchronous-processing
+    name: Synchronous vs Asynchronous Processing
+  - id: producer-consumer-pattern
+    name: Producer-Consumer Pattern
+  - id: message-brokers
+    name: Message Brokers
+  - id: rabbitmq
+    name: RabbitMQ
+  - id: apache-kafka
+    name: Apache Kafka
+  - id: redis-streams
+    name: Redis Streams
+  - id: amazon-sqs
+    name: Amazon SQS
+  - id: publish-subscribe-pattern
+    name: Publish-Subscribe Pattern
+  - id: event-driven-architecture
+    name: Event-Driven Architecture
+  - id: topics-and-partitions
+    name: Topics & Partitions
+  - id: consumer-groups
+    name: Consumer Groups
+  - id: message-ordering
+    name: Message Ordering
+  - id: at-most-once
+    name: At-Most-Once
+    group: Delivery Guarantees
+  - id: at-least-once
+    name: At-Least-Once
+    group: Delivery Guarantees
+  - id: exactly-once-semantics
+    name: Exactly-Once Semantics
+    group: Delivery Guarantees
+  - id: dead-letter-queues
+    name: Dead Letter Queues
+  - id: retry-mechanisms
+    name: Retry Mechanisms
+  - id: event-replay
+    name: Event Replay
+  - id: event-sourcing
+    name: Event Sourcing
+- id: scalability-and-performance
+  n: 10
+  title: Scalability & Performance
+  track: backend
+  why: Knowing where bottlenecks come from lets you scale on purpose instead of in a panic.
+  topics:
+  - id: horizontal-vs-vertical-scaling
+    name: Horizontal vs Vertical Scaling
+  - id: stateless-services
+    name: Stateless Services
+  - id: database-scaling
+    name: Database Scaling
+  - id: read-replicas
+    name: Read Replicas
+  - id: database-sharding
+    name: Database Sharding
+  - id: partitioning-strategies
+    name: Partitioning Strategies
+  - id: connection-pooling
+    name: Connection Pooling
+  - id: query-optimization
+    name: Query Optimization
+  - id: cdn-and-edge-computing
+    name: CDN & Edge Computing
+  - id: data-compression
+    name: Data Compression
+  - id: pagination
+    name: Pagination
+  - id: batching
+    name: Batching
+  - id: rate-limiting
+    name: Rate Limiting
+  - id: load-shedding
+    name: Load Shedding
+  - id: backpressure
+    name: Backpressure
+  - id: hotspot-mitigation
+    name: Hotspot Mitigation
+  - id: performance-bottleneck-analysis
+    name: Performance Bottleneck Analysis
+- id: reliability-and-fault-tolerance
+  n: 11
+  title: Reliability & Fault Tolerance
+  track: backend
+  why: Failures are guaranteed. These patterns decide whether your users ever notice.
+  topics:
+  - id: fault-tolerance-fundamentals
+    name: Fault Tolerance Fundamentals
+  - id: redundancy
+    name: Redundancy
+  - id: high-availability
+    name: High Availability
+  - id: failover-strategies
+    name: Failover Strategies
+  - id: active-active-architecture
+    name: Active-Active Architecture
+  - id: active-passive-architecture
+    name: Active-Passive Architecture
+  - id: circuit-breaker-pattern
+    name: Circuit Breaker Pattern
+  - id: retry-pattern
+    name: Retry Pattern
+  - id: exponential-backoff
+    name: Exponential Backoff
+  - id: timeout-management
+    name: Timeout Management
+  - id: bulkhead-pattern
+    name: Bulkhead Pattern
+  - id: graceful-degradation
+    name: Graceful Degradation
+  - id: health-checks
+    name: Health Checks
+  - id: disaster-recovery
+    name: Disaster Recovery
+  - id: backup-and-restore
+    name: Backup & Restore
+  - id: rpo-and-rto
+    name: RPO & RTO
+  - id: chaos-engineering
+    name: Chaos Engineering
+- id: microservices-architecture
+  n: 12
+  title: Microservices Architecture
+  track: backend
+  why: Service boundaries shape team speed and failure blast radius for years.
+  topics:
+  - id: monolith-vs-microservices
+    name: Monolith vs Microservices
+  - id: service-decomposition
+    name: Service Decomposition
+  - id: domain-driven-design-ddd
+    name: Domain-Driven Design (DDD)
+  - id: bounded-contexts
+    name: Bounded Contexts
+  - id: service-discovery
+    name: Service Discovery
+  - id: api-gateway
+    name: API Gateway
+  - id: backend-for-frontend-bff
+    name: Backend for Frontend (BFF)
+  - id: inter-service-communication
+    name: Inter-Service Communication
+  - id: synchronous-communication
+    name: Synchronous Communication
+  - id: asynchronous-communication
+    name: Asynchronous Communication
+  - id: database-per-service
+    name: Database Per Service
+  - id: saga-pattern
+    name: Saga Pattern
+  - id: cqrs
+    name: CQRS
+  - id: event-sourcing
+    name: Event Sourcing
+  - id: distributed-tracing
+    name: Distributed Tracing
+  - id: service-mesh
+    name: Service Mesh
+  - id: sidecar-pattern
+    name: Sidecar Pattern
+  - id: microservices-deployment-strategies
+    name: Microservices Deployment Strategies
+- id: system-design-patterns
+  n: 13
+  title: System Design Patterns
+  track: backend
+  why: Shared patterns make code and architecture easier to reason about, review and discuss.
+  topics:
+  - id: singleton-pattern
+    name: Singleton Pattern
+  - id: factory-pattern
+    name: Factory Pattern
+  - id: observer-pattern
+    name: Observer Pattern
+  - id: strategy-pattern
+    name: Strategy Pattern
+  - id: adapter-pattern
+    name: Adapter Pattern
+  - id: decorator-pattern
+    name: Decorator Pattern
+  - id: repository-pattern
+    name: Repository Pattern
+  - id: dependency-injection
+    name: Dependency Injection
+  - id: api-gateway-pattern
+    name: API Gateway Pattern
+  - id: strangler-fig-pattern
+    name: Strangler Fig Pattern
+  - id: sidecar-pattern
+    name: Sidecar Pattern
+  - id: ambassador-pattern
+    name: Ambassador Pattern
+  - id: cqrs-pattern
+    name: CQRS Pattern
+  - id: saga-pattern
+    name: Saga Pattern
+  - id: outbox-pattern
+    name: Outbox Pattern
+  - id: retry-pattern
+    name: Retry Pattern
+  - id: circuit-breaker-pattern
+    name: Circuit Breaker Pattern
+  - id: bulkhead-pattern
+    name: Bulkhead Pattern
+- id: security-in-system-design
+  n: 14
+  title: Security in System Design
+  track: backend
+  why: One security mistake can end a company. Secure design is part of being a professional.
+  topics:
+  - id: authentication-and-authorization
+    name: Authentication & Authorization
+  - id: oauth-2-0
+    name: OAuth 2.0
+  - id: openid-connect
+    name: OpenID Connect
+  - id: jwt
+    name: JWT
+  - id: session-based-authentication
+    name: Session-Based Authentication
+  - id: role-based-access-control-rbac
+    name: Role-Based Access Control (RBAC)
+  - id: attribute-based-access-control-abac
+    name: Attribute-Based Access Control (ABAC)
+  - id: encryption-at-rest
+    name: Encryption at Rest
+  - id: encryption-in-transit
+    name: Encryption in Transit
+  - id: tls
+    name: TLS
+  - id: password-hashing
+    name: Password Hashing
+  - id: api-security
+    name: API Security
+  - id: rate-limiting-and-ddos-protection
+    name: Rate Limiting & DDoS Protection
+  - id: sql-injection
+    name: SQL Injection
+  - id: cross-site-scripting-xss
+    name: Cross-Site Scripting (XSS)
+  - id: csrf
+    name: CSRF
+  - id: secrets-management
+    name: Secrets Management
+  - id: zero-trust-architecture
+    name: Zero Trust Architecture
+  - id: audit-logging
+    name: Audit Logging
+- id: observability-and-monitoring
+  n: 15
+  title: Observability & Monitoring
+  track: backend
+  why: You can't fix what you can't see. Observability turns hours of guessing into minutes.
+  topics:
+  - id: logging
+    name: Logging
+  - id: metrics
+    name: Metrics
+  - id: distributed-tracing
+    name: Distributed Tracing
+  - id: opentelemetry
+    name: OpenTelemetry
+  - id: prometheus
+    name: Prometheus
+  - id: grafana
+    name: Grafana
+  - id: elk-stack
+    name: ELK Stack
+  - id: alerting
+    name: Alerting
+  - id: health-monitoring
+    name: Health Monitoring
+  - id: sli-slo-sla
+    name: SLI / SLO / SLA
+  - id: error-budgets
+    name: Error Budgets
+  - id: latency-monitoring
+    name: Latency Monitoring
+  - id: throughput-monitoring
+    name: Throughput Monitoring
+  - id: root-cause-analysis
+    name: Root Cause Analysis
+  - id: incident-management
+    name: Incident Management
+- id: cloud-and-infrastructure
+  n: 16
+  title: Cloud & Infrastructure
+  track: backend
+  why: Where and how software runs decides cost, reliability and how fast your team can ship.
+  topics:
+  - id: cloud-computing-fundamentals
+    name: Cloud Computing Fundamentals
+  - id: aws-gcp-azure
+    name: AWS / GCP / Azure
+  - id: compute-services
+    name: Compute Services
+  - id: storage-services
+    name: Storage Services
+  - id: managed-databases
+    name: Managed Databases
+  - id: virtual-private-cloud-vpc
+    name: Virtual Private Cloud (VPC)
+  - id: dns-and-networking-in-cloud
+    name: DNS & Networking in Cloud
+  - id: object-storage-s3
+    name: Object Storage (S3)
+  - id: containers
+    name: Containers
+  - id: docker
+    name: Docker
+  - id: kubernetes
+    name: Kubernetes
+  - id: container-orchestration
+    name: Container Orchestration
+  - id: terraform
+    name: Terraform
+    group: Infrastructure as Code
+  - id: cloudformation
+    name: CloudFormation
+    group: Infrastructure as Code
+  - id: ci-cd-pipelines
+    name: CI/CD Pipelines
+  - id: blue-green-deployment
+    name: Blue-Green Deployment
+  - id: canary-deployment
+    name: Canary Deployment
+  - id: rolling-deployment
+    name: Rolling Deployment
+  - id: serverless-infrastructure
+    name: Serverless Infrastructure
+- id: storage-systems-and-file-architecture
+  n: 17
+  title: Storage Systems & File Architecture
+  track: backend
+  why: Files and blobs at scale need different designs than rows in a database.
+  topics:
+  - id: block-storage
+    name: Block Storage
+  - id: file-storage
+    name: File Storage
+  - id: object-storage
+    name: Object Storage
+  - id: distributed-file-systems
+    name: Distributed File Systems
+  - id: content-delivery-networks
+    name: Content Delivery Networks
+  - id: file-upload-architecture
+    name: File Upload Architecture
+  - id: multipart-upload
+    name: Multipart Upload
+  - id: resumable-uploads
+    name: Resumable Uploads
+  - id: data-deduplication
+    name: Data Deduplication
+  - id: compression
+    name: Compression
+  - id: data-retention
+    name: Data Retention
+  - id: backup-strategies
+    name: Backup Strategies
+  - id: blob-storage
+    name: Blob Storage
+  - id: metadata-management
+    name: Metadata Management
+- id: real-time-systems
+  n: 18
+  title: Real-Time Systems
+  track: backend
+  why: Live features like chat, presence and collaboration have their own scaling and consistency problems.
+  topics:
+  - id: websockets
+    name: WebSockets
+  - id: server-sent-events
+    name: Server-Sent Events
+  - id: long-polling
+    name: Long Polling
+  - id: real-time-notifications
+    name: Real-Time Notifications
+  - id: presence-systems
+    name: Presence Systems
+  - id: heartbeats
+    name: Heartbeats
+  - id: live-chat-architecture
+    name: Live Chat Architecture
+  - id: real-time-collaboration
+    name: Real-Time Collaboration
+  - id: pub-sub-architecture
+    name: Pub/Sub Architecture
+  - id: fan-out-strategies
+    name: Fan-Out Strategies
+  - id: online-gaming-architecture
+    name: Online Gaming Architecture
+  - id: real-time-data-processing
+    name: Real-Time Data Processing
+- id: advanced-distributed-systems
+  n: 19
+  title: Advanced Distributed Systems
+  track: systems
+  why: These are the building blocks of the largest systems in the world.
+  topics:
+  - id: distributed-hash-tables
+    name: Distributed Hash Tables
+  - id: consistent-hashing
+    name: Consistent Hashing
+  - id: gossip-protocol
+    name: Gossip Protocol
+  - id: merkle-trees
+    name: Merkle Trees
+  - id: vector-clocks
+    name: Vector Clocks
+  - id: lamport-clocks
+    name: Lamport Clocks
+  - id: crdts
+    name: CRDTs
+  - id: distributed-snapshots
+    name: Distributed Snapshots
+  - id: leader-election
+    name: Leader Election
+  - id: log-replication
+    name: Log Replication
+  - id: stream-processing
+    name: Stream Processing
+  - id: apache-flink
+    name: Apache Flink
+  - id: apache-spark
+    name: Apache Spark
+  - id: data-locality
+    name: Data Locality
+  - id: multi-region-architecture
+    name: Multi-Region Architecture
+  - id: geo-replication
+    name: Geo-Replication
+  - id: global-traffic-management
+    name: Global Traffic Management
+- id: low-level-design-lld
+  n: 20
+  title: Low-Level Design (LLD)
+  track: backend
+  why: Clean object and module design keeps code changeable as it grows, and it's tested in every interview loop.
+  topics:
+  - id: object-oriented-design
+    name: Object-Oriented Design
+  - id: solid-principles
+    name: SOLID Principles
+  - id: dry-kiss-yagni
+    name: DRY / KISS / YAGNI
+  - id: uml-class-diagrams
+    name: UML Class Diagrams
+  - id: sequence-diagrams
+    name: Sequence Diagrams
+  - id: state-diagrams
+    name: State Diagrams
+  - id: class-relationships
+    name: Class Relationships
+  - id: composition-vs-inheritance
+    name: Composition vs Inheritance
+  - id: interfaces-and-abstractions
+    name: Interfaces & Abstractions
+  - id: design-patterns
+    name: Design Patterns
+  - id: extensibility-and-maintainability
+    name: Extensibility & Maintainability
+  - id: concurrency-in-lld
+    name: Concurrency in LLD
+  - id: thread-safety
+    name: Thread Safety
+  - id: parking-lot
+    name: Parking Lot
+    group: Common LLD Problems
+  - id: library-management-system
+    name: Library Management System
+    group: Common LLD Problems
+  - id: elevator-system
+    name: Elevator System
+    group: Common LLD Problems
+  - id: splitwise
+    name: Splitwise
+    group: Common LLD Problems
+  - id: bookmyshow
+    name: BookMyShow
+    group: Common LLD Problems
+  - id: chess
+    name: Chess
+    group: Common LLD Problems
+  - id: food-delivery-system
+    name: Food Delivery System
+    group: Common LLD Problems
+- id: high-level-design-hld
+  n: 21
+  title: High-Level Design (HLD)
+  track: backend
+  why: End-to-end design is how senior engineers are evaluated and how large systems get built right.
+  topics:
+  - id: requirement-gathering
+    name: Requirement Gathering
+  - id: functional-and-non-functional-requirements
+    name: Functional & Non-Functional Requirements
+  - id: api-design
+    name: API Design
+  - id: database-schema-design
+    name: Database Schema Design
+  - id: capacity-estimation
+    name: Capacity Estimation
+  - id: component-diagrams
+    name: Component Diagrams
+  - id: data-flow-diagrams
+    name: Data Flow Diagrams
+  - id: architecture-diagrams
+    name: Architecture Diagrams
+  - id: bottleneck-identification
+    name: Bottleneck Identification
+  - id: scaling-strategies
+    name: Scaling Strategies
+  - id: reliability-and-fault-tolerance
+    name: Reliability & Fault Tolerance
+  - id: security-considerations
+    name: Security Considerations
+  - id: trade-off-analysis
+    name: Trade-off Analysis
+  - id: architecture-documentation
+    name: Architecture Documentation
+  - id: end-to-end-system-design
+    name: End-to-End System Design
+- id: system-design-case-studies
+  n: 22
+  title: System Design Case Studies
+  track: backend
+  why: Real systems show how the fundamentals combine, and they are the core of design interviews.
+  topics:
+  - id: url-shortener-tinyurl
+    name: URL Shortener (TinyURL)
+  - id: pastebin
+    name: Pastebin
+  - id: rate-limiter
+    name: Rate Limiter
+  - id: notification-system
+    name: Notification System
+  - id: news-feed-facebook-instagram
+    name: News Feed (Facebook / Instagram)
+  - id: chat-application-whatsapp
+    name: Chat Application (WhatsApp)
+  - id: video-streaming-youtube-netflix
+    name: Video Streaming (YouTube / Netflix)
+  - id: ride-hailing-uber
+    name: Ride-Hailing (Uber)
+  - id: food-delivery-swiggy-zomato
+    name: Food Delivery (Swiggy / Zomato)
+  - id: e-commerce-amazon
+    name: E-Commerce (Amazon)
+  - id: payment-system
+    name: Payment System
+  - id: search-engine
+    name: Search Engine
+  - id: file-storage-google-drive-dropbox
+    name: File Storage (Google Drive / Dropbox)
+  - id: ticket-booking-bookmyshow
+    name: Ticket Booking (BookMyShow)
+  - id: social-media-platform-x
+    name: Social Media Platform (X)
+  - id: recommendation-system
+    name: Recommendation System
+  - id: distributed-cache-redis
+    name: Distributed Cache (Redis)
+  - id: logging-and-monitoring-platform
+    name: Logging & Monitoring Platform
+  - id: web-crawler
+    name: Web Crawler
+  - id: video-conferencing-system
+    name: Video Conferencing System
+- id: system-design-tools-and-technologies
+  n: 23
+  title: System Design Tools & Technologies
+  track: backend
+  why: Knowing the standard tools well is how designs become running systems.
+  topics:
+  - id: go
+    name: Go
+    group: Programming Languages
+  - id: java
+    name: Java
+    group: Programming Languages
+  - id: python
+    name: Python
+    group: Programming Languages
+  - id: postgresql
+    name: PostgreSQL
+    group: Databases
+  - id: mysql
+    name: MySQL
+    group: Databases
+  - id: redis
+    name: Redis
+    group: Databases
+  - id: mongodb
+    name: MongoDB
+    group: Databases
+  - id: cassandra
+    name: Cassandra
+    group: Databases
+  - id: kafka
+    name: Kafka
+    group: Message Brokers
+  - id: rabbitmq
+    name: RabbitMQ
+    group: Message Brokers
+  - id: nginx
+    name: Nginx
+    group: Networking & Proxy
+  - id: haproxy
+    name: HAProxy
+    group: Networking & Proxy
+  - id: docker
+    name: Docker
+    group: Infrastructure
+  - id: kubernetes
+    name: Kubernetes
+    group: Infrastructure
+  - id: terraform
+    name: Terraform
+    group: Infrastructure
+  - id: prometheus
+    name: Prometheus
+    group: Monitoring
+  - id: grafana
+    name: Grafana
+    group: Monitoring
+  - id: opentelemetry
+    name: OpenTelemetry
+    group: Monitoring
+  - id: postman
+    name: Postman
+    group: API Testing
+  - id: curl
+    name: curl
+    group: API Testing
+  - id: excalidraw
+    name: Excalidraw
+    group: Architecture Documentation
+  - id: draw-io
+    name: Draw.io
+    group: Architecture Documentation
+  - id: mermaid
+    name: Mermaid
+    group: Architecture Documentation
+- id: system-design-practice
+  n: 24
+  title: System Design Practice
+  track: backend
+  why: Designing systems yourself is the only way this knowledge turns into skill.
+  topics:
+  - id: design-small-systems-first
+    name: Design Small Systems First
+  - id: design-a-url-shortener
+    name: Design a URL Shortener
+  - id: design-a-rate-limiter
+    name: Design a Rate Limiter
+  - id: design-a-notification-service
+    name: Design a Notification Service
+  - id: design-a-chat-application
+    name: Design a Chat Application
+  - id: design-a-news-feed
+    name: Design a News Feed
+  - id: design-a-video-streaming-platform
+    name: Design a Video Streaming Platform
+  - id: design-a-ride-hailing-platform
+    name: Design a Ride-Hailing Platform
+  - id: design-a-payment-service
+    name: Design a Payment Service
+  - id: design-a-distributed-cache
+    name: Design a Distributed Cache
+  - id: design-a-search-engine
+    name: Design a Search Engine
+  - id: design-a-file-storage-service
+    name: Design a File Storage Service
+  - id: design-a-ticket-booking-system
+    name: Design a Ticket Booking System
+  - id: design-a-real-time-analytics-system
+    name: Design a Real-Time Analytics System
+  - id: document-design-decisions
+    name: Document Design Decisions
+  - id: identify-trade-offs
+    name: Identify Trade-offs
+  - id: review-existing-architectures
+    name: Review Existing Architectures
+  - id: build-end-to-end-projects
+    name: Build End-to-End Projects
+- id: mastery-and-career-preparation
+  n: 25
+  title: Mastery & Career Preparation
+  track: backend
+  why: Thinking in trade-offs and communicating designs is what separates senior and staff engineers.
+  topics:
+  - id: architectural-thinking
+    name: Architectural Thinking
+  - id: breaking-down-complex-problems
+    name: Breaking Down Complex Problems
+  - id: requirement-analysis
+    name: Requirement Analysis
+  - id: capacity-estimation
+    name: Capacity Estimation
+  - id: identifying-bottlenecks
+    name: Identifying Bottlenecks
+  - id: choosing-the-right-components
+    name: Choosing the Right Components
+  - id: scalability-trade-offs
+    name: Scalability Trade-offs
+  - id: reliability-engineering
+    name: Reliability Engineering
+  - id: distributed-systems-thinking
+    name: Distributed Systems Thinking
+  - id: cost-optimization
+    name: Cost Optimization
+  - id: security-first-design
+    name: Security-First Design
+  - id: architecture-reviews
+    name: Architecture Reviews
+  - id: technical-documentation
+    name: Technical Documentation
+  - id: system-design-interviews
+    name: System Design Interviews
+  - id: mock-design-interviews
+    name: Mock Design Interviews
+  - id: real-world-production-experience
+    name: Real-World Production Experience
+  - id: continuous-learning
+    name: Continuous Learning
+- id: ai-engineering-and-agents
+  n: 26
+  title: AI Engineering & Agents
+  track: ai-eng
+  why: Engineers who can build reliable AI features are in the highest demand.
+  topics:
+  - id: agent-design
+    name: Design reliable agents and workflows
+    why: Most agents fail because of poor design, not weak models.
+    about: agents agentic workflows orchestrator workers planning multi-agent routing loops
+  - id: tool-use
+    name: Give models tools (function calling, MCP)
+    why: Tools turn a chatbot into something that does real work in your systems.
+    about: tool use function calling model context protocol mcp tool calling
+  - id: context-engineering
+    name: Engineer context and prompts
+    why: What the model sees decides what it does. Context is the main lever you control.
+    about: prompt engineering context engineering context window system prompts few shot
+  - id: evals
+    name: Build evals for LLM features
+    why: Without evals you can't tell whether a change made things better or worse.
+    about: evals evaluation llm as judge test sets error analysis quality metrics
+  - id: rag-retrieval
+    name: Build retrieval (RAG, search, embeddings)
+    why: Most useful AI features need your own data, and retrieval quality caps answer quality.
+    about: rag retrieval augmented generation embeddings vector search hybrid search reranking chunking
+  - id: structured-output
+    name: Get structured, validated output from models
+    why: Production systems need data, not prose.
+    about: structured outputs json schema validation pydantic extraction
+  - id: llm-production
+    name: Run LLM features in production (cost, latency, reliability)
+    why: The gap between a demo and a product is cost, latency, fallbacks and monitoring.
+    about: llm production latency cost caching rate limits fallbacks model routing gateway
+  - id: ai-coding
+    name: Use AI coding tools effectively
+    why: Engineers who direct AI well ship several times faster; the skill is steering and reviewing.
+    about: ai coding assistants claude code copilot cursor code generation agents
+  - id: guardrails-safety
+    name: Make AI systems safe (guardrails, prompt injection)
+    why: AI features open new attack surfaces, and shipping them safely is now part of the job.
+    about: guardrails prompt injection jailbreak safety red teaming
+  - id: model-selection
+    name: Choose and compare models
+    why: The right model can cut cost by 10x or remove a quality ceiling, and the landscape changes monthly.
+    about: model comparison benchmarks open weights frontier models model release pricing
+  - id: local-models
+    name: Run and serve open models
+    why: Open models give you privacy, cost control and offline capability that APIs can't.
+    about: open weights local models ollama vllm llama.cpp serving quantized gguf
+  - id: ai-product
+    name: Build AI products users trust
+    why: Great AI products come from UX, feedback loops and data flywheels, not just a model call.
+    about: ai product design ux feedback loops human in the loop data flywheel trust
+- id: ml-and-llm-foundations
+  n: 27
+  title: ML & LLM Foundations
+  track: ml
+  why: Understanding how models work turns AI from magic into engineering you can reason about.
+  topics:
+  - id: transformers-attention
+    name: Understand transformers and attention
+    why: It's the architecture behind every modern model.
+    about: transformer attention self attention heads positional embeddings layers
+  - id: tokenization-embeddings
+    name: Understand tokenization and embeddings
+    why: Tokens and embeddings explain cost, context limits and many strange model behaviours.
+    about: tokenization tokens bpe tokenizer embeddings vectors vocabulary
+  - id: training-pretraining
+    name: Understand how models are trained
+    why: Knowing what pretraining does tells you what a model can and can't know.
+    about: pretraining training data loss gradient descent backpropagation optimizers scaling laws
+  - id: post-training
+    name: Understand post-training (RLHF, RL, alignment)
+    why: Post-training is where assistant behaviour and reasoning come from.
+    about: rlhf reinforcement learning post-training alignment dpo grpo ppo reward models reasoning
+  - id: fine-tuning
+    name: Fine-tune models (LoRA, PEFT)
+    why: Fine-tuning adapts a model to your domain cheaply, and LoRA is how most teams do it.
+    about: fine-tuning lora qlora peft adapters supervised fine tuning
+  - id: inference-efficiency
+    name: Make inference fast and cheap
+    why: Inference is where AI money goes.
+    about: inference optimization kv cache quantization batching speculative decoding distillation
+  - id: gpu-hardware
+    name: Understand GPUs and ML hardware
+    why: Hardware limits shape every AI decision, from model size to cost per request.
+    about: gpu cuda kernels memory bandwidth tpu accelerators flops
+  - id: architectures
+    name: Follow architecture advances (MoE, long context, multimodal)
+    why: Architecture shifts change what's possible and what's cheap.
+    about: mixture of experts moe long context state space models multimodal
+  - id: interpretability
+    name: Understand what happens inside models
+    why: Interpretability explains model failures and is becoming central to trusting AI.
+    about: interpretability mechanistic features circuits sparse autoencoders
+  - id: ml-math
+    name: Build the math and ML fundamentals
+    why: Linear algebra, probability and optimization let you read papers instead of waiting for blog posts.
+    about: linear algebra probability statistics optimization neural networks fundamentals
+  - id: reading-papers
+    name: Read and evaluate research papers
+    why: Reading papers puts you months ahead of people who wait for summaries.
+    about: research papers arxiv benchmarks methodology ablations
+- id: payments-and-money-systems
+  n: 28
+  title: Payments & Money Systems
+  track: backend
+  why: Money bugs are the most expensive bugs, and payments expertise is rare and highly valued.
+  topics:
+  - id: idempotent-payment-apis
+    name: Idempotent Payment APIs
+    why: Retries are inevitable, and without idempotency they become double charges.
+    about: idempotency keys payments retries duplicate charges
+  - id: ledgers-double-entry
+    name: Ledgers & Double-Entry Bookkeeping
+    why: A ledger is the source of truth for money, and getting it wrong is unrecoverable.
+    about: ledger double entry bookkeeping accounting balances journal
+  - id: reconciliation
+    name: Reconciliation
+    why: Reconciliation is how you find missing money before customers or auditors do.
+    about: reconciliation settlement matching payment provider reports
+  - id: payment-webhooks
+    name: Payment Webhooks
+    why: Webhooks are how payment state reaches you, and they arrive late, twice or out of order.
+    about: webhooks signature verification retries event ordering stripe razorpay
+  - id: refunds-chargebacks
+    name: Refunds, Disputes & Chargebacks
+    why: The unhappy paths of payments are where most money is lost.
+    about: refunds chargebacks disputes fraud failed payments
+  - id: subscriptions-billing
+    name: Subscriptions & Billing
+    why: Recurring billing combines time, money and state machines, a classic source of subtle bugs.
+    about: subscriptions recurring billing invoices proration renewals in-app purchases
+- id: mathematics-for-engineers
+  n: 29
+  title: Mathematics for Engineers
+  track: math
+  why: 'Maths is what lets you reason about systems and models instead of guessing: correctness, probability, performance and ML all rest on it.'
+  topics:
+  - id: logic-and-proofs
+    name: Logic & Proofs
+    group: Discrete Math & Logic
+    why: Proof skills are how you convince yourself an algorithm or invariant is actually correct.
+    about: propositional logic predicates proofs proof by contradiction invariants correctness
+  - id: induction-and-recursion
+    name: Induction & Recursion
+    group: Discrete Math & Logic
+    why: Induction is how recursive code and loop invariants are reasoned about.
+    about: mathematical induction recursion recurrence structural induction
+  - id: sets-relations-functions
+    name: Sets, Relations & Functions
+    group: Discrete Math & Logic
+    why: The language of data modelling, SQL and type systems.
+    about: sets relations functions mappings equivalence relations orderings
+  - id: combinatorics
+    name: Combinatorics & Counting
+    group: Discrete Math & Logic
+    why: Counting tells you how big a search space is and whether brute force can work.
+    about: combinatorics counting permutations combinations pigeonhole principle
+  - id: graph-theory
+    name: Graph Theory
+    group: Discrete Math & Logic
+    why: Networks, dependencies, routing and social feeds are all graphs.
+    about: graphs vertices edges trees paths connectivity shortest paths dag topological sort
+  - id: number-theory
+    name: Number Theory & Modular Arithmetic
+    group: Discrete Math & Logic
+    why: Hashing, checksums and cryptography all run on modular arithmetic.
+    about: modular arithmetic primes gcd number theory rsa cryptography hashing
+  - id: big-o-asymptotics
+    name: Big-O & Asymptotic Analysis
+    group: Algorithms & Complexity
+    why: It tells you what breaks first when data grows 100x.
+    about: big o notation time complexity space complexity asymptotic analysis
+  - id: recurrences
+    name: Recurrences & Divide and Conquer
+    group: Algorithms & Complexity
+    why: Analysing recursive algorithms is how you predict their real cost.
+    about: recurrence relations master theorem divide and conquer
+  - id: amortized-analysis
+    name: Amortized Analysis
+    group: Algorithms & Complexity
+    why: Explains why dynamic arrays and hash tables are fast on average despite occasional slow operations.
+    about: amortized analysis dynamic arrays resizing potential method
+  - id: complexity-classes
+    name: Complexity Classes (P vs NP)
+    group: Algorithms & Complexity
+    why: Recognising an NP-hard problem saves you from searching for an exact solution that doesn't exist.
+    about: p np np-complete np-hard reductions computational complexity
+  - id: randomized-algorithms
+    name: Randomized Algorithms
+    group: Algorithms & Complexity
+    why: Randomness makes many algorithms simpler and faster, from quicksort to load balancing.
+    about: randomized algorithms monte carlo las vegas random sampling probabilistic analysis
+  - id: probability-fundamentals
+    name: Probability Fundamentals
+    group: Probability & Statistics
+    why: Probability is how you reason about failures, retries, sampling and ML.
+    about: probability events conditional probability independence random variables
+  - id: distributions
+    name: Distributions (Normal, Poisson, Exponential, Power-law)
+    group: Probability & Statistics
+    why: Real traffic and latency follow specific distributions, and assuming "normal" is often wrong.
+    about: normal distribution poisson exponential power law heavy tails distributions
+  - id: expectation-variance
+    name: Expectation & Variance
+    group: Probability & Statistics
+    why: Averages hide variance, and variance is what users feel.
+    about: expected value variance standard deviation law of large numbers
+  - id: bayes-theorem
+    name: Bayes' Theorem
+    group: Probability & Statistics
+    why: The tool for updating beliefs from evidence, from spam filters to incident triage.
+    about: bayes theorem prior posterior likelihood bayesian inference
+  - id: statistical-inference
+    name: Statistical Inference & A/B Testing
+    group: Probability & Statistics
+    why: Deciding whether a change really helped needs statistics, not vibes.
+    about: hypothesis testing p-values confidence intervals a/b testing significance experiments
+  - id: percentiles-tails
+    name: Percentiles & Tail Behaviour
+    group: Probability & Statistics
+    why: p99 latency is what users remember, and it behaves very differently from the mean.
+    about: percentiles p99 tail latency quantiles histograms outliers
+  - id: vectors-matrices
+    name: Vectors & Matrices
+    group: Linear Algebra
+    why: Every embedding, image and neural network layer is a vector or matrix.
+    about: vectors matrices dot product matrix multiplication linear transformations
+  - id: eigen
+    name: Eigenvalues & Eigenvectors
+    group: Linear Algebra
+    why: They reveal the directions a transformation stretches, behind PageRank and PCA.
+    about: eigenvalues eigenvectors diagonalization pagerank spectral
+  - id: svd-pca
+    name: SVD & PCA (Dimensionality Reduction)
+    group: Linear Algebra
+    why: Compressing high-dimensional data into what matters is everywhere in ML and search.
+    about: singular value decomposition svd pca principal component analysis low rank dimensionality reduction
+  - id: vector-spaces
+    name: Vector Spaces, Norms & Similarity
+    group: Linear Algebra
+    why: Cosine similarity and distances are how embeddings and search work.
+    about: vector spaces norms cosine similarity projections orthogonality embeddings distance
+  - id: derivatives-gradients
+    name: Derivatives & Gradients
+    group: Calculus & Optimization
+    why: Gradients tell a model which way to change, the core of all training.
+    about: derivatives gradients partial derivatives multivariable calculus
+  - id: chain-rule-backprop
+    name: Chain Rule & Backpropagation
+    group: Calculus & Optimization
+    why: Backpropagation is the chain rule applied at scale.
+    about: chain rule backpropagation automatic differentiation computational graph
+  - id: gradient-descent
+    name: Gradient Descent & Optimizers
+    group: Calculus & Optimization
+    why: How every neural network is trained, and why learning rates matter.
+    about: gradient descent sgd adam optimizer learning rate convergence loss landscape
+  - id: convex-optimization
+    name: Convex Optimization
+    group: Calculus & Optimization
+    why: Many scheduling, pricing and ML problems become solvable once you see they are convex.
+    about: convex optimization linear programming constraints lagrange multipliers
+  - id: queueing-theory
+    name: Queueing Theory & Little's Law
+    group: The Maths of Systems
+    why: Explains why latency explodes as utilisation climbs, the maths behind capacity planning.
+    about: queueing theory littles law utilization waiting time m/m/1 arrival rate service time
+  - id: capacity-math
+    name: Capacity Planning Math
+    group: The Maths of Systems
+    why: Back-of-the-envelope maths decides how many machines you need before you buy them.
+    about: capacity planning estimation throughput qps storage math back of the envelope
+  - id: hashing-probability
+    name: Hashing & Probabilistic Data Structures
+    group: The Maths of Systems
+    why: Bloom filters, HyperLogLog and the birthday paradox trade tiny error for huge savings.
+    about: hashing birthday paradox bloom filter hyperloglog count-min sketch collisions
+  - id: information-theory
+    name: Information Theory (Entropy, Compression)
+    group: The Maths of Systems
+    why: Entropy explains compression limits and the loss function LLMs train on.
+    about: information theory entropy cross entropy compression shannon bits
+  - id: floating-point
+    name: Floating-Point & Numerical Precision
+    group: The Maths of Systems
+    why: Precision bugs corrupt money and metrics. Never store currency as a float.
+    about: floating point precision rounding errors numerical stability decimals ieee 754
