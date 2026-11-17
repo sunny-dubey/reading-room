@@ -3,10 +3,10 @@
 import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { parse, stringify } from 'yaml';
+import { parse, stringify, parseDocument } from 'yaml';
 
-const DIRS = { log: 'src/content/log', note: 'src/content/notes', writing: 'src/content/writing' };
-const ROUTES = { log: 'log', note: 'notes', writing: 'writing' };
+// One kind of entry: a note. Files live in src/content/notes, pages at /notebook/<id>/.
+const NOTES_DIR = 'src/content/notes';
 
 const slugify = s => s.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').replace(/-+/g, '-').slice(0, 60).replace(/-$/, '');
 const today = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local
@@ -17,13 +17,10 @@ function split(md) {
     return m ? { data: parse(m[1]) ?? {}, body: m[2].replace(/^\n/, '') } : { data: {}, body: md };
 }
 
-function frontmatter(kind, input, existing = {}) {
+function frontmatter(input, existing = {}) {
     const tags = (input.tags ?? []).map(t => String(t).toLowerCase().trim().replace(/\s+/g, '-')).filter(Boolean);
-    const fm = { title: input.title.trim() };
-    if (kind === 'log') fm.date = input.date || existing.date || today();
-    if (kind === 'note') { if (input.summary) fm.summary = input.summary.trim(); fm.updated = today(); }
-    if (kind === 'writing') { if (input.summary) fm.description = input.summary.trim(); fm.date = input.date || existing.date || today(); }
-    fm.tags = tags;
+    const fm = { title: input.title.trim(), date: existing.date || today(), tags };
+    if (input.source && /^https?:\/\//.test(input.source)) fm.source = input.source;
     if (input.draft) fm.draft = true;
     return fm;
 }
@@ -62,32 +59,26 @@ export default function notebookEditor() {
                     if (!['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(ip)) return send(res, 403, { error: 'local only' });
                     try {
                         if (url.pathname === '/__notebook/load' && req.method === 'GET') {
-                            const kind = url.searchParams.get('kind'), id = url.searchParams.get('id');
-                            if (!DIRS[kind] || !safeId(id)) return send(res, 400, { error: 'bad kind or id' });
-                            const file = resolve(root, DIRS[kind], `${id}.md`);
+                            const id = url.searchParams.get('id');
+                            if (!safeId(id)) return send(res, 400, { error: 'bad id' });
+                            const file = resolve(root, NOTES_DIR, `${id}.md`);
                             if (!existsSync(file)) return send(res, 404, { error: 'not found' });
                             const { data, body: md } = split(await readFile(file, 'utf8'));
-                            return send(res, 200, { kind, id, data, body: md });
+                            return send(res, 200, { id, data, body: md });
                         }
                         if (url.pathname === '/__notebook/tags' && req.method === 'GET') {
                             const tags = new Set();
-                            for (const dir of Object.values(DIRS)) {
-                                const abs = resolve(root, dir);
-                                if (!existsSync(abs)) continue;
-                                for (const f of await readdir(abs)) if (f.endsWith('.md')) {
-                                    for (const t of split(await readFile(join(abs, f), 'utf8')).data.tags ?? []) tags.add(t);
-                                }
+                            const abs = resolve(root, NOTES_DIR);
+                            if (existsSync(abs)) for (const f of await readdir(abs)) if (f.endsWith('.md')) {
+                                for (const t of split(await readFile(join(abs, f), 'utf8')).data.tags ?? []) tags.add(t);
                             }
                             return send(res, 200, { tags: [...tags].sort() });
                         }
                         if (url.pathname === '/__notebook/save' && req.method === 'POST') {
                             const input = await body(req);
-                            const kind = input.kind;
-                            if (!DIRS[kind]) return send(res, 400, { error: 'bad kind' });
                             if (!input.title?.trim()) return send(res, 400, { error: 'Title is required' });
-                            const dir = resolve(root, DIRS[kind]);
+                            const dir = resolve(root, NOTES_DIR);
                             await mkdir(dir, { recursive: true });
-
                             let id = input.id;
                             let existing = {};
                             if (id) {
@@ -95,16 +86,15 @@ export default function notebookEditor() {
                                 const f = join(dir, `${id}.md`);
                                 if (existsSync(f)) existing = split(await readFile(f, 'utf8')).data;
                             } else {
-                                const slug = slugify(input.title) || 'untitled';
-                                id = kind === 'log' ? `${input.date || today()}-${slug}` : slug;
-                                let n = 2;
-                                while (existsSync(join(dir, `${id}.md`))) id = `${id.replace(/-\d+$/, '')}-${n++}`;
+                                const base0 = `${today()}-${slugify(input.title) || 'note'}`;
+                                id = base0;
+                                for (let n = 2; existsSync(join(dir, `${id}.md`)); n++) id = `${base0}-${n}`;
                             }
-                            const fm = frontmatter(kind, input, existing);
-                            const text = `---\n${stringify(fm, { flowCollectionPadding: false }).replace(/^tags:\n((?:  - .*\n?)*)/m, (_, l) => `tags: [${l.split('\n').filter(Boolean).map(x => x.replace(/^\s*- /, '')).join(', ')}]\n`)}---\n\n${(input.body ?? '').trim()}\n`;
-                            await writeFile(join(dir, `${id}.md`), text);
-                            logger.info(`saved ${DIRS[kind]}/${id}.md`);
-                            return send(res, 200, { id, path: `${DIRS[kind]}/${id}.md`, url: `${base}/${ROUTES[kind]}/${id}/` });
+                            const fm = frontmatter(input, existing);
+                            const yaml = stringify(fm, { lineWidth: 0 }).replace(/^tags:\n((?:  - .*\n?)*)/m, (_, l) => `tags: [${l.split('\n').filter(Boolean).map(x => x.replace(/^\s*- /, '')).join(', ')}]\n`);
+                            await writeFile(join(dir, `${id}.md`), `---\n${yaml}---\n\n${(input.body ?? '').trim()}\n`);
+                            logger.info(`saved ${NOTES_DIR}/${id}.md`);
+                            return send(res, 200, { id, path: `${NOTES_DIR}/${id}.md`, url: `${base}/notebook/${id}/` });
                         }
                         if (url.pathname === '/__notebook/library' && req.method === 'POST') {
                             const input = await body(req);
@@ -125,6 +115,20 @@ export default function notebookEditor() {
                             const block = stringify([entry]).replace(/^tags:\n((?:\s+- .*\n?)*)/m, m => m);
                             await writeFile(file, text.replace(/\s*$/, '\n\n') + block);
                             logger.info(`saved to library: ${input.title}`);
+                            return send(res, 200, { id });
+                        }
+                        if (url.pathname === '/__notebook/library/remove' && req.method === 'POST') {
+                            const { id } = await body(req);
+                            if (!id || typeof id !== 'string') return send(res, 400, { error: 'id is required' });
+                            const file = resolve(root, 'src/content/library.yaml');
+                            if (!existsSync(file)) return send(res, 404, { error: 'no library file' });
+                            // parseDocument keeps the file's comments intact.
+                            const doc = parseDocument(await readFile(file, 'utf8'));
+                            const idx = (doc.contents?.items ?? []).findIndex(n => n.get?.('id') === id);
+                            if (idx < 0) return send(res, 404, { error: 'not found' });
+                            doc.contents.items.splice(idx, 1);
+                            await writeFile(file, doc.toString({ lineWidth: 0, flowCollectionPadding: false }));
+                            logger.info(`removed from library: ${id}`);
                             return send(res, 200, { id });
                         }
                         return send(res, 404, { error: 'unknown endpoint' });

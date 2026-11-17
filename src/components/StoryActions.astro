@@ -4,7 +4,7 @@ import { u } from '../lib/url';
 interface Props { title: string; url: string; author?: string; }
 const { title, url, author = '' } = Astro.props;
 const dev = import.meta.env.DEV;
-const explainHref = `${u('/write/')}?kind=log&explain=1&title=${encodeURIComponent(title)}&ref=${encodeURIComponent(url)}`;
+const explainHref = `${u('/write/')}?title=${encodeURIComponent(title)}&ref=${encodeURIComponent(url)}`;
 ---
 {dev && (
     <span class="story-actions">

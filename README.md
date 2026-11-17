@@ -1,6 +1,6 @@
 # reading-room
 
-My learning notebook: **Log** (short dated learnings), **Notes** (one page per topic), **Writing** (long-form), **Library** (links worth keeping).
+The Reading Room: deep reads, the Canon, and a notebook of what I understood.
 
 ```bash
 npm install
@@ -9,11 +9,10 @@ npm run dev        # http://localhost:4321
 
 ## Adding things
 
-- **In the site:** run `npm run dev`, click **+ Write** (or **Edit** on any entry), ⌘S to save. The editor only exists locally; it writes markdown into `src/content/`.
-
-- **From a Claude Code session:** type `/til` near the end. It writes draft log entries here; review them, flip `draft: false`, commit.
-- **By hand:** `npm run new log "What I learned" postgres,queues`
-- **A link:** add an item to `src/content/library.yaml`.
+- **A note:** run `npm run dev`, click **+ Write** (or **Explain it back** on anything you read). ⌘S saves into `src/content/notes/`.
+- **From the terminal:** `npm run new "What I understood about MVCC" postgres,mvcc`
+- **From a Claude Code session:** `/til`
+- **Save / unsave a link:** Save on any piece, Unsave on the Saved page (local only).
 
 ## Habit
 

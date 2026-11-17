@@ -5,6 +5,6 @@ const { tags } = Astro.props;
 ---
 {tags.length > 0 && (
     <span class="tags">
-        {tags.map(t => <a class="tag" href={u(`/tags/${t}/`)}>#{t}</a>)}
+        {tags.map(t => <a class="tag" href={`${u("/notebook/")}?tag=${t}`}>#{t}</a>)}
     </span>
 )}

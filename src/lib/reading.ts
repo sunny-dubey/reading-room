@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 import { getFeeds, CATEGORIES, type FeedItem } from './feeds';
-import { getLog, getNotes } from './content';
+import { getNotes } from './content';
 
 const DAY = 864e5;
 
@@ -70,11 +70,7 @@ export async function getReading() {
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */
 export async function getRevisit(now: number) {
-    const [log, notes] = await Promise.all([getLog(), getNotes()]);
-    const entries = [
-        ...log.map(e => ({ title: e.data.title, href: `/log/${e.id}/`, date: e.data.date, kind: 'log' as const })),
-        ...notes.map(n => ({ title: n.data.title, href: `/notes/${n.id}/`, date: n.data.updated, kind: 'note' as const })),
-    ];
+    const entries = (await getNotes()).map(n => ({ title: n.data.title, href: `/notebook/${n.id}/`, date: n.data.date }));
     const ago = (d: Date) => (now - +d) / DAY;
     const week = entries.filter(e => ago(e.date) >= 5 && ago(e.date) <= 10);
     const month = entries.filter(e => ago(e.date) >= 25 && ago(e.date) <= 40);

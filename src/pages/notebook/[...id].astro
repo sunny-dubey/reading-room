@@ -1,0 +1,15 @@
+---
+import { u } from '../../lib/url';
+import Entry from '../../layouts/Entry.astro';
+import { getNotes, fmtDate } from '../../lib/content';
+import { render } from 'astro:content';
+
+export async function getStaticPaths() {
+    return (await getNotes()).map(entry => ({ params: { id: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Entry k="note" edit={entry.id} title={entry.data.title} meta={fmtDate(entry.data.date)} tags={entry.data.tags} source={entry.data.source} back={{ href: u('/notebook/'), label: 'Notebook' }}>
+    <Content />
+</Entry>

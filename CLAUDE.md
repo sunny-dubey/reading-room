@@ -8,24 +8,23 @@
 
 ## Content (all in `src/content/`, schemas in `src/content.config.ts`)
 
-| Tab | Location | Frontmatter |
+| What | Location | Frontmatter |
 |---|---|---|
-| Log | `log/YYYY-MM-DD-slug.md` | `title`, `date`, `tags`, `draft` |
-| Notes | `notes/<topic>.md` (one page per topic) | `title`, `summary`, `updated`, `tags`, `draft` |
-| Writing | `writing/<slug>.md` | `title`, `description`, `date`, `tags`, `draft` |
-| Library | `library.yaml` (list) | `id`, `title`, `url`, `author`, `kind`, `why`, `added`, `tags` |
+| Notebook notes | `notes/YYYY-MM-DD-slug.md` → `/notebook/<id>/` | `title`, `date`, `tags`, optional `source` (URL), `draft` |
+| Saved links | `library.yaml` (list) → `/library/` | `id`, `title`, `url`, `author`, `kind`, `why`, `added`, `tags` |
+| Canon | `canon.yaml` | see file header |
+| Sources | `feeds.yaml` | see file header |
 
-- Tags are lowercase and kebab-case. Reuse existing tags before inventing new ones (`grep -rh "^tags:" src/content`).
+- The notebook has one kind of entry: a note (what Sunny understood, in his own words). No log/writing split.
+- Tags are lowercase and kebab-case. Reuse existing tags before inventing new ones (`grep -rh "^tags:" src/content/notes`).
 - `draft: true` shows in `npm run dev` and is hidden in production builds.
-- Log entries: one idea each, 2–8 sentences, specific (commands, numbers, error messages). Write in first person, plainly.
-- When folding log entries into a note: update the note's `updated` date and keep the log entries (notes link back to them via shared tags).
 
 - Site is served under `/reading-room/` (GitHub Pages project site). Wrap every internal link in `u()` from `src/lib/url.ts`, never a bare `/path`.
 
-- In-site editor: `/write/` page + dev-only API in `integrations/notebook-editor.mjs` (save/load/tags under `/reading-room/__notebook/`). Never exists in the static build.
+- In-site editor: `/write/` (new note, `?id=` to edit, `?ref=&title=` for Explain it back) + dev-only API in `integrations/notebook-editor.mjs` (notes save/load/tags, library add/remove under `/reading-room/__notebook/`). Never exists in the static build.
 
 ## Commands
 
 - `npm run dev`: local preview at http://localhost:4321
 - `npm run build`: production build into `dist/`
-- `npm run new <log|note|writing> "Title" [tags]`: scaffold an entry
+- `npm run new "Title" [tags]`: scaffold a note

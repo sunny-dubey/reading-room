@@ -4,11 +4,12 @@ import Tags from '../components/Tags.astro';
 import { getLibrary, fmtDate } from '../lib/content';
 const links = await getLibrary();
 const kinds = [...new Set(links.map(l => l.data.kind))].sort();
+const dev = import.meta.env.DEV;
 const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
 ---
 <Base title="Saved" description="Stories worth keeping, with a line on why." accent="library">
     <header class="page-head">
-        <h1>Saved <span class="count-pill">{links.length}</span></h1>
+        <h1>Saved <span class="count-pill" id="saved-count">{links.length}</span></h1>
         <p class="lead">Stories from the Reading Room worth coming back to, each with a line on why I kept it.</p>
     </header>
     {kinds.length > 1 && (
@@ -20,7 +21,7 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
     {links.length === 0 ? <p class="notice">Nothing saved yet.</p> : (
         <div class="grid">
             {links.map(l => (
-                <article class="tile hoverable k-library" data-kind={l.data.kind}>
+                <article class="tile hoverable k-library" data-kind={l.data.kind} data-id={l.id}>
                     <div class="domain"><span class="kind">{l.data.kind}</span> · {host(l.data.url)}</div>
                     <a class="card-title stretched" href={l.data.url} target="_blank" rel="noopener noreferrer">{l.data.title} ↗</a>
                     <p class="card-text">{l.data.why}</p>
@@ -28,6 +29,7 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
                         <Tags tags={l.data.tags} />
                         <span class="card-date">{l.data.author ? `${l.data.author} · ` : ''}{fmtDate(l.data.added)}</span>
                     </div>
+                    {dev && <button type="button" class="unsave-btn" data-unsave={l.id} title="Remove from Saved (local only)">Unsave</button>}
                 </article>
             ))}
         </div>
@@ -42,4 +44,32 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
             el.hidden = kind !== 'all' && el.dataset.kind !== kind;
         });
     }));
+
+    // Local only: remove an item from library.yaml. Two clicks to confirm, no dialog.
+    const API = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/__notebook`;
+    document.querySelectorAll<HTMLButtonElement>('[data-unsave]').forEach(btn => {
+        let armed: number | undefined;
+        btn.addEventListener('click', async () => {
+            if (!armed) {
+                btn.textContent = 'Click again to remove';
+                btn.classList.add('armed');
+                armed = window.setTimeout(() => { armed = undefined; btn.textContent = 'Unsave'; btn.classList.remove('armed'); }, 3000);
+                return;
+            }
+            clearTimeout(armed);
+            btn.disabled = true;
+            btn.textContent = 'Removing…';
+            try {
+                const res = await fetch(`${API}/library/remove`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: btn.dataset.unsave }) });
+                const out = await res.json();
+                if (!res.ok) throw new Error(out.error);
+                btn.closest('article')?.remove();
+                const count = document.getElementById('saved-count');
+                if (count) count.textContent = String(document.querySelectorAll('[data-unsave]').length);
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = `Failed: ${(err as Error).message}`;
+            }
+        });
+    });
 </script>

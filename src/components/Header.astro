@@ -10,7 +10,7 @@ const sections = [
     { href: u('/canon/'), label: 'Canon', cat: '' },
     { href: u('/concepts/'), label: 'Concepts', cat: '' },
 ];
-const notebookPaths = ['/notebook/', '/log/', '/notes/', '/writing/', '/tags/', '/write/'].map(p => u(p));
+const notebookPaths = ['/notebook/', '/write/'].map(p => u(p));
 const isNotebook = notebookPaths.some(p => path.startsWith(p));
 const isSaved = path.startsWith(u('/library/'));
 ---
