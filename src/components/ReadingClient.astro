@@ -24,6 +24,37 @@ const progress = await getProgress();
             : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: days > 300 ? 'numeric' : undefined });
         t.title = d.toLocaleString();
     });
+    // ---------- editions: show build time in the reader's timezone ----------
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tzName = (d: Date) => {
+        const short = new Intl.DateTimeFormat(undefined, { timeZoneName: 'short' }).formatToParts(d).find(p => p.type === 'timeZoneName')?.value ?? '';
+        if (/^GMT[+-]/.test(short) || short === 'UTC') {
+            // Prefer a familiar abbreviation where the reader's locale doesn't have one (e.g. IST).
+            const alt = new Intl.DateTimeFormat('en-IN', { timeZoneName: 'short', timeZone: tz }).formatToParts(d).find(p => p.type === 'timeZoneName')?.value;
+            if (alt && !/^GMT[+-]/.test(alt)) return alt;
+        }
+        return short;
+    };
+    const clock = (d: Date) => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }).toLowerCase().replace(/\s?(am|pm)$/, ' $1');
+    document.querySelectorAll<HTMLTimeElement>('[data-edition-time]').forEach(t => {
+        const d = new Date(t.dateTime);
+        t.textContent = `${clock(d)} ${tzName(d)}`;
+    });
+    document.querySelectorAll<HTMLElement>('[data-edition-date]').forEach(el => {
+        el.textContent = new Date(el.dataset.editionDate!).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    });
+    document.querySelectorAll<HTMLElement>('[data-next-edition]').forEach(el => {
+        // Next scheduled build: 00:17, 06:17, 12:17, 18:17 UTC. GitHub often runs a little late, hence "around".
+        const now = new Date();
+        const mins = now.getUTCHours() * 60 + now.getUTCMinutes();
+        const slots = [17, 377, 737, 1097];
+        const nextSlot = slots.find(s => s > mins) ?? slots[0] + 1440;
+        const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) + nextSlot * 60000);
+        const sameDay = next.toDateString() === now.toDateString();
+        el.textContent = `Next edition around ${clock(next)}${sameDay ? '' : ' tomorrow'}`;
+        el.title = `Scheduled for ${next.toISOString().slice(11, 16)} UTC; GitHub sometimes runs 5–30 minutes late`;
+    });
+
     document.querySelectorAll<HTMLElement>('[data-today]').forEach(el => {
         el.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     });

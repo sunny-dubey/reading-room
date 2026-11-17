@@ -11,6 +11,7 @@ const canon = await getCanon();
 const revisit = await getRevisit(now);
 const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 const deepCount = tracks.reduce((a, t) => a + t.deep.length, 0);
+const newReads = learning.filter(i => +i.date > +fetchedAt - 6 * 3600e3 && +i.date <= +fetchedAt).length;
 const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
 
 // ---------- Today's plan: read → canon → reflect/revisit ----------
@@ -23,7 +24,7 @@ const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
 ---
 <Base description="Learn something real every day: distributed systems, backend, AI engineering and ML foundations." accent="reading">
     <div class="rd">
-        <ReadingMast title="The Reading Room" kicker={today} sub="Become a sharper engineer: read deeply, reflect, revisit." updated={fetchedAt} />
+        <ReadingMast title="The Reading Room" sub="Become a sharper engineer: read deeply, reflect, revisit." edition={{ at: fetchedAt, newReads }} />
 
         <section class="plan" data-plan>
             <header class="plan-head">
