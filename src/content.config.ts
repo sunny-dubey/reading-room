@@ -39,9 +39,7 @@ const feeds = defineCollection({
         category: z.string().default('other'),
         limit: z.number().int().positive().default(8),
         maxAgeDays: z.number().int().positive().default(45),
-        type: z.enum(['rss', 'bluesky', 'reddit']).default('rss'),
-        perSub: z.number().int().positive().default(3), // reddit only: max posts per subreddit
-        minLikes: z.number().int().nonnegative().default(15), // bluesky only
+        weight: z.number().min(-2).max(2).default(0), // ranking nudge for this source (depth/quality)
     }),
 });
 

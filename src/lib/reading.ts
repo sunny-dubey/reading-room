@@ -9,7 +9,7 @@ const DAY = 864e5;
 export const rank = (i: FeedItem, now: number) => {
     const age = (now - +i.date) / DAY;
     const fresh = age < 2 ? 1.2 : age < 7 ? 0.8 : age < 21 ? 0.3 : 0;
-    return (i.brief?.worth ?? 2) * 2 + fresh + (i.skill?.boost ?? 0);
+    return (i.brief?.worth ?? 2) * 2 + fresh + (i.skill?.boost ?? 0) + (i.weight ?? 0);
 };
 
 export const isDeep = (i: FeedItem) => (i.brief?.worth ?? 0) >= 3.5;
@@ -72,16 +72,7 @@ async function buildReading() {
         funding: startup('tc-startups'),
     };
 
-    // Concept index across everything summarised.
-    const concepts = new Map<string, FeedItem[]>();
-    for (const i of learning) for (const c of i.brief?.concepts ?? []) {
-        if (!concepts.has(c)) concepts.set(c, []);
-        concepts.get(c)!.push(i);
-    }
-    const conceptIndex = [...concepts].map(([name, list]) => ({ name, slug: name.replace(/[^a-z0-9]+/g, '-'), items: list.sort((a, b) => rank(b, now) - rank(a, now)) }))
-        .sort((a, b) => b.items.length - a.items.length);
-
-    return { items, learning, status, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, startups, conceptIndex, roadmap };
+    return { items, learning, status, fetchedAt, now, deepRead, picks, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */

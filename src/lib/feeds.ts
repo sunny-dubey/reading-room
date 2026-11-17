@@ -10,33 +10,14 @@ export interface FeedItem {
     link: string;
     date: Date;
     summary: string;
-    signals: Signal[];
     embedText?: string;  // title + start of article, for topic matching
+    weight?: number;     // source-level ranking nudge from feeds.yaml
     skill?: import('./roadmap').SkillMatch; // closest Roadmap topic (build time)
     brief?: Brief;       // build-time summary (learning tracks only)
     content?: string;    // full feed HTML, used for summarising then dropped
     comments?: string;   // discussion link (Hacker News)
     points?: number;
-    reddit?: {           // Reddit top-of-day
-        sub: string;
-        rank: number;        // position in the day's top list for its feed
-        score?: number;      // votes (only with API credentials)
-        comments?: number;
-        self: boolean;       // text post rather than a link
-    };
-    post?: {             // social posts (Bluesky)
-        author: string;
-        handle: string;
-        avatar?: string;
-        likes: number;
-        reposts: number;
-        replies: number;
-        score: number;
-        embed?: { title: string; url: string };
-    };
 }
-
-export type Signal = 'outage' | 'model' | 'migration' | 'security' | 'controversy';
 
 export const CATEGORIES = [
     { id: 'systems', slug: 'systems', label: 'Distributed Systems & Databases', short: 'Systems & DBs', blurb: 'Consensus, replication, consistency, storage engines, Postgres internals' },
@@ -52,31 +33,6 @@ export const STARTUPS = { id: 'startups', slug: 'startups', label: 'Startups', s
 export const SIDE = new Set(['pulse', 'startups']);
 export const categoryLabel = (id: string) => CATEGORIES.find(c => c.id === id)?.label ?? (id === 'pulse' ? PULSE.label : id === 'startups' ? STARTUPS.label : id);
 export const categoryShort = (id: string) => CATEGORIES.find(c => c.id === id)?.short ?? (id === 'pulse' ? PULSE.short : id);
-
-export const SIGNALS: { id: Signal; label: string; hint: string }[] = [
-    { id: 'outage', label: 'Outages', hint: 'Incidents, downtime, post-mortems' },
-    { id: 'model', label: 'New models', hint: 'Model and open-weights releases' },
-    { id: 'migration', label: 'Migrations', hint: 'Moves, rewrites, deprecations, shutdowns' },
-    { id: 'security', label: 'Security', hint: 'Breaches, CVEs, exploits, malware' },
-    { id: 'controversy', label: 'Controversy', hint: 'Backlash, lawsuits, layoffs, bans' },
-];
-
-// Keyword rules, checked against the title (strong) and summary (weak).
-const RULES: Record<Signal, RegExp> = {
-    outage: /\b(outages?|downtime|went down|is down|goes down|degraded|disruptions? (with|to|of)|elevated errors?|error rates?|service interruption|post-?mortem|unable to|failing)\b/i,
-    model: /\b(gpt-?\d[\w.-]*|o[1-9](-mini|-pro)?|claude (opus|sonnet|haiku|fable)( [\d.]+)?|claude [\d.]+|gemini [\d.]+[\w ]*|gemma ?\d+|llama ?\d[\d.]*|mistral (large|medium|small)|mixtral|codestral|qwen ?\d[\d.]*|deepseek[- ]?(v|r)\d+|grok ?\d[\d.]*|phi-?\d|kimi k\d|new (ai |language |reasoning )?models?|open[- ]weights?( models?)?|frontier models?|model release)\b/i,
-    migration: /\b(migrat\w*|deprecat\w*|sunset(s|ting)?|end[- ]of[- ]life|shutting down|shuts down|moves? (off|away from)|moving (off|away from)|switch(ed|es|ing)? (from|away)|rewr(ite|itten|ote) in|ditch(es|ed|ing)?)\b/i,
-    security: /\b(breach(es|ed)?|hack(ed|ers?)?|vulnerabilit(y|ies)|cve-\d{4}-\d+|zero-days?|0-day|ransomware|exploit(ed|s)?|data leak|leaked|malware|compromised|supply[- ]chain attack|backdoor|(cyber)?security incident)\b/i,
-    controversy: /\b(lawsuits?|sues|sued|antitrust|fined|backlash|outrage|layoffs?|lays off|laid off|resigns?|ousted|banned|bans|probe|whistleblower)\b/i,
-};
-
-function detectSignals(title: string, category: string): Signal[] {
-    // Status pages: every item is an incident, nothing else applies.
-    if (category === 'status') return ['outage'];
-    const found = (Object.entries(RULES) as [Signal, RegExp][]).filter(([, re]) => re.test(title)).map(([sig]) => sig);
-    // A "security incident" is not an outage.
-    return found.includes('security') ? found.filter(s => s !== 'outage') : found;
-}
 
 export interface FeedStatus {
     id: string;
@@ -125,7 +81,7 @@ function atomLink(links: any[]): string {
     return typeof l === 'string' ? l : l?.['@_href'] ?? '';
 }
 
-type Parsed = Omit<FeedItem, 'feedId' | 'feedTitle' | 'category' | 'signals'>;
+type Parsed = Omit<FeedItem, 'feedId' | 'feedTitle' | 'category'>;
 
 function parseFeed(xml: string): Parsed[] {
     const doc = parser.parse(xml);
@@ -163,122 +119,6 @@ function parseFeed(xml: string): Parsed[] {
     throw new Error('not an RSS or Atom feed');
 }
 
-// ---------- Bluesky: public API, no auth. Gives engagement counts and skips replies. ----------
-async function loadBluesky(handle: string, limit: number, cutoff: number, minLikes: number): Promise<Omit<FeedItem, 'feedId' | 'feedTitle' | 'category' | 'signals'>[]> {
-    const api = `https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${encodeURIComponent(handle)}&filter=posts_no_replies&limit=50`;
-    const res = await fetch(api, { signal: AbortSignal.timeout(TIMEOUT_MS) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { feed } = await res.json() as { feed: any[] };
-    return feed
-        .filter(f => !f.reason) // skip reposts of other people
-        .map(({ post: p }) => {
-            const text = String(p.record?.text ?? '').trim();
-            const ext = p.embed?.external ?? p.embed?.media?.external;
-            const score = (p.likeCount ?? 0) + 2 * (p.repostCount ?? 0) + (p.replyCount ?? 0);
-            return {
-                title: text,
-                link: `https://bsky.app/profile/${p.author.handle}/post/${p.uri.split('/').pop()}`,
-                date: new Date(p.record?.createdAt ?? p.indexedAt),
-                summary: '',
-                post: {
-                    author: p.author.displayName || p.author.handle,
-                    handle: p.author.handle,
-                    avatar: p.author.avatar,
-                    likes: p.likeCount ?? 0, reposts: p.repostCount ?? 0, replies: p.replyCount ?? 0, score,
-                    embed: ext?.uri ? { title: clean(ext.title || ext.uri, 140), url: ext.uri } : undefined,
-                },
-            };
-        })
-        .filter(i => i.title.length >= 40 && i.post.likes >= minLikes && +i.date >= cutoff)
-        .sort((a, b) => b.post.score - a.post.score)
-        .slice(0, limit);
-}
-
-// ---------- Reddit ----------
-// With REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET (a free "script" app at reddit.com/prefs/apps) we use the
-// official API and get vote counts. Without them we fall back to the public top-of-day RSS (rank only),
-// which Reddit often rate-limits. Requests are made one at a time either way.
-type RedditItem = Omit<FeedItem, 'feedId' | 'feedTitle' | 'category' | 'signals'>;
-const REDDIT_UA = 'web:reading-room:1.0 (personal reading page)';
-let redditQueue: Promise<unknown> = Promise.resolve();
-let redditToken: Promise<string | null> | undefined;
-
-function redditCreds() {
-    const id = process.env.REDDIT_CLIENT_ID ?? import.meta.env.REDDIT_CLIENT_ID;
-    const secret = process.env.REDDIT_CLIENT_SECRET ?? import.meta.env.REDDIT_CLIENT_SECRET;
-    return id && secret ? { id, secret } : null;
-}
-
-async function getRedditToken(): Promise<string | null> {
-    const creds = redditCreds();
-    if (!creds) return null;
-    const res = await fetch('https://www.reddit.com/api/v1/access_token', {
-        method: 'POST',
-        headers: { Authorization: 'Basic ' + Buffer.from(`${creds.id}:${creds.secret}`).toString('base64'), 'User-Agent': REDDIT_UA, 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'grant_type=client_credentials',
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-    if (!res.ok) throw new Error(`reddit auth HTTP ${res.status}`);
-    return (await res.json()).access_token ?? null;
-}
-
-async function loadReddit(subs: string, limit: number, perSub: number): Promise<RedditItem[]> {
-    // Serialise all Reddit requests with a small gap to stay under rate limits.
-    const run = redditQueue.then(async () => {
-        const token = await (redditToken ??= getRedditToken());
-        let items: RedditItem[];
-        if (token) {
-            const res = await fetch(`https://oauth.reddit.com/r/${subs}/top?t=day&limit=50&raw_json=1`, {
-                headers: { Authorization: `Bearer ${token}`, 'User-Agent': REDDIT_UA }, signal: AbortSignal.timeout(TIMEOUT_MS),
-            });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const { data } = await res.json();
-            items = data.children.map((c: any) => c.data)
-                .filter((d: any) => !d.over_18 && !d.stickied)
-                .map((d: any, n: number) => ({
-                    title: clean(d.title, 300),
-                    link: d.is_self ? `https://www.reddit.com${d.permalink}` : d.url,
-                    date: new Date(d.created_utc * 1000),
-                    summary: d.is_self ? clean(d.selftext ?? '', 240) : '',
-                    comments: `https://www.reddit.com${d.permalink}`,
-                    reddit: { sub: d.subreddit, rank: n + 1, score: d.score, comments: d.num_comments, self: !!d.is_self },
-                }));
-        } else {
-            const res = await fetch(`https://www.reddit.com/r/${subs}/top/.rss?t=day&limit=50`, {
-                headers: { 'User-Agent': REDDIT_UA }, signal: AbortSignal.timeout(TIMEOUT_MS),
-            });
-            if (!res.ok) throw new Error(res.status === 429 ? 'rate limited by Reddit (add REDDIT_CLIENT_ID/SECRET for reliable access)' : `HTTP ${res.status}`);
-            const doc = parser.parse(await res.text());
-            items = arr(doc.feed?.entry).map((e: any, n: number) => {
-                const html = decode(text(e.content));
-                const linkHref = html.match(/<a href="([^"]+)">\[link\]<\/a>/)?.[1];
-                const permalink = atomLink(arr(e.link));
-                const self = !linkHref || linkHref.includes('reddit.com/r/');
-                const body = html.split('submitted by')[0];
-                return {
-                    title: clean(text(e.title), 300),
-                    link: self ? permalink : decode(linkHref!),
-                    date: new Date(text(e.published) || text(e.updated)),
-                    summary: self ? clean(body, 240) : '',
-                    comments: permalink,
-                    reddit: { sub: arr(e.category)[0]?.['@_term'] ?? '', rank: n + 1, self },
-                };
-            });
-        }
-        // At most `perSub` from any one subreddit so the big ones don't drown the rest.
-        const perCount = new Map<string, number>();
-        const out = items.filter(i => {
-            const n = (perCount.get(i.reddit!.sub) ?? 0) + 1;
-            perCount.set(i.reddit!.sub, n);
-            return n <= perSub;
-        }).slice(0, limit);
-        out.forEach((i, n) => (i.reddit!.rank = n + 1));
-        return out;
-    });
-    redditQueue = run.catch(() => {}).then(() => new Promise(r => setTimeout(r, 1500)));
-    return run;
-}
-
 async function load(): Promise<{ items: FeedItem[]; status: FeedStatus[]; fetchedAt: Date }> {
     const feeds = await getCollection('feeds');
 
@@ -286,20 +126,6 @@ async function load(): Promise<{ items: FeedItem[]; status: FeedStatus[]; fetche
         const base: FeedStatus = { id, title: data.title, url: data.url, site: data.site, category: data.category, ok: false, count: 0 };
         const cutoff = Date.now() - data.maxAgeDays * 864e5;
         try {
-            if (data.type === 'reddit') {
-                const subs = data.url.match(/\/r\/([^/?#]+)/)?.[1];
-                if (!subs) throw new Error('reddit url must look like https://www.reddit.com/r/a+b+c');
-                const items = (await loadReddit(subs, data.limit, data.perSub))
-                    .map(i => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, signals: data.category === 'pulse' ? detectSignals(i.title, data.category) : [] }));
-                return { status: { ...base, ok: true, count: items.length }, items };
-            }
-            if (data.type === 'bluesky') {
-                const handle = data.url.split('/profile/')[1]?.replace(/\/.*$/, '');
-                if (!handle) throw new Error('bluesky url must be https://bsky.app/profile/<handle>');
-                const items = (await loadBluesky(handle, data.limit, cutoff, data.minLikes))
-                    .map(i => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, signals: data.category === 'pulse' ? detectSignals(i.title, data.category) : [] }));
-                return { status: { ...base, ok: true, count: items.length }, items };
-            }
             const res = await fetch(data.url, {
                 signal: AbortSignal.timeout(TIMEOUT_MS),
                 headers: { 'User-Agent': 'reading-room feed reader (+https://sunny-dubey.github.io/reading-room/)', Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5' },
@@ -309,7 +135,7 @@ async function load(): Promise<{ items: FeedItem[]; status: FeedStatus[]; fetche
                 .filter(i => i.link && i.title && !isNaN(+i.date) && +i.date >= cutoff && +i.date <= Date.now() + 864e5)
                 .sort((a, b) => +b.date - +a.date)
                 .slice(0, data.limit)
-                .map(i => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, signals: data.category === 'pulse' ? detectSignals(i.title, data.category) : [] }));
+                .map(i => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, weight: data.weight }));
             return { status: { ...base, ok: true, count: items.length }, items };
         } catch (err) {
             const error = err instanceof Error ? err.message : String(err);

@@ -2,6 +2,7 @@
 import { u } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
 import { getNotes, getNoteTags, fmtDate } from '../../lib/content';
+import { ghNewNote } from '../../lib/site';
 const notes = await getNotes();
 const tags = await getNoteTags();
 const dev = import.meta.env.DEV;
@@ -12,7 +13,9 @@ const host = (url?: string) => { try { return url ? new URL(url).hostname.replac
         <header class="page-head">
             <h1>Notebook <span class="count-pill">{notes.length}</span></h1>
             <p class="lead">What I understood from what I read, in my own words.</p>
-            {dev && <a class="btn nb-new" href={u('/write/')}>+ New note</a>}
+            {dev
+                ? <a class="btn nb-new" href={u('/write/')}>+ New note</a>
+                : <a class="btn nb-new" href={ghNewNote} data-gh-new target="_blank" rel="noopener">+ New note</a>}
         </header>
 
         {tags.length > 0 && (
@@ -24,7 +27,7 @@ const host = (url?: string) => { try { return url ? new URL(url).hostname.replac
 
         {notes.length === 0 ? (
             <p class="notice">
-                No notes yet. {dev ? <>Use <strong>Explain it back</strong> on anything you read, or <a class="u" href={u('/write/')}>write a note</a>.</> : 'Notes appear here as I write them.'}
+                No notes yet. Use <strong>Explain it back</strong> on anything you read: putting it in your own words is where understanding happens.
             </p>
         ) : (
             <ul class="nb-list" role="list">

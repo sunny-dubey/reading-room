@@ -1,7 +1,11 @@
 ---
 // Shared behaviour for every Reading Room page. Include once per page.
+import { getProgress } from '../lib/progress';
+const progress = await getProgress();
 ---
+<script type="application/json" id="repo-progress" set:html={JSON.stringify(progress)} />
 <script>
+    import { getSet, setProgress } from '../lib/progress-client';
     const store = {
         get<T>(k: string, d: T): T { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
         set(k: string, v: unknown) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
@@ -38,7 +42,7 @@
     });
 
     // ---------- the Canon: progress per track ----------
-    const done = new Set<string>(store.get('canon:done', [] as string[]));
+    const done = getSet('canon');
     function paintCanon() {
         document.querySelectorAll<HTMLInputElement>('[data-canon-toggle]').forEach(cb => {
             cb.checked = done.has(cb.dataset.canonToggle!);
@@ -67,14 +71,14 @@
         const cb = (e.target as HTMLElement).closest<HTMLInputElement>('[data-canon-toggle]');
         if (!cb) return;
         cb.checked ? done.add(cb.dataset.canonToggle!) : done.delete(cb.dataset.canonToggle!);
-        store.set('canon:done', [...done]);
+        setProgress('canon', cb.dataset.canonToggle!, cb.checked);
         paintCanon();
     });
     document.addEventListener('click', e => {
         const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-mark-done]');
         if (!btn) return;
         done.add(btn.dataset.markDone!);
-        store.set('canon:done', [...done]);
+        setProgress('canon', btn.dataset.markDone!, true);
         paintCanon();
     });
     paintCanon();

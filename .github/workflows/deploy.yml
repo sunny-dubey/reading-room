@@ -5,7 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: '17 */6 * * *'  # refresh the Reading tab every 6 hours
+    - cron: '17 */6 * * *'  # refresh feeds and rankings every 6 hours
 
 permissions:
   contents: read
@@ -33,10 +33,6 @@ jobs:
           key: articles-${{ github.run_id }}
           restore-keys: articles-
       - run: npm run build
-        env:
-          # Optional: free Reddit 'script' app for reliable Reddit + vote counts
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
@@ -50,3 +46,16 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  check-links:
+    needs: deploy
+    runs-on: ubuntu-latest
+    continue-on-error: true   # report dead Canon links without failing the deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check:links

@@ -98,10 +98,9 @@ const freshCount = (a: typeof areas[number]) => new Set(a.data.topics.flatMap(t 
 </Base>
 
 <script>
-    const KEY = 'roadmap:learned';
-    const read = (k: string) => { try { return new Set<string>(JSON.parse(localStorage.getItem(k) ?? '[]')); } catch { return new Set<string>(); } };
-    let learned = read(KEY);
-    const canonDone = read('canon:done');
+    import { getSet, setProgress } from '../lib/progress-client';
+    let learned = getSet('learned');
+    const canonDone = getSet('canon');
 
     function paint() {
         // Topic state: learned (ticked) > in progress (notes, saved, or a finished Canon read) > not started.
@@ -132,7 +131,7 @@ const freshCount = (a: typeof areas[number]) => new Set(a.data.topics.flatMap(t 
         const cb = (e.target as HTMLElement).closest<HTMLInputElement>('[data-learn]');
         if (!cb) return;
         cb.checked ? learned.add(cb.dataset.learn!) : learned.delete(cb.dataset.learn!);
-        try { localStorage.setItem(KEY, JSON.stringify([...learned])); } catch {}
+        setProgress('learned', cb.dataset.learn!, cb.checked);
         paint();
     });
 

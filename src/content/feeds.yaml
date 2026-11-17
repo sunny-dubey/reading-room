@@ -11,7 +11,7 @@
 #   postmortems  Postmortems: learning from failure
 #   pulse        Pulse: a small page of the week's headlines (not on the front page)
 # limit: max items kept from this feed · maxAgeDays: ignore older items
-# type: rss (default) | bluesky | reddit
+# weight: ranking nudge, -2..2 (default 0). Raise authors known for depth, lower newsletters and roundups.
 
 # ---------- systems ----------
 - id: marc-brooker
@@ -21,6 +21,7 @@
   category: systems
   limit: 6
   maxAgeDays: 120
+  weight: 0.8
 - id: murat
   title: Murat Demirbas
   url: https://muratbuffalo.blogspot.com/feeds/posts/default
@@ -28,6 +29,7 @@
   category: systems
   limit: 6
   maxAgeDays: 120
+  weight: 0.5
 - id: eatonphil
   title: Phil Eaton
   url: https://notes.eatonphil.com/rss.xml
@@ -35,6 +37,7 @@
   category: systems
   limit: 6
   maxAgeDays: 120
+  weight: 0.5
 - id: tigerbeetle
   title: TigerBeetle
   url: https://tigerbeetle.com/blog/atom.xml
@@ -42,6 +45,7 @@
   category: systems
   limit: 6
   maxAgeDays: 120
+  weight: 0.5
 - id: planetscale
   title: PlanetScale
   url: https://planetscale.com/blog/rss.xml
@@ -56,6 +60,7 @@
   category: systems
   limit: 8
   maxAgeDays: 30
+  weight: -0.4
 - id: hillel-wayne
   title: Hillel Wayne
   url: https://www.hillelwayne.com/index.xml
@@ -63,6 +68,7 @@
   category: systems
   limit: 6
   maxAgeDays: 120
+  weight: 0.5
 - id: dan-luu
   title: Dan Luu
   url: https://danluu.com/atom.xml
@@ -70,6 +76,7 @@
   category: systems
   limit: 6
   maxAgeDays: 120
+  weight: 0.5
 
 # ---------- backend ----------
 - id: brandur
@@ -79,6 +86,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  weight: 0.8
 - id: stripe
   title: Stripe
   url: https://stripe.com/blog/feed.rss
@@ -128,6 +136,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  weight: -0.4
 - id: pragmatic-engineer
   title: The Pragmatic Engineer
   url: https://newsletter.pragmaticengineer.com/feed
@@ -135,6 +144,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  weight: -0.2
 - id: julia-evans
   title: Julia Evans
   url: https://jvns.ca/atom.xml
@@ -142,6 +152,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  weight: 0.4
 - id: infoq
   title: InfoQ Architecture & Design
   url: https://feed.infoq.com/architecture-design/
@@ -149,6 +160,7 @@
   category: backend
   limit: 6
   maxAgeDays: 30
+  weight: -0.3
 - id: martin-fowler
   title: Martin Fowler
   url: https://martinfowler.com/feed.atom
@@ -156,6 +168,7 @@
   category: backend
   limit: 6
   maxAgeDays: 90
+  weight: 0.6
 - id: all-things-distributed
   title: All Things Distributed (Werner Vogels)
   url: https://www.allthingsdistributed.com/index.xml
@@ -163,6 +176,7 @@
   category: backend
   limit: 4
   maxAgeDays: 180
+  weight: 0.5
 - id: airbnb-eng
   title: Airbnb Engineering
   url: https://medium.com/feed/airbnb-engineering
@@ -186,6 +200,7 @@
   category: ai-eng
   limit: 10
   maxAgeDays: 30
+  weight: -0.3
 - id: hamel
   title: Hamel Husain
   url: https://hamel.dev/index.xml
@@ -193,6 +208,7 @@
   category: ai-eng
   limit: 6
   maxAgeDays: 60
+  weight: 0.6
 - id: eugene-yan
   title: Eugene Yan
   url: https://eugeneyan.com/rss/
@@ -200,6 +216,7 @@
   category: ai-eng
   limit: 6
   maxAgeDays: 60
+  weight: 0.6
 - id: chip-huyen
   title: Chip Huyen
   url: https://huyenchip.com/feed.xml
@@ -207,6 +224,7 @@
   category: ai-eng
   limit: 6
   maxAgeDays: 60
+  weight: 0.6
 - id: jxnl
   title: Jason Liu
   url: https://jxnl.co/feed_rss_created.xml
@@ -228,6 +246,7 @@
   category: ai-eng
   limit: 6
   maxAgeDays: 60
+  weight: -0.6
 
 # ---------- ml ----------
 - id: lilian-weng
@@ -237,6 +256,7 @@
   category: ml
   limit: 5
   maxAgeDays: 180
+  weight: 0.8
 - id: raschka
   title: Sebastian Raschka
   url: https://magazine.sebastianraschka.com/feed
@@ -244,6 +264,7 @@
   category: ml
   limit: 5
   maxAgeDays: 180
+  weight: 0.6
 - id: interconnects
   title: Interconnects (Nathan Lambert)
   url: https://www.interconnects.ai/feed
@@ -251,6 +272,7 @@
   category: ml
   limit: 5
   maxAgeDays: 180
+  weight: 0.4
 - id: karpathy
   title: Andrej Karpathy
   url: https://karpathy.github.io/feed.xml
@@ -258,6 +280,7 @@
   category: ml
   limit: 5
   maxAgeDays: 180
+  weight: 0.8
 - id: jalammar
   title: Jay Alammar
   url: https://jalammar.github.io/feed.xml
@@ -265,6 +288,7 @@
   category: ml
   limit: 5
   maxAgeDays: 180
+  weight: 0.6
 - id: hugging-face
   title: Hugging Face
   url: https://huggingface.co/blog/feed.xml
@@ -272,6 +296,7 @@
   category: ml
   limit: 8
   maxAgeDays: 60
+  weight: -0.2
 
 # ---------- postmortems ----------
 - id: github-availability
@@ -285,13 +310,6 @@
   title: Cloudflare post-mortems
   url: https://blog.cloudflare.com/tag/post-mortem/rss/
   site: https://blog.cloudflare.com/tag/post-mortem/
-  category: postmortems
-  limit: 6
-  maxAgeDays: 365
-- id: hn-postmortems
-  title: Postmortems on HN
-  url: https://hnrss.org/newest?q=postmortem&points=40
-  site: https://news.ycombinator.com/
   category: postmortems
   limit: 6
   maxAgeDays: 365
@@ -350,6 +368,7 @@
   category: math
   limit: 5
   maxAgeDays: 180
+  weight: 0.4
 - id: 3blue1brown
   title: 3Blue1Brown
   url: https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw
@@ -364,6 +383,7 @@
   category: math
   limit: 4
   maxAgeDays: 90
+  weight: -0.3
 - id: allen-downey
   title: Allen Downey (Probably Overthinking It)
   url: https://www.allendowney.com/blog/feed/
@@ -378,3 +398,4 @@
   category: math
   limit: 6
   maxAgeDays: 30
+  weight: -0.3

@@ -3,6 +3,9 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import type { FeedItem } from './feeds';
 import { embed, cosine } from './embed';
 import { getNotes, getLibrary } from './content';
+import { getProgress } from './progress';
+import { readFile } from 'node:fs/promises';
+import { parse } from 'yaml';
 
 export interface Topic {
     id: string;
@@ -93,14 +96,35 @@ async function build(articles: FeedItem[]) {
         }
     });
 
+    // Progress from the repo: learned topics and finished Canon reads count as covered.
+    const progress = await getProgress();
+    const learned = new Set(progress.learned);
+    const canonDoneTopics = new Map<string, number>();
+    for (const [tid, cs] of canonByTopic) {
+        const n = cs.filter(c => progress.canon.includes(c.id)).length;
+        if (n) canonDoneTopics.set(tid, n);
+    }
+
+    // Manual overrides (src/content/overrides.yaml): pin a topic for a URL, or "none".
+    let overrides = new Map<string, string>();
+    try {
+        const list = parse(await readFile('src/content/overrides.yaml', 'utf8')) ?? [];
+        overrides = new Map(list.filter((o: any) => o?.url && o?.topic).map((o: any) => [o.url, String(o.topic)]));
+    } catch {}
+
     // Articles: closest topic, with a boost that favours topics you haven't covered yet.
     const itemsByTopic = new Map<string, FeedItem[]>();
     articles.forEach((i, idx) => {
-        const [top] = best(av[idx], 1, ALLOWED[i.category]);
+        const pinned = overrides.get(i.link);
+        if (pinned === 'none') return;
+        const [top] = pinned && topics.has(pinned)
+            ? [{ t: topics.get(pinned)!, sim: 1 }]
+            : best(av[idx], 1, ALLOWED[i.category]);
         // Maths posts use different vocabulary from topic names, so they get a slightly lower bar.
         const bar = i.category === 'math' ? MATCH - 0.03 : MATCH;
         if (!top || top.sim < bar) return;
-        const covered = (notesByTopic.get(top.t.id) ?? 0) + (savedByTopic.get(top.t.id) ?? 0) * 0.5;
+        const covered = learned.has(top.t.id) ? 3
+            : (notesByTopic.get(top.t.id) ?? 0) + (savedByTopic.get(top.t.id) ?? 0) * 0.5 + (canonDoneTopics.get(top.t.id) ?? 0);
         const gap = covered === 0 ? 1 : covered < 3 ? 0.6 : 0.3;
         const strength = Math.min(1, (top.sim - bar) / 0.2 + 0.3);
         i.skill = { topic: top.t, sim: top.sim, boost: Math.round(1.5 * strength * gap * 100) / 100 };

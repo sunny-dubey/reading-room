@@ -7,7 +7,6 @@ interface Props { i: FeedItem; size?: 'hero' | 'card' | 'row'; showTrack?: boole
 const { i, size = 'card', showTrack = true } = Astro.props;
 const b = i.brief;
 const depthLabel = { quick: 'Quick read', article: 'Article', deep: 'Deep dive' }[b?.depth ?? 'quick'];
-const slug = (c: string) => c.replace(/[^a-z0-9]+/g, '-');
 ---
 <article class={`learn learn-${size}`} data-link={i.link} data-ts={+i.date} data-cat={i.category}>
     <div class="learn-meta">
@@ -27,7 +26,7 @@ const slug = (c: string) => c.replace(/[^a-z0-9]+/g, '-');
     )}
     <div class="learn-foot">
         {b && b.concepts.length > 0 && (
-            <span class="concepts">{b.concepts.map(c => <a class="concept" href={u(`/concepts/#${slug(c)}`)}>{c}</a>)}</span>
+            <span class="concepts">{b.concepts.map(c => <a class="concept" href={`${u('/search/')}?q=${encodeURIComponent(c)}`} title={`Search everything about ${c}`}>{c}</a>)}</span>
         )}
         <StoryActions title={i.title} url={i.link} author={i.feedTitle} />
     </div>

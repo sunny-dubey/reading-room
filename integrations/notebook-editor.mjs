@@ -117,6 +117,15 @@ export default function notebookEditor() {
                             logger.info(`saved to library: ${input.title}`);
                             return send(res, 200, { id });
                         }
+                        if (url.pathname === '/__notebook/progress' && req.method === 'POST') {
+                            const { canon = [], learned = [] } = await body(req);
+                            const ok = xs => Array.isArray(xs) && xs.every(x => typeof x === 'string' && /^[a-z0-9][a-z0-9-]*$/.test(x));
+                            if (!ok(canon) || !ok(learned)) return send(res, 400, { error: 'bad ids' });
+                            const list = xs => xs.length ? '\n' + [...new Set(xs)].sort().map(x => `  - ${x}`).join('\n') : ' []';
+                            const text = `# Your learning progress. Shared across devices and used by ranking (covered topics rank lower,\n# so the Reading Room keeps pushing you to new ground).\n# Updated automatically when you tick things locally (npm run dev); on the live site use "Sync progress".\ncanon:${list(canon)}\nlearned:${list(learned)}\n`;
+                            await writeFile(resolve(root, 'src/content/progress.yaml'), text);
+                            return send(res, 200, { canon: canon.length, learned: learned.length });
+                        }
                         if (url.pathname === '/__notebook/library/remove' && req.method === 'POST') {
                             const { id } = await body(req);
                             if (!id || typeof id !== 'string') return send(res, 400, { error: 'id is required' });

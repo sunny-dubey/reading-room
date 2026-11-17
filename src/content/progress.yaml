@@ -1,0 +1,5 @@
+# Your learning progress. Shared across devices and used by ranking (covered topics rank lower,
+# so the Reading Room keeps pushing you to new ground).
+# Updated automatically when you tick things locally (npm run dev); on the live site use "Sync progress".
+canon: []    # Canon item ids you've finished
+learned: []  # Roadmap topic ids you've learned

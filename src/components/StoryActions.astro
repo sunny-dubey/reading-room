@@ -1,14 +1,19 @@
 ---
-// Local-only actions: save to library, or explain the piece back in your own words.
+// Actions on a piece you read.
+// Locally (npm run dev): the in-site editor and direct saves.
+// Live site: GitHub's web editor (works from any device; committing publishes the note).
 import { u } from '../lib/url';
+import { ghNewNote } from '../lib/site';
 interface Props { title: string; url: string; author?: string; }
 const { title, url, author = '' } = Astro.props;
 const dev = import.meta.env.DEV;
-const explainHref = `${u('/write/')}?title=${encodeURIComponent(title)}&ref=${encodeURIComponent(url)}`;
+const explainHref = dev ? `${u('/write/')}?title=${encodeURIComponent(title)}&ref=${encodeURIComponent(url)}` : ghNewNote;
 ---
-{dev && (
-    <span class="story-actions">
-        <a class="act act-primary" href={explainHref}>Explain it back</a>
-        <button type="button" class="act" data-save data-title={title} data-url={url} data-author={author}>Save</button>
-    </span>
-)}
+<span class="story-actions">
+    {dev
+        ? <a class="act act-primary" href={explainHref}>Explain it back</a>
+        : <a class="act act-primary" href={explainHref} data-gh-explain target="_blank" rel="noopener">Explain it back</a>}
+    {dev
+        ? <button type="button" class="act" data-save data-title={title} data-url={url} data-author={author}>Save</button>
+        : <button type="button" class="act" data-gh-save>Save</button>}
+</span>

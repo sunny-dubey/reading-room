@@ -9,7 +9,7 @@ export const GET: APIRoute = async () => {
     const [notes, library, feeds] = await Promise.all([getNotes(), getLibrary(), getFeeds()]);
     const index = [
         ...notes.map(e => ({ kind: 'note', title: e.data.title, href: u(`/notebook/${e.id}/`), tags: e.data.tags, text: strip(e.body) })),
-        ...feeds.items.map(i => ({ kind: 'reading', title: i.title.slice(0, 200), href: i.link, tags: [categoryLabel(i.category).toLowerCase(), ...i.signals], text: `${i.post?.author ?? (i.reddit ? 'r/' + i.reddit.sub : i.feedTitle)} ${i.summary}` })),
+        ...feeds.items.map(i => ({ kind: 'reading', title: i.title.slice(0, 200), href: i.link, tags: [categoryLabel(i.category).toLowerCase()], text: `${i.feedTitle} ${i.summary}` })),
         ...library.map(e => ({ kind: 'library', title: e.data.title, href: e.data.url, tags: e.data.tags, text: `${e.data.author ?? ''} ${e.data.why}` })),
     ];
     return new Response(JSON.stringify(index), { headers: { 'Content-Type': 'application/json' } });

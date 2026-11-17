@@ -110,6 +110,9 @@ function concepts(text: string, title: string, max = 5): string[] {
 
 const ANNOUNCE = /\b(announc\w*|launch(es|ed|ing)?|introduc(ing|es)|now available|generally available|release notes|what'?s new|we'?re hiring|webinar|event|conference|meetup|join us|recap|roundup|weekly|newsletter|funding|raises|acquires?|pricing|partner(s|ship)|award|podcast|episode|livestream|keynote)\b/i;
 
+// Roundups and newsletters: long, but a list of links rather than an explanation.
+const ROUNDUP = /^\[ainews\]|^ep\d+[:\s]|\bthis week in\b|\bweekly\b|\broundup\b|\bdigest\b|\blinks? (for|of the)\b|\bissue #?\d+|\bnewsletter\b|\bthe pulse\b|\b(day \d+|days? \d+ and \d+)\)?$/i;
+
 // ---------------------------------------------------------------- public API
 export async function makeBrief(i: { title: string; link: string; summary: string; content?: string; category: string }): Promise<Brief> {
     // Use full text from the feed when it has it; otherwise fetch the page.
@@ -133,6 +136,7 @@ export async function makeBrief(i: { title: string; link: string; summary: strin
     if (found.length >= 4) worth += 0.5;
     if (fetched && ex!.code >= 2) worth += 0.5;
     if (ANNOUNCE.test(i.title)) worth -= 2;
+    else if (ROUNDUP.test(i.title)) worth -= 1.5;
     if (i.category === 'postmortems') worth += 0.5;
     if (!fetched) worth -= 0.5;
     worth = Math.max(1, Math.min(5, Math.round(worth * 2) / 2));

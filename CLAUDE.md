@@ -6,6 +6,12 @@
 - **Build-time article analysis, no AI model, no summaries:** `src/lib/summarize.ts` uses feed full-text or fetches the page (cached in `.cache/articles`, 30 days), then extracts concepts (VOCAB list), reading time, depth and a 1-5 `worth` score used for ranking. Deep reads = worth ≥ 3.5.
 - The Canon (foundational reads, in order): `src/content/canon.yaml`. Progress lives in the browser (localStorage `canon:done`).
 - **Roadmap** (`src/content/roadmap.yaml`, page `/roadmap/`): Sunny's 25-area system design roadmap + AI engineering, ML foundations, payments, mathematics (29 areas, ~470 topics). `src/lib/embed.ts` runs a local embedding model (all-MiniLM-L6-v2 via @huggingface/transformers; cached in `.cache/models`, vectors in `.cache/embeddings.json`) at build time. `src/lib/roadmap.ts` matches each article to its closest topic (restricted by source track, see `ALLOWED`), giving cards a "Why read: you'll get better at <topic>" line and a rank boost for topics not yet covered by notes/saved links. If the model can't load, ranking falls back to the rules.
+- **Overrides** (`src/content/overrides.yaml`): pin a roadmap topic for an article URL, or `none`.
+- **Ranking:** `rank = worth×2 + freshness + topic boost + source weight` (`weight` per feed in feeds.yaml; roundup/newsletter titles lose worth in summarize.ts).
+- **Progress** (`src/content/progress.yaml`: finished Canon ids, learned topic ids): merged into the browser on every page (`src/lib/progress-client.ts`); local ticks write the file via the dev API; on the live site a "Sync progress" button copies it and opens GitHub. Build-time coverage uses it, so covered topics rank lower.
+- **Writing from anywhere:** on the live site, Explain it back / + Write / Edit / Save open GitHub's web editor (`src/lib/gh-actions.ts`, repo in `src/lib/site.ts`). Committing there publishes.
+- **Today** (`src/pages/index.astro`): Today's plan (deep read → next Canon item, rotating tracks daily → explain it back or revisit), then the deep read, Canon next-ups, picks, postmortem, revisit.
+- `npm run check:links` checks Canon URLs (runs after each deploy, non-blocking).
 - Tracks: systems, backend (shown as "Scalability & Architecture" at /architecture/), ai-eng, ml, math, postmortems (+ side pages pulse, startups).
 
 ## Content (all in `src/content/`, schemas in `src/content.config.ts`)
@@ -30,3 +36,4 @@
 - `npm run dev`: local preview at http://localhost:4321
 - `npm run build`: production build into `dist/`
 - `npm run new "Title" [tags]`: scaffold a note
+- `npm run check:links`: verify Canon links

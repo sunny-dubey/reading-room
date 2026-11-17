@@ -36,6 +36,7 @@ const fullTitle = title ? `${title} · The Reading Room` : 'The Reading Room';
     <main class="shell"><slot /></main>
     <Footer />
     <script>
+        import '../lib/gh-actions';
         document.querySelectorAll('.theme-toggle').forEach(btn => btn.addEventListener('click', () => {
             const root = document.documentElement;
             const dark = root.getAttribute('data-theme') === 'dark';

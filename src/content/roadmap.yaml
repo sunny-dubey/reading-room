@@ -1,5 +1,6 @@
 # The Roadmap: what you want to learn, area by area.
-# Areas 1-25 are your system design roadmap; 26-29 cover AI engineering, ML foundations, payments and mathematics.
+# Areas 1-25 are your system design roadmap; 26-31 cover AI engineering, ML foundations, payments, mathematics,
+# testing & correctness, and engineering craft & judgment.
 # Every article is matched to its closest topics by meaning (embeddings, at build time) and cards show
 # "Why read: you'll get better at <topic> (<area>). <why>". Topic ids are used for progress, so keep them
 # stable; a topic that appears in several areas shares one id.
@@ -14,6 +15,7 @@
   topics:
   - id: how-the-internet-works
     name: How the Internet Works
+    why: Knowing every hop from browser to server lets you debug what others call 'the network being weird'.
   - id: client-server-architecture
     name: Client-Server Architecture
   - id: http-and-https
@@ -36,10 +38,12 @@
     name: Operating System Fundamentals
   - id: processes-and-threads
     name: Processes & Threads
+    why: Knowing how the OS runs your code explains concurrency bugs and performance at their root.
   - id: concurrency-and-parallelism
     name: Concurrency & Parallelism
   - id: memory-management
     name: Memory Management
+    why: Knowing where memory goes lets you reason about leaks, GC pauses and performance from first principles.
   - id: cpu-and-i-o-basics
     name: CPU & I/O Basics
   - id: linux-fundamentals
@@ -54,6 +58,7 @@
     name: What is System Design?
   - id: what-is-software-architecture
     name: What is Software Architecture?
+    why: Architecture is the set of decisions that are hard to change. Learning to spot them is the core of senior judgment.
   - id: monolithic-architecture
     name: Monolithic Architecture
   - id: microservices-architecture
@@ -72,6 +77,7 @@
     name: Serverless Architecture
   - id: distributed-systems-basics
     name: Distributed Systems Basics
+    why: Builds the instinct that anything can fail independently, the foundation of reasoning about real systems.
   - id: stateful-vs-stateless-systems
     name: Stateful vs Stateless Systems
   - id: synchronous-vs-asynchronous-communication
@@ -90,6 +96,7 @@
     name: Non-Functional Requirements
   - id: scalability
     name: Scalability
+    why: Builds the habit of asking 'what breaks at 10× and 100×?' before it does.
   - id: availability
     name: Availability
   - id: reliability
@@ -102,6 +109,7 @@
     name: Performance
   - id: latency-and-throughput
     name: Latency & Throughput
+    why: Trains you to tell the two apart and see which one users actually feel.
   - id: consistency
     name: Consistency
   - id: durability
@@ -148,6 +156,7 @@
     name: Long Polling
   - id: api-versioning
     name: API Versioning
+    why: Teaches you to design for change, so other teams can rely on you without freezing your system.
   - id: api-rate-limiting
     name: API Rate Limiting
   - id: connection-pooling
@@ -163,6 +172,7 @@
   - id: postgresql
     name: PostgreSQL
     group: Relational Databases
+    why: Deep knowledge of the database you use most turns guesswork into precise, confident decisions.
   - id: mysql
     name: MySQL
     group: Relational Databases
@@ -178,6 +188,7 @@
   - id: b-tree-and-bplus-tree
     name: B-Tree & B+ Tree
     group: Relational Databases
+    why: Knowing how the index is laid out on disk lets you predict query speed instead of guessing.
   - id: query-optimization
     name: Query Optimization
     group: Relational Databases
@@ -208,6 +219,7 @@
   - id: mongodb-cassandra-dynamodb
     name: MongoDB / Cassandra / DynamoDB
     group: NoSQL Databases
+    why: Seeing how document and wide-column stores differ builds the judgment to pick the right database.
   - id: storage-engines
     name: Storage Engines
     group: Database Internals
@@ -220,12 +232,14 @@
   - id: locking
     name: Locking
     group: Database Internals
+    why: Helps you see where contention hides in a database, so you can design around it instead of firefighting.
   - id: isolation-levels
     name: Isolation Levels
     group: Database Internals
   - id: sql-vs-nosql
     name: SQL vs NoSQL
     group: Database Design Decisions
+    why: Teaches you to choose a database from access patterns and guarantees, not hype.
   - id: schema-design
     name: Schema Design
     group: Database Design Decisions
@@ -235,6 +249,7 @@
   - id: data-modeling
     name: Data Modeling
     group: Database Design Decisions
+    why: Good models make features easy. This builds the judgment to design data that outlives the code.
 - id: caching
   n: 6
   title: Caching
@@ -292,6 +307,7 @@
   topics:
   - id: what-is-load-balancing
     name: What is Load Balancing?
+    why: The first tool for spreading work and surviving failures. Every larger design builds on it.
   - id: layer-4-vs-layer-7-load-balancing
     name: Layer 4 vs Layer 7 Load Balancing
   - id: reverse-proxy
@@ -304,14 +320,17 @@
     name: HAProxy
   - id: cloud-load-balancers
     name: Cloud Load Balancers
+    why: Shows how traffic really enters your system, so you can debug the layer most engineers ignore.
   - id: round-robin
     name: Round Robin
   - id: least-connections
     name: Least Connections
+    why: Shows how a simple routing rule adapts to uneven load, and when it fails.
   - id: ip-hash
     name: IP Hash
   - id: consistent-hashing
     name: Consistent Hashing
+    why: A small idea that lets systems grow without reshuffling everything, and a model for elegant design.
   - id: health-checks
     name: Health Checks
   - id: sticky-sessions
@@ -330,18 +349,22 @@
   topics:
   - id: what-is-a-distributed-system
     name: What is a Distributed System?
+    why: The mindset shift from one machine to many, where every assumption needs re-checking.
   - id: distributed-system-challenges
     name: Distributed System Challenges
   - id: cap-theorem
     name: CAP Theorem
+    why: Gives you the vocabulary to reason about what a system gives up during a network partition.
   - id: pacelc-theorem
     name: PACELC Theorem
   - id: strong-consistency
     name: Strong Consistency
     group: Consistency Models
+    why: Helps you see the real cost of 'everyone sees the latest write', so you only pay for it where it matters.
   - id: eventual-consistency
     name: Eventual Consistency
     group: Consistency Models
+    why: Teaches you to design for stale reads on purpose and to explain the trade-off to product teams.
   - id: causal-consistency
     name: Causal Consistency
     group: Consistency Models
@@ -363,24 +386,30 @@
     name: Data Replication Strategies
   - id: distributed-transactions
     name: Distributed Transactions
+    why: Shows why atomicity across services is so expensive, so you design to avoid needing it.
   - id: two-phase-commit-2pc
     name: Two-Phase Commit (2PC)
   - id: paxos
     name: Paxos
     group: Consensus Algorithms
+    why: The classic consensus algorithm. Working through it is the deepest training in distributed reasoning there is.
   - id: raft
     name: Raft
     group: Consensus Algorithms
+    why: The most understandable consensus algorithm. Learning it gives you a precise model of how replicated systems agree.
   - id: split-brain-problem
     name: Split Brain Problem
   - id: quorum
     name: Quorum
+    why: Shows how overlapping majorities give consistency without asking everyone, a beautifully simple idea to internalise.
   - id: distributed-locking
     name: Distributed Locking
   - id: clock-synchronization
     name: Clock Synchronization
+    why: Teaches you never to trust timestamps across machines, which prevents a whole class of subtle bugs.
   - id: idempotency
     name: Idempotency
+    why: 'The single most useful habit for reliable systems: make every retry safe.'
 - id: message-queues-and-event-streaming
   n: 9
   title: Message Queues & Event Streaming
@@ -399,10 +428,12 @@
     name: RabbitMQ
   - id: apache-kafka
     name: Apache Kafka
+    why: Kafka trains you to see the log as the backbone of a system, the idea behind most modern data architectures.
   - id: redis-streams
     name: Redis Streams
   - id: amazon-sqs
     name: Amazon SQS
+    why: Shows how a managed queue trades ordering and exactly-once for simplicity, a trade-off you'll make again and again.
   - id: publish-subscribe-pattern
     name: Publish-Subscribe Pattern
   - id: event-driven-architecture
@@ -419,6 +450,7 @@
   - id: at-least-once
     name: At-Least-Once
     group: Delivery Guarantees
+    why: Forces you to accept duplicates as normal and design idempotent consumers, a core distributed-systems instinct.
   - id: exactly-once-semantics
     name: Exactly-Once Semantics
     group: Delivery Guarantees
@@ -426,6 +458,7 @@
     name: Dead Letter Queues
   - id: retry-mechanisms
     name: Retry Mechanisms
+    why: Trains you to retry with limits, backoff and idempotency, so recovery never becomes the outage.
   - id: event-replay
     name: Event Replay
   - id: event-sourcing
@@ -440,12 +473,16 @@
     name: Horizontal vs Vertical Scaling
   - id: stateless-services
     name: Stateless Services
+    why: Shows why pushing state out of services makes them trivial to scale and replace.
   - id: database-scaling
     name: Database Scaling
+    why: Teaches you the order of moves (indexes, caching, replicas, sharding) instead of jumping to the hardest one.
   - id: read-replicas
     name: Read Replicas
+    why: Teaches the simplest way to scale reads, and the replication-lag bugs that come with it.
   - id: database-sharding
     name: Database Sharding
+    why: Trains you to choose a shard key from access patterns, a decision that's very expensive to undo.
   - id: partitioning-strategies
     name: Partitioning Strategies
   - id: connection-pooling
@@ -456,20 +493,24 @@
     name: CDN & Edge Computing
   - id: data-compression
     name: Data Compression
+    why: Teaches you to trade CPU for bytes deliberately, a lever for cost and speed in every system.
   - id: pagination
     name: Pagination
   - id: batching
     name: Batching
+    why: Trains you to trade a little latency for a lot of throughput, one of the most powerful performance levers.
   - id: rate-limiting
     name: Rate Limiting
   - id: load-shedding
     name: Load Shedding
+    why: Teaches you that rejecting some work on purpose is how systems survive overload.
   - id: backpressure
     name: Backpressure
   - id: hotspot-mitigation
     name: Hotspot Mitigation
   - id: performance-bottleneck-analysis
     name: Performance Bottleneck Analysis
+    why: Trains you to measure before optimising and find the one constraint that actually matters.
 - id: reliability-and-fault-tolerance
   n: 11
   title: Reliability & Fault Tolerance
@@ -482,8 +523,10 @@
     name: Redundancy
   - id: high-availability
     name: High Availability
+    why: Teaches you to count nines honestly and remove single points of failure one by one.
   - id: failover-strategies
     name: Failover Strategies
+    why: Teaches you to plan for the moment the primary disappears, the difference between a blip and an outage.
   - id: active-active-architecture
     name: Active-Active Architecture
   - id: active-passive-architecture
@@ -492,20 +535,24 @@
     name: Circuit Breaker Pattern
   - id: retry-pattern
     name: Retry Pattern
+    why: Trains you to retry with limits, backoff and idempotency, so recovery never becomes the outage.
   - id: exponential-backoff
     name: Exponential Backoff
   - id: timeout-management
     name: Timeout Management
+    why: Trains you to put a deadline on every remote call, the simplest defence against cascading failure.
   - id: bulkhead-pattern
     name: Bulkhead Pattern
   - id: graceful-degradation
     name: Graceful Degradation
+    why: Trains you to decide in advance what to sacrifice under stress, so the core keeps working.
   - id: health-checks
     name: Health Checks
   - id: disaster-recovery
     name: Disaster Recovery
   - id: backup-and-restore
     name: Backup & Restore
+    why: Teaches you that a backup only counts once you've restored it, the habit that prevents permanent data loss.
   - id: rpo-and-rto
     name: RPO & RTO
   - id: chaos-engineering
@@ -518,8 +565,10 @@
   topics:
   - id: monolith-vs-microservices
     name: Monolith vs Microservices
+    why: Trains you to choose architecture by team and domain, not fashion, one of the most consequential calls you'll make.
   - id: service-decomposition
     name: Service Decomposition
+    why: Trains you to draw service boundaries along the domain, the decision that decides how fast teams can move.
   - id: domain-driven-design-ddd
     name: Domain-Driven Design (DDD)
   - id: bounded-contexts
@@ -540,8 +589,10 @@
     name: Database Per Service
   - id: saga-pattern
     name: Saga Pattern
+    why: Teaches you to keep data consistent across services with compensating steps instead of global locks.
   - id: cqrs
     name: CQRS
+    why: Trains you to question whether reads and writes really need the same model, and when separating them pays off.
   - id: event-sourcing
     name: Event Sourcing
   - id: distributed-tracing
@@ -574,22 +625,27 @@
     name: Repository Pattern
   - id: dependency-injection
     name: Dependency Injection
+    why: Teaches you to separate what code does from what it depends on, which makes systems testable and changeable.
   - id: api-gateway-pattern
     name: API Gateway Pattern
   - id: strangler-fig-pattern
     name: Strangler Fig Pattern
+    why: Teaches you to replace legacy systems gradually, the safest way to change something important.
   - id: sidecar-pattern
     name: Sidecar Pattern
   - id: ambassador-pattern
     name: Ambassador Pattern
   - id: cqrs-pattern
     name: CQRS Pattern
+    why: Trains you to question whether reads and writes really need the same model, and when separating them pays off.
   - id: saga-pattern
     name: Saga Pattern
+    why: Teaches you to keep data consistent across services with compensating steps instead of global locks.
   - id: outbox-pattern
     name: Outbox Pattern
   - id: retry-pattern
     name: Retry Pattern
+    why: Trains you to retry with limits, backoff and idempotency, so recovery never becomes the outage.
   - id: circuit-breaker-pattern
     name: Circuit Breaker Pattern
   - id: bulkhead-pattern
@@ -604,6 +660,7 @@
     name: Authentication & Authorization
   - id: oauth-2-0
     name: OAuth 2.0
+    why: Teaches delegated authorisation properly, so you stop copying auth flows you don't understand.
   - id: openid-connect
     name: OpenID Connect
   - id: jwt
@@ -624,6 +681,7 @@
     name: Password Hashing
   - id: api-security
     name: API Security
+    why: Makes you think like an attacker about every endpoint, which is how secure systems actually get built.
   - id: rate-limiting-and-ddos-protection
     name: Rate Limiting & DDoS Protection
   - id: sql-injection
@@ -672,6 +730,7 @@
     name: Throughput Monitoring
   - id: root-cause-analysis
     name: Root Cause Analysis
+    why: Trains you to ask 'why' until you reach the system cause, not the person, which is how teams actually improve.
   - id: incident-management
     name: Incident Management
 - id: cloud-and-infrastructure
@@ -682,10 +741,12 @@
   topics:
   - id: cloud-computing-fundamentals
     name: Cloud Computing Fundamentals
+    why: Helps you reason about cost, elasticity and failure domains instead of treating the cloud as magic.
   - id: aws-gcp-azure
     name: AWS / GCP / Azure
   - id: compute-services
     name: Compute Services
+    why: Helps you pick the right unit of compute (VM, container, function) for each workload instead of defaulting.
   - id: storage-services
     name: Storage Services
   - id: managed-databases
@@ -696,14 +757,17 @@
     name: DNS & Networking in Cloud
   - id: object-storage-s3
     name: Object Storage (S3)
+    why: Shows how blobs at planet scale work, and why storage is designed so differently from databases.
   - id: containers
     name: Containers
   - id: docker
     name: Docker
   - id: kubernetes
     name: Kubernetes
+    why: Teaches the declarative, self-healing model that most production systems now run on.
   - id: container-orchestration
     name: Container Orchestration
+    why: Teaches how schedulers place, heal and scale workloads, so production behaviour stops surprising you.
   - id: terraform
     name: Terraform
     group: Infrastructure as Code
@@ -718,6 +782,7 @@
     name: Canary Deployment
   - id: rolling-deployment
     name: Rolling Deployment
+    why: Teaches you to ship changes safely while old and new versions run side by side.
   - id: serverless-infrastructure
     name: Serverless Infrastructure
 - id: storage-systems-and-file-architecture
@@ -746,6 +811,7 @@
     name: Data Deduplication
   - id: compression
     name: Compression
+    why: Teaches you to trade CPU for bytes deliberately, a lever for cost and speed in every system.
   - id: data-retention
     name: Data Retention
   - id: backup-strategies
@@ -778,6 +844,7 @@
     name: Real-Time Collaboration
   - id: pub-sub-architecture
     name: Pub/Sub Architecture
+    why: Teaches decoupling producers from consumers, and the ordering and delivery trade-offs that come with it.
   - id: fan-out-strategies
     name: Fan-Out Strategies
   - id: online-gaming-architecture
@@ -794,6 +861,7 @@
     name: Distributed Hash Tables
   - id: consistent-hashing
     name: Consistent Hashing
+    why: A small idea that lets systems grow without reshuffling everything, and a model for elegant design.
   - id: gossip-protocol
     name: Gossip Protocol
   - id: merkle-trees
@@ -802,6 +870,7 @@
     name: Vector Clocks
   - id: lamport-clocks
     name: Lamport Clocks
+    why: A short idea that changes how you think about 'before' and 'after' in any distributed system.
   - id: crdts
     name: CRDTs
   - id: distributed-snapshots
@@ -810,10 +879,12 @@
     name: Leader Election
   - id: log-replication
     name: Log Replication
+    why: The core mechanism behind consensus. Understanding it demystifies etcd, Kafka and every replicated database.
   - id: stream-processing
     name: Stream Processing
   - id: apache-flink
     name: Apache Flink
+    why: Teaches you to think in streams and event time, not batches, which changes how you design data systems.
   - id: apache-spark
     name: Apache Spark
   - id: data-locality
@@ -822,6 +893,7 @@
     name: Multi-Region Architecture
   - id: geo-replication
     name: Geo-Replication
+    why: Makes you reason about the speed of light, latency and conflicts across regions, at the edge of distributed design.
   - id: global-traffic-management
     name: Global Traffic Management
 - id: low-level-design-lld
@@ -850,10 +922,13 @@
     name: Interfaces & Abstractions
   - id: design-patterns
     name: Design Patterns
+    why: Patterns give you names for recurring solutions, so you can design and discuss faster and more precisely.
   - id: extensibility-and-maintainability
     name: Extensibility & Maintainability
+    why: Trains you to design for the next change, which is what makes code cheap to live with.
   - id: concurrency-in-lld
     name: Concurrency in LLD
+    why: Trains you to spot shared mutable state in a design before it becomes a race condition.
   - id: thread-safety
     name: Thread Safety
   - id: parking-lot
@@ -897,6 +972,7 @@
     name: Component Diagrams
   - id: data-flow-diagrams
     name: Data Flow Diagrams
+    why: Drawing how data moves exposes design flaws before any code is written.
   - id: architecture-diagrams
     name: Architecture Diagrams
   - id: bottleneck-identification
@@ -939,6 +1015,7 @@
     name: Food Delivery (Swiggy / Zomato)
   - id: e-commerce-amazon
     name: E-Commerce (Amazon)
+    why: A case study in balancing consistency where money is involved against availability everywhere else.
   - id: payment-system
     name: Payment System
   - id: search-engine
@@ -971,12 +1048,14 @@
   - id: java
     name: Java
     group: Programming Languages
+    why: A strongly typed, JVM-based lens on performance, concurrency and large codebases broadens how you design software.
   - id: python
     name: Python
     group: Programming Languages
   - id: postgresql
     name: PostgreSQL
     group: Databases
+    why: Deep knowledge of the database you use most turns guesswork into precise, confident decisions.
   - id: mysql
     name: MySQL
     group: Databases
@@ -989,9 +1068,11 @@
   - id: cassandra
     name: Cassandra
     group: Databases
+    why: A real example of availability-first design, so you can recognise when that trade-off fits.
   - id: kafka
     name: Kafka
     group: Message Brokers
+    why: Kafka trains you to see the log as the backbone of a system, the idea behind most modern data architectures.
   - id: rabbitmq
     name: RabbitMQ
     group: Message Brokers
@@ -1007,6 +1088,7 @@
   - id: kubernetes
     name: Kubernetes
     group: Infrastructure
+    why: Teaches the declarative, self-healing model that most production systems now run on.
   - id: terraform
     name: Terraform
     group: Infrastructure
@@ -1060,6 +1142,7 @@
     name: Design a Payment Service
   - id: design-a-distributed-cache
     name: Design a Distributed Cache
+    why: Combines hashing, replication, eviction and consistency in one design, the best practice there is for systems thinking.
   - id: design-a-search-engine
     name: Design a Search Engine
   - id: design-a-file-storage-service
@@ -1074,6 +1157,7 @@
     name: Identify Trade-offs
   - id: review-existing-architectures
     name: Review Existing Architectures
+    why: Studying how others solved real problems is the fastest way to build design judgment.
   - id: build-end-to-end-projects
     name: Build End-to-End Projects
 - id: mastery-and-career-preparation
@@ -1108,6 +1192,7 @@
     name: Architecture Reviews
   - id: technical-documentation
     name: Technical Documentation
+    why: Writing clarifies thinking. Engineers who explain designs well get their ideas built.
   - id: system-design-interviews
     name: System Design Interviews
   - id: mock-design-interviews
@@ -1406,3 +1491,63 @@
     group: The Maths of Systems
     why: Precision bugs corrupt money and metrics. Never store currency as a float.
     about: floating point precision rounding errors numerical stability decimals ieee 754
+- id: testing-and-correctness
+  n: 30
+  title: Testing & Correctness
+  track: systems
+  why: Knowing your system is correct, not just hoping, is what separates engineers people trust with critical systems.
+  topics:
+  - id: deterministic-simulation-testing
+    name: Deterministic Simulation Testing
+    why: Trains you to make every failure reproducible, the most powerful way to find one-in-a-million distributed bugs.
+    about: deterministic simulation testing dst simulation fault injection reproducible tigerbeetle foundationdb antithesis
+  - id: property-based-testing
+    name: Property-Based Testing & Fuzzing
+    why: Teaches you to state what must always be true and let the computer hunt for counterexamples.
+    about: property based testing fuzzing quickcheck hypothesis generative testing invariants
+  - id: formal-methods
+    name: Formal Methods (TLA+, model checking)
+    why: Lets you prove a design is right before writing code, and sharpens how precisely you think about systems.
+    about: tla+ formal methods model checking specification verification invariants
+  - id: testing-strategy
+    name: Testing Strategy (unit, integration, end-to-end)
+    why: Teaches you to put tests where bugs actually live, instead of chasing coverage numbers.
+    about: testing strategy unit tests integration tests end to end tests test pyramid mocks
+  - id: chaos-and-fault-injection
+    name: Chaos & Fault Injection
+    why: Trains you to break things on purpose, so you learn how systems fail before users do.
+    about: chaos engineering fault injection game days failure testing resilience
+  - id: code-review
+    name: Code Review
+    why: Reviewing well is how you learn the most from others' code and catch the bugs tests miss.
+    about: code review pull requests reviewing feedback quality
+- id: engineering-craft-and-judgment
+  n: 31
+  title: Engineering Craft & Judgment
+  track: backend
+  why: 'Being a great engineer is mostly judgment: what to build, what to skip, and how to bring people with you.'
+  topics:
+  - id: design-docs
+    name: Writing Design Docs & RFCs
+    why: Writing a design forces clear thinking and lets others improve it before it's expensive to change.
+    about: design docs rfc technical writing proposals architecture decision records adr
+  - id: engineering-tradeoffs
+    name: Making Trade-offs Explicit
+    why: Naming what you give up for what you get is the core of engineering judgment.
+    about: trade-offs decision making engineering judgment build vs buy technical decisions
+  - id: technical-leadership
+    name: Technical Leadership (Senior & Staff)
+    why: Shows how impact grows from your code to your team's decisions, the path from senior to staff.
+    about: staff engineer senior engineer technical leadership influence career growth mentoring
+  - id: productivity-and-culture
+    name: Engineering Productivity & Culture
+    why: Teaches what actually makes teams ship fast and well, so you can improve your own environment.
+    about: developer productivity engineering culture velocity dora metrics team practices
+  - id: ai-in-engineering
+    name: Engineering in the Age of AI
+    why: Helps you decide where AI multiplies your work and where your own judgment is irreplaceable.
+    about: ai and software engineering future of programming code becomes cheap ai assisted development
+  - id: learning-how-to-learn
+    name: Learning Deeply & Explaining Clearly
+    why: 'The meta-skill: turning reading into understanding, and understanding into explanations others can use.'
+    about: learning feynman technique writing as thinking explaining spaced repetition deliberate practice

@@ -13,10 +13,68 @@ const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'l
 const deepCount = tracks.reduce((a, t) => a + t.deep.length, 0);
 const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
 const dev = import.meta.env.DEV;
+
+// ---------- Today's plan: read → canon → explain/revisit ----------
+const canonPlan = canon.filter(t => t.items.length).map(t => ({
+    track: t.short, cat: t.id,
+    items: t.items.map(c => ({ id: c.id, title: c.data.title, url: c.data.url, minutes: c.data.minutes })),
+}));
+const revisitItem = revisit.week[0] ?? revisit.month[0] ?? revisit.archive;
+const planMinutes = (deepRead?.brief?.minutes ?? 15) + 25 + 10;
+const explainLocal = deepRead ? `${u('/write/')}?title=${encodeURIComponent(deepRead.title)}&ref=${encodeURIComponent(deepRead.link)}` : u('/write/');
 ---
 <Base description="Learn something real every day: distributed systems, backend, AI engineering and ML foundations." accent="reading">
     <div class="rd">
-        <ReadingMast title="The Reading Room" kicker={today} sub={`${deepCount} deep reads across ${tracks.length} tracks, ranked for understanding`} updated={fetchedAt} />
+        <ReadingMast title="The Reading Room" kicker={today} sub="Become a sharper engineer: read deeply, explain it back, revisit." updated={fetchedAt} />
+
+        <section class="plan" data-plan>
+            <header class="plan-head">
+                <h2>Today's plan</h2>
+                <span class="plan-time">about {planMinutes} min</span>
+            </header>
+            <ol class="plan-steps" role="list">
+                {deepRead && (
+                    <li class="plan-step" data-step="read" data-link={deepRead.link}>
+                        <label class="plan-check"><input type="checkbox" data-plan-step="read" aria-label="Done: read" /><span></span></label>
+                        <div>
+                            <span class="plan-kind">1 · Read deeply</span>
+                            <a class="plan-title" href={deepRead.link} target="_blank" rel="noopener noreferrer" data-read>{deepRead.title}</a>
+                            <span class="plan-meta">{deepRead.feedTitle}{deepRead.brief?.minutes ? ` · ${deepRead.brief.minutes} min` : ''}{deepRead.skill ? ` · builds ${deepRead.skill.topic.name}` : ''}</span>
+                        </div>
+                    </li>
+                )}
+                <li class="plan-step" data-step="canon">
+                    <label class="plan-check"><input type="checkbox" data-plan-step="canon" aria-label="Done: canon" /><span></span></label>
+                    <div>
+                        <span class="plan-kind">2 · A foundation (the Canon)</span>
+                        <a class="plan-title" data-plan-canon href={u('/canon/')} target="_blank" rel="noopener noreferrer">Next foundational read</a>
+                        <span class="plan-meta" data-plan-canon-meta>Read 25 minutes of it; it doesn't have to be finished today</span>
+                    </div>
+                </li>
+                <li class="plan-step" data-step="explain">
+                    <label class="plan-check"><input type="checkbox" data-plan-step="explain" aria-label="Done: explain or revisit" /><span></span></label>
+                    <div>
+                        {revisitItem ? (
+                            <>
+                                <span class="plan-kind">3 · Revisit what you wrote</span>
+                                <a class="plan-title" href={u(revisitItem.href)}>{revisitItem.title}</a>
+                                <span class="plan-meta">Re-read it, then fix or extend it. Revisiting is what makes knowledge stick.</span>
+                            </>
+                        ) : (
+                            <>
+                                <span class="plan-kind">3 · Explain it back</span>
+                                {dev
+                                    ? <a class="plan-title" href={explainLocal}>Explain today's read in your own words</a>
+                                    : <a class="plan-title" href="#" data-gh-explain data-title={deepRead?.title ?? 'Today'} data-url={deepRead?.link ?? ''} target="_blank" rel="noopener">Explain today's read in your own words</a>}
+                                <span class="plan-meta">10 minutes. If you can explain it simply, you understand it.</span>
+                            </>
+                        )}
+                    </div>
+                </li>
+            </ol>
+            <p class="plan-done" data-plan-done hidden>Done for today ✓ That's a real step forward. Come back tomorrow.</p>
+            <script type="application/json" id="plan-canon" set:html={JSON.stringify(canonPlan)} />
+        </section>
 
         {deepRead && (
             <section class="today-hero" data-cat={deepRead.category}>
@@ -125,3 +183,41 @@ const dev = import.meta.env.DEV;
     </div>
     <ReadingClient />
 </Base>
+
+<script>
+    import { getSet } from '../lib/progress-client';
+    // Today's plan: pick the next unfinished Canon item, rotating through tracks day by day,
+    // and remember today's ticks (reset tomorrow).
+    const key = `plan:${new Date().toLocaleDateString('en-CA')}`;
+    const readSet = (k: string) => { try { return new Set<string>(JSON.parse(localStorage.getItem(k) ?? '[]')); } catch { return new Set<string>(); } };
+    const plan = JSON.parse(document.getElementById('plan-canon')?.textContent ?? '[]') as { track: string; cat: string; items: { id: string; title: string; url: string; minutes: number }[] }[];
+    const canonDone = getSet('canon');
+    const open = plan.filter(t => t.items.some(c => !canonDone.has(c.id)));
+    const day = Math.floor(Date.now() / 864e5);
+    const pickTrack = open.length ? open[day % open.length] : null;
+    const next = pickTrack?.items.find(c => !canonDone.has(c.id));
+    const link = document.querySelector<HTMLAnchorElement>('[data-plan-canon]');
+    const meta = document.querySelector<HTMLElement>('[data-plan-canon-meta]');
+    if (next && link && meta) {
+        link.href = next.url;
+        link.textContent = next.title;
+        const t = next.minutes > 60 ? `${Math.round(next.minutes / 60)} h total, read 25 minutes of it today` : `${next.minutes} min`;
+        meta.textContent = `${pickTrack!.track} · ${t}`;
+        link.closest('li')?.setAttribute('data-link', next.url);
+    }
+
+    let done = readSet(key);
+    const boxes = document.querySelectorAll<HTMLInputElement>('[data-plan-step]');
+    function paintPlan() {
+        boxes.forEach(b => { b.checked = done.has(b.dataset.planStep!); b.closest('li')?.classList.toggle('is-done', b.checked); });
+        const all = boxes.length > 0 && [...boxes].every(b => b.checked);
+        document.querySelector<HTMLElement>('[data-plan-done]')!.hidden = !all;
+        document.querySelector('[data-plan]')?.classList.toggle('is-complete', all);
+    }
+    boxes.forEach(b => b.addEventListener('change', () => {
+        b.checked ? done.add(b.dataset.planStep!) : done.delete(b.dataset.planStep!);
+        try { localStorage.setItem(key, JSON.stringify([...done])); } catch {}
+        paintPlan();
+    }));
+    paintPlan();
+</script>

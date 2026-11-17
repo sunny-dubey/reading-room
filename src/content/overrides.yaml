@@ -1,0 +1,7 @@
+# Manual fixes for "Why read" matching. The matcher is right most of the time; use this when it isn't.
+# url: the article link exactly as it appears on the site
+# topic: a roadmap topic id (see src/content/roadmap.yaml), or "none" to show no "Why read" line
+#
+# - url: https://example.com/some-post
+#   topic: idempotency
+[]
