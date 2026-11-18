@@ -1,26 +1,88 @@
 ---
+import { getCollection } from 'astro:content';
 import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
 import ReadingMast from '../components/ReadingMast.astro';
-import { getReading } from '../lib/reading';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getReading, isDeep, rank } from '../lib/reading';
 import { PULSE, STARTUPS } from '../lib/feeds';
-const { tracks, status, fetchedAt } = await getReading();
-const groups = [...tracks.map(t => ({ id: t.id, label: t.label, href: u(`/${t.slug}/`), sources: t.sources })), { id: 'startups', label: STARTUPS.label, href: u('/startups/'), sources: status.filter(s => s.category === 'startups') }, { id: 'pulse', label: PULSE.label, href: u('/pulse/'), sources: status.filter(s => s.category === 'pulse') }];
+
+const { items, tracks, status, fetchedAt, now } = await getReading();
+const feeds = new Map((await getCollection('feeds')).map(f => [f.id, f.data]));
+const canon = await getCollection('canon');
+
+// What each source is contributing right now.
+const stats = (id: string) => {
+    const mine = items.filter(i => i.feedId === id);
+    const latest = mine.reduce<Date | undefined>((d, i) => (!d || i.date > d ? i.date : d), undefined);
+    const best = [...mine].sort((a, b) => rank(b, now) - rank(a, now))[0];
+    return { posts: mine.length, deep: mine.filter(isDeep).length, latest, best };
+};
+const groups = [
+    ...tracks.map(t => ({ id: t.id, label: t.label, href: u(`/${t.slug}/`), sources: t.sources })),
+    { id: 'startups', label: STARTUPS.label, href: u('/startups/'), sources: status.filter(s => s.category === 'startups') },
+    { id: 'pulse', label: PULSE.label, href: u('/pulse/'), sources: status.filter(s => s.category === 'pulse') },
+].map(g => ({
+    ...g,
+    rows: g.sources.map(s => ({ s, f: feeds.get(s.id), ...stats(s.id) }))
+        // Most useful first: deep reads, then posts; quiet or failing sources last.
+        .sort((a, b) => b.deep - a.deep || b.posts - a.posts || a.s.title.localeCompare(b.s.title)),
+}));
 const failing = status.filter(s => !s.ok).length;
+const quiet = status.filter(s => s.ok && s.count === 0).length;
+const authors = new Set(canon.map(c => c.data.author)).size;
+const nudge = (w = 0) => w >= 0.5 ? 'ranked up' : w <= -0.5 ? 'ranked down' : '';
 ---
-<Base title="Sources" accent="reading">
+<Base title="Sources" description="Every source The Reading Room reads from, and what each one is contributing right now." accent="reading">
     <div class="rd">
-        <ReadingMast compact title="Sources" sub={`${status.length} feeds${failing ? `, ${failing} failing right now` : ''}`} updated={fetchedAt} />
-        <div class="rd-sources">
-            {groups.map(g => (
-                <section class="tile">
-                    <h2 class="src-head"><a href={g.href}><span class="cat-dot" data-cat={g.id}></span>{g.label}</a></h2>
-                    <ul role="list">
-                        {g.sources.map(x => <li><span class={x.ok ? 'ok' : 'bad'}></span><a href={x.site ?? x.url} target="_blank" rel="noopener noreferrer">{x.title}</a><span class="n" title={x.error}>{x.ok ? x.count : 'failing'}</span></li>)}
-                    </ul>
-                </section>
-            ))}
-        </div>
-        <p class="side-note" style="text-align:center;margin-top:20px">Sources live in <code>src/content/feeds.yaml</code> · <a href={u('/feeds.opml')}>Download OPML</a></p>
+        <ReadingMast compact title="Sources" sub={`Everything here comes from ${status.length} feeds and ${canon.length} hand-picked Canon reads.`} updated={fetchedAt} />
+
+        <section class="src-how">
+            <div>
+                <h2>Feeds, checked every 6 hours</h2>
+                <p>{status.length} RSS and Atom feeds: engineering blogs, researchers and company tech blogs. Each article is read in full, scored for how much it teaches, matched to a Roadmap topic and ranked. Announcements and roundups sink; deep explanations rise.</p>
+            </div>
+            <div>
+                <h2>The Canon, chosen by hand</h2>
+                <p>{canon.length} foundational papers, books, courses and articles by {authors} authors. They don't change with the news. <a class="u" href={u('/canon/')}>See the Canon →</a></p>
+            </div>
+            <div>
+                <h2>Health right now</h2>
+                <p>{status.length - failing - quiet} feeds active{quiet ? `, ${quiet} with nothing recent` : ''}{failing ? `, ${failing} failing` : ''}. Feeds live in <code>src/content/feeds.yaml</code>. <a class="u" href={u('/feeds.opml')}>Download as OPML</a> for your own reader.</p>
+            </div>
+        </section>
+
+        {groups.map(g => (
+            <section class="src-group" data-cat={g.id}>
+                <header class="block-head">
+                    <h2><span class="cat-dot" data-cat={g.id}></span><a href={g.href}>{g.label}</a></h2>
+                    <span class="dim">{g.rows.length} {g.rows.length === 1 ? 'source' : 'sources'}</span>
+                </header>
+                <ul class="src-list" role="list">
+                    {g.rows.map(r => (
+                        <li class:list={['src-row', { quiet: !r.s.ok || r.posts === 0 }]}>
+                            <div class="src-name">
+                                <span class={r.s.ok ? (r.posts ? 'ok' : 'idle') : 'bad'} title={r.s.ok ? (r.posts ? 'Active' : 'Nothing recent') : `Failing: ${r.s.error ?? ''}`}></span>
+                                <a href={r.s.site ?? r.s.url} target="_blank" rel="noopener noreferrer">{r.s.title}</a>
+                                {nudge(r.f?.weight) && <span class="src-tag">{nudge(r.f?.weight)}</span>}
+                            </div>
+                            <div class="src-stats">
+                                {!r.s.ok ? <span>not reachable right now</span>
+                                    : r.posts === 0 ? <span>nothing in the last {r.f?.maxAgeDays ?? 45} days</span>
+                                    : <>
+                                        <span>{r.posts} {r.posts === 1 ? 'post' : 'posts'}</span>
+                                        {r.deep > 0 && <span>{r.deep} deep</span>}
+                                        {r.latest && <span>latest <time data-rel datetime={r.latest.toISOString()}></time></span>}
+                                    </>}
+                            </div>
+                            {r.best && g.id !== 'pulse' && g.id !== 'startups' && (
+                                <a class="src-best" href={r.best.link} target="_blank" rel="noopener noreferrer" data-read>{r.best.title}</a>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        ))}
     </div>
+    <ReadingClient />
 </Base>

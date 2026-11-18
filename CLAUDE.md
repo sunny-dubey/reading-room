@@ -12,6 +12,7 @@
 - **The site is read-only:** no in-site editor, saving, syncing or Explain-it-back. Notes and saved links are added as files (`npm run new`, `/til`, or editing `src/content/`).
 - **Reading history** (`src/lib/history-client.ts`): opened pieces + timestamps in localStorage (`reading:history`); drives read dimming and spaced revisits (≈1 week / ≈1 month later) on Today.
 - **Weekly design practice** (`src/content/practice.yaml`): one "Design a …" prompt per week on Today, with curated topics, Canon reads and a hard question; prompts not listed fall back to embedding matches. "Read first" never lists a whole book or course (book/course over 120 min is dropped with a build warning); it adds the best recent deep article (topic match ≥ 0.5) for the exercise topics when there is one.
+- **Sources** (`src/pages/sources.astro`, in the sections bar): every feed grouped by track with posts, deep reads, latest post, best current read, ranking nudge and health.
 - **Search** covers roadmap topics, Canon, articles, notes and saved links (`src/pages/search-index.json.ts`).
 - **Today** (`src/pages/index.astro`): Today's plan (deep read with its Why read → next Canon item, rotating tracks daily → revisit from notes or reading history, else reflect), this week's design practice, Canon next-ups, picks, postmortem, revisit.
 - `npm run check:links` checks Canon URLs (runs after each deploy, non-blocking).

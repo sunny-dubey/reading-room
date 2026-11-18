@@ -27,6 +27,7 @@ It covers the areas a strong engineer needs:
 | **Saved** (`/library/`) | Links worth keeping, each with a line on why |
 | **Startups** (`/startups/`) | What the best new companies are building (Launch HN, Show HN, Product Hunt, funding news) |
 | **Pulse** (`/pulse/`) | The week's ten headlines, kept off the front page on purpose |
+| **Sources** (`/sources/`) | Every feed the site reads from, what each is contributing right now (posts, deep reads, latest post, its best current read), and feed health |
 | **Search** | Roadmap topics, the Canon, articles, notes and saved links |
 
 Every matched article carries a **"Why read"** line, e.g. *"You'll get better at **Failover Strategies** (Reliability & Fault Tolerance). Teaches you to plan for the moment the primary disappears…"*, so you always know what a piece will do for you.

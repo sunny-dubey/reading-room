@@ -8,6 +8,7 @@ const sections = [
     ...CATEGORIES.map(c => ({ href: u(`/${c.slug}/`), label: c.short, cat: c.id })),
     { href: u('/roadmap/'), label: 'Roadmap', cat: '' },
     { href: u('/canon/'), label: 'Canon', cat: '' },
+    { href: u('/sources/'), label: 'Sources', cat: '' },
 ];
 const notebookPaths = ['/notebook/'].map(p => u(p));
 const isNotebook = notebookPaths.some(p => path.startsWith(p));
