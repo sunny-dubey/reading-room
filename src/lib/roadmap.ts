@@ -40,9 +40,10 @@ const COVER = 0.40;     // note/saved ↔ topic: counts as coverage of the topic
 // essay from matching Leader Election, while letting a queueing post match Queueing Theory.
 const ALLOWED: Record<string, string[]> = {
     systems: ['systems', 'backend', 'math'],
-    backend: ['backend', 'systems', 'math'],
-    postmortems: ['backend', 'systems'],
-    'ai-eng': ['ai-eng', 'ml', 'backend'],
+    backend: ['backend', 'systems', 'math', 'security'],
+    postmortems: ['backend', 'systems', 'security'],
+    'ai-eng': ['ai-eng', 'ml', 'backend', 'security'],
+    security: ['security', 'backend', 'systems'],
     ml: ['ml', 'ai-eng', 'math'],
     math: ['math', 'ml'],
 };
@@ -129,8 +130,8 @@ async function build(articles: FeedItem[]) {
         const [top] = pinned && topics.has(pinned)
             ? [{ t: topics.get(pinned)!, sim: 1 }]
             : best(av[idx], 1, ALLOWED[i.category]);
-        // Maths posts use different vocabulary from topic names, so they get a slightly lower bar.
-        const bar = i.category === 'math' ? MATCH - 0.03 : MATCH;
+        // Maths and security posts use different vocabulary from topic names, so they get a slightly lower bar.
+        const bar = i.category === 'math' || i.category === 'security' ? MATCH - 0.03 : MATCH;
         if (!top || top.sim < bar) return;
         const covered = learned.has(top.t.id) ? 3
             : (notesByTopic.get(top.t.id) ?? 0) + (savedByTopic.get(top.t.id) ?? 0) * 0.5 + (canonDoneTopics.get(top.t.id) ?? 0);

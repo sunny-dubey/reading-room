@@ -1,6 +1,6 @@
 # The Canon: foundational reads per track, in suggested order.
 # Progress is tracked in your browser. Edit freely: add, remove, reorder.
-# track: systems | backend | ai-eng | ml | math | postmortems
+# track: systems | backend | ai-eng | ml | security | math | postmortems
 # kind: paper | article | book | video | course | docs
 # minutes: rough reading/watching time
 # parts: chapters (or sittings) of a long work, in reading order. Today's plan and the Canon
@@ -771,3 +771,153 @@
     - { title: "Lecture 22: Diagonalization and powers of A", minutes: 50 }
     - { title: "Lecture 25: Symmetric matrices and positive definiteness", minutes: 50 }
     - { title: "Lecture 29: Singular value decomposition", minutes: 50 }
+
+# ---------- Security ----------
+- id: saltzer-schroeder
+  track: security
+  title: "The Protection of Information in Computer Systems"
+  author: "Jerome Saltzer & Michael Schroeder"
+  url: https://www.cs.virginia.edu/~evans/cs551/saltzer/
+  kind: paper
+  minutes: 60
+  why: "The 1975 design principles (least privilege, fail-safe defaults, complete mediation) that every security decision still rests on."
+- id: owasp-top10
+  track: security
+  title: "OWASP Top 10"
+  author: "OWASP"
+  url: https://owasp.org/Top10/
+  kind: docs
+  minutes: 60
+  why: "The most common ways web apps get broken, with how to prevent each. The shared vocabulary of application security."
+- id: portswigger-academy
+  track: security
+  title: "Web Security Academy"
+  author: "PortSwigger"
+  url: https://portswigger.net/web-security
+  kind: course
+  minutes: 600
+  why: "The best free way to learn web vulnerabilities: clear explanations, then hands-on labs where you exploit each one."
+  parts:
+    - { title: "SQL injection", minutes: 90, url: "https://portswigger.net/web-security/sql-injection" }
+    - { title: "Cross-site scripting (XSS)", minutes: 90, url: "https://portswigger.net/web-security/cross-site-scripting" }
+    - { title: "Cross-site request forgery (CSRF)", minutes: 60, url: "https://portswigger.net/web-security/csrf" }
+    - { title: "Server-side request forgery (SSRF)", minutes: 60, url: "https://portswigger.net/web-security/ssrf" }
+    - { title: "Authentication vulnerabilities", minutes: 90, url: "https://portswigger.net/web-security/authentication" }
+    - { title: "Access control vulnerabilities", minutes: 60, url: "https://portswigger.net/web-security/access-control" }
+    - { title: "API testing", minutes: 60, url: "https://portswigger.net/web-security/api-testing" }
+- id: illustrated-tls
+  track: security
+  title: "The Illustrated TLS 1.3 Connection"
+  author: "Michael Driscoll"
+  url: https://tls13.xargs.org/
+  kind: article
+  minutes: 45
+  why: "Every byte of a real TLS handshake, explained. After this, HTTPS stops being magic."
+- id: crypto-right-answers
+  track: security
+  title: "Cryptographic Right Answers"
+  author: "Latacora"
+  url: https://www.latacora.com/blog/2018/04/03/cryptographic-right-answers/
+  kind: article
+  minutes: 20
+  why: "Which algorithm to use for each job, and why. Stops you inventing your own crypto."
+- id: trusting-trust
+  track: security
+  title: "Reflections on Trusting Trust"
+  author: "Ken Thompson"
+  url: https://www.cs.cmu.edu/~rdriley/487/papers/Thompson_1984_ReflectionsonTrustingTrust.pdf
+  kind: paper
+  minutes: 20
+  why: "A three-page Turing lecture on why you can't fully trust code you didn't write, including your compiler. The root of supply-chain security."
+- id: beyondcorp
+  track: security
+  title: "BeyondCorp: A New Approach to Enterprise Security"
+  author: "Rory Ward & Betsy Beyer (Google)"
+  url: https://research.google/pubs/beyondcorp-a-new-approach-to-enterprise-security/
+  kind: paper
+  minutes: 30
+  why: "How Google dropped the trusted internal network. The paper behind zero trust."
+- id: srs-book
+  track: security
+  title: "Building Secure and Reliable Systems"
+  author: "Google"
+  url: https://google.github.io/building-secure-and-reliable-systems/raw/toc.html
+  kind: book
+  minutes: 900
+  why: "Security and reliability as one engineering discipline, from Google's SRE and security teams. Free online."
+  parts:
+    - { title: "Ch 1 \u00b7 The Intersection of Security and Reliability", minutes: 30, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch01.html" }
+    - { title: "Ch 2 \u00b7 Understanding Adversaries", minutes: 40, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch02.html" }
+    - { title: "Ch 4 \u00b7 Design Tradeoffs", minutes: 40, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch04.html" }
+    - { title: "Ch 5 \u00b7 Design for Least Privilege", minutes: 60, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch05.html" }
+    - { title: "Ch 6 \u00b7 Design for Understandability", minutes: 45, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch06.html" }
+    - { title: "Ch 8 \u00b7 Design for Resilience", minutes: 60, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch08.html" }
+    - { title: "Ch 10 \u00b7 Mitigating Denial-of-Service Attacks", minutes: 30, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch10.html" }
+    - { title: "Ch 12 \u00b7 Writing Code", minutes: 45, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch12.html" }
+    - { title: "Ch 15 \u00b7 Investigating Systems", minutes: 45, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch15.html" }
+    - { title: "Ch 17 \u00b7 Crisis Management", minutes: 50, url: "https://google.github.io/building-secure-and-reliable-systems/raw/ch17.html" }
+- id: cloudbleed
+  track: security
+  title: "Incident report on memory leak caused by Cloudflare parser bug"
+  author: "John Graham-Cumming (Cloudflare)"
+  url: https://blog.cloudflare.com/incident-report-on-memory-leak-caused-by-cloudflare-parser-bug/
+  kind: article
+  minutes: 25
+  why: "Cloudbleed: how one pointer bug leaked private data across sites, and how the team found and contained it."
+- id: target-breach
+  track: security
+  title: "Target Hackers Broke in Via HVAC Company"
+  author: "Brian Krebs"
+  url: https://krebsonsecurity.com/2014/02/target-hackers-broke-in-via-hvac-company/
+  kind: article
+  minutes: 10
+  why: "A famous breach that started at a refrigeration vendor. A short lesson in third-party access and network segmentation."
+- id: mitre-attack
+  track: security
+  title: "MITRE ATT&CK"
+  author: "MITRE"
+  url: https://attack.mitre.org/
+  kind: docs
+  minutes: 60
+  why: "The map of how real attackers operate, tactic by tactic. The shared language of detection and red teams."
+- id: smashing-the-stack
+  track: security
+  title: "Smashing The Stack For Fun And Profit"
+  author: "Aleph One"
+  url: https://phrack.org/issues/49/14
+  kind: article
+  minutes: 90
+  why: "The classic buffer overflow tutorial. Explains why memory safety matters better than any argument."
+- id: meltdown
+  track: security
+  title: "Meltdown: Reading Kernel Memory from User Space"
+  author: "Lipp et al. (USENIX Security 2018)"
+  url: https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-lipp.pdf
+  kind: paper
+  minutes: 60
+  why: "How a CPU performance trick broke process isolation. Shows that security assumptions go all the way down to hardware."
+- id: bandit
+  track: security
+  title: "OverTheWire: Bandit"
+  author: "OverTheWire"
+  url: https://overthewire.org/wargames/bandit/
+  kind: course
+  minutes: 300
+  why: "A beginner wargame played over SSH. Builds the Linux and shell fluency every security task needs."
+  parts:
+    - { title: "Levels 0 to 10", minutes: 90, url: "https://overthewire.org/wargames/bandit/bandit0.html" }
+    - { title: "Levels 11 to 20", minutes: 100, url: "https://overthewire.org/wargames/bandit/bandit11.html" }
+    - { title: "Levels 21 to 33", minutes: 110, url: "https://overthewire.org/wargames/bandit/bandit21.html" }
+- id: cryptopals
+  track: security
+  title: "The Cryptopals Crypto Challenges"
+  author: "Cryptopals"
+  url: https://cryptopals.com/
+  kind: course
+  minutes: 1200
+  why: "Learn cryptography by breaking it. You implement real attacks on real constructions, which is the only way it sticks."
+  parts:
+    - { title: "Set 1 \u00b7 Basics", minutes: 120, url: "https://cryptopals.com/sets/1" }
+    - { title: "Set 2 \u00b7 Block crypto", minutes: 180, url: "https://cryptopals.com/sets/2" }
+    - { title: "Set 3 \u00b7 Block and stream crypto", minutes: 180, url: "https://cryptopals.com/sets/3" }
+    - { title: "Set 4 \u00b7 Stream crypto and randomness", minutes: 180, url: "https://cryptopals.com/sets/4" }

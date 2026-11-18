@@ -16,7 +16,7 @@
 - **Search** covers roadmap topics, Canon, articles, notes and saved links (`src/pages/search-index.json.ts`).
 - **Today** (`src/pages/index.astro`): Today's plan (deep read with its Why read → next Canon item, rotating tracks daily → revisit from notes or reading history, else reflect), this week's design practice, Canon next-ups, picks, postmortem, revisit.
 - `npm run check:links` checks Canon URLs (runs after each deploy, non-blocking).
-- Tracks: systems, backend (shown as "Scalability & Architecture" at /architecture/), ai-eng, ml, math, postmortems (+ side pages pulse, startups).
+- Tracks: systems, backend (shown as "Scalability & Architecture" at /architecture/), ai-eng, ml, security (roadmap area 32, cybersecurity engineer roadmap; lower match bar like math), math, postmortems (+ side pages pulse, startups).
 
 ## Content (all in `src/content/`, schemas in `src/content.config.ts`)
 

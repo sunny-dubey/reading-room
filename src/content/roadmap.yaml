@@ -1,6 +1,6 @@
 # The Roadmap: what you want to learn, area by area.
 # Areas 1-25 are your system design roadmap; 26-31 cover AI engineering, ML foundations, payments, mathematics,
-# testing & correctness, and engineering craft & judgment.
+# testing & correctness, and engineering craft & judgment; 32 is the cybersecurity engineer roadmap.
 # Every article is matched to its closest topics by meaning (embeddings, at build time) and cards show
 # "Why read: you'll get better at <topic> (<area>). <why>". Topic ids are used for progress, so keep them
 # stable; a topic that appears in several areas shares one id.
@@ -1551,3 +1551,200 @@
     name: Learning Deeply & Explaining Clearly
     why: 'The meta-skill: turning reading into understanding, and understanding into explanations others can use.'
     about: learning feynman technique writing as thinking explaining spaced repetition deliberate practice
+- id: cybersecurity-engineering
+  n: 32
+  title: Cybersecurity Engineering
+  track: security
+  why: Every system you build will be attacked. Knowing how attacks work is how you design systems that survive them.
+  topics:
+  - id: sec-os-processes-memory
+    name: OS, CPU, Memory & Processes
+    group: CS Fundamentals
+    about: virtual memory, process isolation, system calls, kernel and user space
+  - id: sec-binary-and-filesystems
+    name: Data Structures, Binary & Filesystems
+    group: CS Fundamentals
+    about: binary formats, ELF, PE, file systems, inodes, encodings
+  - id: osi-model
+    name: OSI Model
+    group: Networking
+  - id: tcp-and-udp
+    name: TCP & UDP
+    group: Networking
+  - id: dns-domain-name-system
+    name: DNS (Domain Name System)
+    group: Networking
+  - id: http-and-https
+    name: HTTP & HTTPS
+    group: Networking
+  - id: ip-addresses-and-ports
+    name: IP Addresses & Ports
+    group: Networking
+  - id: sec-firewalls
+    name: Firewalls & Network Segmentation
+    group: Networking
+    about: firewall rules, network segmentation, VPN, NAT, packet filtering
+  - id: sec-cli-bash-powershell
+    name: CLI, Bash & PowerShell
+    group: Linux & Windows
+  - id: sec-permissions-hardening
+    name: Permissions & Hardening
+    group: Linux & Windows
+    about: file permissions, setuid, sudo, least privilege, system hardening, CIS benchmarks
+  - id: sec-active-directory
+    name: Active Directory
+    group: Linux & Windows
+    about: Active Directory, Kerberos, domain controllers, NTLM, Windows authentication
+  - id: sec-scripting-automation
+    name: Python, C, JavaScript & SQL for Security
+    group: Programming
+    about: writing exploits and tools in Python, C memory model, JavaScript in the browser, SQL
+  - id: sec-cia-triad
+    name: CIA Triad
+    group: Security Fundamentals
+    about: confidentiality, integrity, availability, security principles, least privilege, defense in depth
+  - id: sec-encryption-hashing
+    name: Encryption & Hashing
+    group: Security Fundamentals
+    about: symmetric encryption, hashing, password hashing, bcrypt, argon2, salts
+  - id: authentication-and-authorization
+    name: Authentication & Authorization
+    group: Security Fundamentals
+  - id: sec-threat-modeling
+    name: Threats, Vulnerabilities & Threat Modeling
+    group: Security Fundamentals
+    why: Thinking like an attacker before you build is the cheapest security you'll ever buy.
+    about: threat model, STRIDE, attack surface, vulnerabilities, CVE, CWE, risk
+  - id: sec-recon-tools
+    name: Nmap, Wireshark & Kali Linux
+    group: Security Tools
+    about: port scanning, packet capture, network analysis, Kali Linux
+  - id: sec-exploit-tools
+    name: Burp Suite, Metasploit & Netcat
+    group: Security Tools
+    about: using Burp Suite to intercept and modify HTTP requests, Metasploit modules, netcat listeners (hands-on tooling)
+  - id: sec-sql-injection
+    name: SQL Injection
+    group: Web Security
+    why: The classic bug that still breaches companies. Understanding it teaches you why parameterised queries exist.
+    about: SQL injection, SQLi, parameterized queries, prepared statements
+  - id: sec-xss
+    name: Cross-Site Scripting (XSS)
+    group: Web Security
+    about: XSS, cross-site scripting, content security policy, output encoding, DOM
+  - id: sec-csrf
+    name: CSRF
+    group: Web Security
+    about: cross-site request forgery, SameSite cookies, CSRF tokens
+  - id: sec-ssrf
+    name: SSRF
+    group: Web Security
+    about: server-side request forgery, cloud metadata endpoint, internal network access
+  - id: api-security
+    name: API Security
+    group: Web Security
+  - id: sec-owasp-top-10
+    name: OWASP Top 10
+    group: Web Security
+    about: OWASP Top 10, broken access control, injection, insecure design, security misconfiguration
+  - id: sec-recon-scanning
+    name: Reconnaissance & Vulnerability Scanning
+    group: Ethical Hacking & Pentesting
+    about: reconnaissance, attack surface discovery, subdomain enumeration, vulnerability scanning
+  - id: sec-exploitation
+    name: Exploitation
+    group: Ethical Hacking & Pentesting
+    about: exploit, remote code execution, RCE, proof of concept, vulnerability chain
+  - id: sec-privilege-escalation
+    name: Privilege Escalation
+    group: Ethical Hacking & Pentesting
+    about: privilege escalation, root, local privilege escalation, sandbox escape
+  - id: sec-aes-rsa-sha
+    name: AES, RSA, SHA & Digital Signatures
+    group: Cryptography
+    about: AES, RSA, elliptic curves, SHA-256, digital signatures, cryptographic primitives, post-quantum cryptography, ML-KEM, which algorithm to choose
+  - id: tls
+    name: TLS
+    group: Cryptography
+  - id: sec-pki-key-management
+    name: PKI & Key Management
+    group: Cryptography
+    about: certificates, certificate authority, PKI, key rotation, KMS, HSM, secrets management
+  - id: sec-siem-edr
+    name: SIEM, EDR & Threat Detection
+    group: Defensive Security & SOC
+    about: SIEM, EDR, detection engineering, detection rules, threat hunting, SOC
+  - id: sec-log-analysis
+    name: Log Analysis
+    group: Defensive Security & SOC
+    about: security logs, log analysis, audit logs, anomaly detection
+  - id: sec-incident-response
+    name: Incident Response
+    group: Defensive Security & SOC
+    why: When a breach happens, the first hours decide the damage. Knowing the playbook keeps you calm and useful.
+    about: incident response, containment, eradication, breach investigation, ransomware response
+  - id: sec-forensics
+    name: Disk, Memory & Network Forensics
+    group: Digital Forensics
+    about: digital forensics, memory forensics, disk image, timeline analysis, DFIR
+  - id: sec-malware-analysis
+    name: Malware Analysis & Reverse Engineering
+    group: Digital Forensics
+    about: malware analysis, reverse engineering, disassembly, Ghidra, IDA, ransomware, loader, remote access trojan (RAT), implant, backdoor, command and control (C2), malware campaign
+  - id: sec-cloud-iam
+    name: Cloud Security & IAM (AWS, Azure)
+    group: Cloud Security
+    about: cloud security, IAM policies, AWS, Azure, misconfiguration, S3 buckets, cloud identity
+  - id: sec-container-security
+    name: Docker & Kubernetes Security
+    group: Cloud Security
+    about: container security, Kubernetes security, container escape, image scanning, pod security
+  - id: sec-cloud-monitoring
+    name: Cloud Monitoring
+    group: Cloud Security
+    about: CloudTrail, cloud detection, cloud audit logs
+  - id: sec-devsecops
+    name: DevSecOps & CI/CD Security
+    group: Security Engineering
+    about: DevSecOps, CI/CD security, software supply chain security, package managers, package integrity, code signing, dependency scanning, SBOM, GitHub Actions security
+  - id: sec-zero-trust
+    name: Zero Trust
+    group: Security Engineering
+    about: zero trust, BeyondCorp, identity-aware proxy, device trust
+  - id: sec-sast-dast
+    name: SAST, DAST & Security Automation
+    group: Security Engineering
+    about: static analysis, dynamic analysis, CodeQL, Semgrep, security automation
+  - id: sec-binary-exploitation
+    name: Exploit Development & Binary Exploitation
+    group: Advanced Security
+    about: buffer overflow, use-after-free, memory corruption, ROP, heap exploitation, memory safety
+  - id: sec-fuzzing
+    name: Fuzzing
+    group: Advanced Security
+    about: fuzzing, fuzzers, AFL, libFuzzer, coverage-guided fuzzing
+  - id: sec-apts-red-team
+    name: APTs & Red Team Operations
+    group: Advanced Security
+    about: advanced persistent threat, threat actors, red team, lateral movement, MITRE ATT&CK
+  - id: sec-labs-ctfs
+    name: Home Labs, CTFs & Bug Hunting
+    group: Practical Experience
+    about: capture the flag, CTF, bug bounty, home lab
+  - id: sec-security-projects
+    name: Security Tools & Projects
+    group: Practical Experience
+  - id: sec-certifications
+    name: Certifications (Network+, Security+, CCNA, eJPT, PNPT, OSCP)
+    group: Certifications & Career
+  - id: sec-portfolio-interviews
+    name: Portfolio & Interviews
+    group: Certifications & Career
+  - id: sec-cves-breach-reports
+    name: CVEs, Research Papers & Breach Reports
+    group: Continuous Learning
+    about: CVE, vulnerability disclosure, security research, breach report, data breach
+  - id: sec-emerging-threats
+    name: Security Trends & Emerging Threats
+    group: Continuous Learning
+    about: emerging threats, AI security, prompt injection, supply chain attacks

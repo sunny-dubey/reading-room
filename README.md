@@ -13,6 +13,7 @@ It covers the areas a strong engineer needs:
 - **AI Engineering & Agents**: agents, evals, retrieval, LLMs in production
 - **ML & LLM Foundations**: how transformers, training, fine-tuning and inference work
 - **Mathematics**: discrete maths, probability, linear algebra, and the maths behind systems and ML
+- **Security**: web vulnerabilities, cryptography, cloud security, detection and exploitation (a full cybersecurity engineer roadmap)
 - **Postmortems**: real failures, explained
 
 ## What's on the site
@@ -21,8 +22,8 @@ It covers the areas a strong engineer needs:
 |---|---|
 | **Today** (`/`) | A ~1-hour daily plan (one deep read, one foundational Canon read, then revisit something you read a week or a month ago, or reflect), this week's system design practice, and more worth your time |
 | **Track pages** (`/systems/`, `/architecture/`, …) | The best recent deep reads for that track, plus its Canon |
-| **Roadmap** (`/roadmap/`) | 31 areas and ~485 topics to master (a full system design roadmap plus AI, ML, payments, maths, testing and engineering judgment), with progress ticks and the reads that teach each topic |
-| **Canon** (`/canon/`) | 78 hand-picked foundational reads in order: papers, books, courses and classic articles |
+| **Roadmap** (`/roadmap/`) | 32 areas and ~530 topics to master (a full system design roadmap plus AI, ML, payments, maths, testing, engineering judgment and cybersecurity), with progress ticks and the reads that teach each topic |
+| **Canon** (`/canon/`) | 93 hand-picked foundational reads in order: papers, books, courses and classic articles |
 | **Notebook** (`/notebook/`) | Notes on what I've understood, in my own words |
 | **Saved** (`/library/`) | Links worth keeping, each with a line on why |
 | **Startups** (`/startups/`) | What the best new companies are building (Launch HN, Show HN, Product Hunt, funding news) |
@@ -36,7 +37,7 @@ Every matched article carries a **"Why read"** line, e.g. *"You'll get better at
 
 Everything happens **at build time**. There's no server, no database, no API keys and no AI service.
 
-1. **Fetch.** About 63 RSS/Atom sources (`src/content/feeds.yaml`): engineering blogs like Marc Brooker, Martin Fowler, Brandur, Stripe, Cloudflare, Lilian Weng, Sebastian Raschka, Jeremy Kun and more.
+1. **Fetch.** About 75 RSS/Atom sources (`src/content/feeds.yaml`): engineering blogs like Marc Brooker, Martin Fowler, Brandur, Stripe, Cloudflare, Lilian Weng, Sebastian Raschka, Jeremy Kun and more.
 2. **Analyse.** For each article (`src/lib/summarize.ts`): uses the full text from the feed or fetches the page (cached for 30 days), then estimates reading time and depth, extracts technical concepts, and gives it a **worth score (1–5)** for how much it builds lasting understanding. Announcements, newsletters and roundups score low.
 3. **Match.** A small local embedding model (all-MiniLM-L6-v2, ~23 MB, via `@huggingface/transformers`) matches each article to its closest **Roadmap topic** by meaning (`src/lib/roadmap.ts`). That's where "Why read" comes from.
 4. **Rank.** `rank = worth × 2 + freshness + topic boost + source weight`. Depth comes first, but freshness counts for a lot (+2.5 today, halving every 4 days), so a good new post beats a slightly better old one. Topics you haven't covered yet get a boost, and authors known for depth get a small nudge (`src/lib/reading.ts`).

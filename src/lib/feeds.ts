@@ -24,6 +24,7 @@ export const CATEGORIES = [
     { id: 'backend', slug: 'architecture', label: 'Scalability & Architecture', short: 'Architecture', blurb: 'Scaling systems, architectural design and trade-offs, reliability patterns, APIs' },
     { id: 'ai-eng', slug: 'ai-engineering', label: 'AI Engineering & Agents', short: 'AI Engineering', blurb: 'Agents, evals, RAG, tool use, LLMs in production' },
     { id: 'ml', slug: 'foundations', label: 'ML & LLM Foundations', short: 'ML Foundations', blurb: 'How transformers, training, fine-tuning and inference actually work' },
+    { id: 'security', slug: 'security', label: 'Security', short: 'Security', blurb: 'How attacks work and how to build systems that survive them: web, crypto, cloud, detection' },
     { id: 'math', slug: 'math', label: 'Mathematics', short: 'Math', blurb: 'Discrete math, probability, linear algebra and the maths behind systems and ML' },
     { id: 'postmortems', slug: 'postmortems', label: 'Postmortems', short: 'Postmortems', blurb: 'Real failures, explained. The fastest way to learn how systems break' },
 ] as const;

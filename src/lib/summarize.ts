@@ -80,6 +80,14 @@ const VOCAB: [RegExp, string][] = ([
     ['migrations', 'schema migrations?|online migrations?|zero-downtime'], ['microservices', 'microservices?'], ['kubernetes', 'kubernetes|\\bk8s\\b'],
     ['concurrency', 'concurren\\w+|race conditions?|deadlocks?|locks?\\b|mutex'], ['networking', 'tcp|bgp|dns|http/2|http/3|quic'],
     ['incident response', 'incident|post-?mortem|root cause|outage'], ['autoscaling', 'autoscal\\w+'], ['security', 'authentication|authorization|oauth|encryption|tls'],
+    // security
+    ['sql injection', 'sql injection|sqli'], ['xss', 'xss|cross-site scripting'], ['csrf', 'csrf|cross-site request forgery'], ['ssrf', 'ssrf|server-side request forgery'],
+    ['rce', 'remote code execution|\\brce\\b'], ['privilege escalation', 'privilege escalation|privesc'], ['memory safety', 'memory safety|buffer overflows?|use-after-free|memory corruption'],
+    ['exploits', 'exploit(s|ation|ed)?'], ['vulnerabilities', 'vulnerabilit(y|ies)|\\bcves?\\b|cve-\\d{4}-\\d+'], ['fuzzing', 'fuzz(ing|ers?)'], ['malware', 'malware|ransomware|trojans?|backdoors?'],
+    ['cryptography', 'cryptograph\\w+|cipher(s|text)?|aes|rsa|elliptic curves?|signatures?'], ['pki', 'pki|certificate authorit(y|ies)|x\\.509'], ['threat detection', 'detection engineering|siem|edr|threat hunting'],
+    ['forensics', 'forensics?|dfir'], ['reverse engineering', 'reverse engineer\\w*|disassembl\\w+|decompil\\w+'], ['zero trust', 'zero trust|beyondcorp'],
+    ['supply chain security', 'supply[- ]chain (attacks?|security)|sbom|dependency confusion'], ['iam', '\\biam\\b|identity and access management'], ['prompt injection', 'prompt injection|jailbreaks?'],
+    ['threat actors', 'threat actors?|apts?\\b|lateral movement|initial access'],
     // ai engineering
     ['agents', 'agents?|agentic'], ['tool use', 'tool (use|calling|calls)|function calling'], ['mcp', 'model context protocol|\\bmcp\\b'], ['evals', 'evals?|evaluation(s)?'],
     ['rag', 'rag|retrieval[- ]augmented'], ['embeddings', 'embeddings?'], ['vector search', 'vector (search|database|store)s?'], ['prompting', 'prompt(s|ing)?|prompt engineering'],

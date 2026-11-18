@@ -7,6 +7,7 @@
 #   backend      Scalability & Architecture (page: /architecture/)
 #   ai-eng       AI Engineering & Agents
 #   ml           ML & LLM Foundations
+#   security     Security: web, crypto, cloud, detection, exploitation
 #   math         Mathematics
 #   postmortems  Postmortems: learning from failure
 #   pulse        Pulse: a small page of the week's headlines (not on the front page)
@@ -472,6 +473,103 @@
   category: startups
   limit: 8
   maxAgeDays: 7
+
+# ---------- security ----------
+- id: project-zero
+  title: Google Project Zero
+  url: 'https://googleprojectzero.blogspot.com/feeds/posts/default'
+  site: https://googleprojectzero.blogspot.com/
+  category: security
+  limit: 5
+  maxAgeDays: 240
+  weight: 0.8
+- id: portswigger-research
+  title: PortSwigger Research
+  url: 'https://portswigger.net/research/rss'
+  site: https://portswigger.net/research
+  category: security
+  limit: 6
+  maxAgeDays: 180
+  weight: 0.8
+- id: trail-of-bits
+  title: Trail of Bits
+  url: 'https://blog.trailofbits.com/feed/'
+  site: https://blog.trailofbits.com/
+  category: security
+  limit: 6
+  maxAgeDays: 120
+  weight: 0.5
+- id: dfir-report
+  title: The DFIR Report
+  url: 'https://thedfirreport.com/feed/'
+  site: https://thedfirreport.com/
+  category: security
+  limit: 4
+  maxAgeDays: 240
+  weight: 0.5
+- id: filippo
+  title: Filippo Valsorda
+  url: 'https://words.filippo.io/rss/'
+  site: https://words.filippo.io/
+  category: security
+  limit: 4
+  maxAgeDays: 240
+  weight: 0.5
+- id: matthew-green
+  title: Matthew Green (Cryptographic Engineering)
+  url: 'https://blog.cryptographyengineering.com/feed/'
+  site: https://blog.cryptographyengineering.com/
+  category: security
+  limit: 4
+  maxAgeDays: 240
+  weight: 0.5
+- id: latacora
+  title: Latacora
+  url: 'https://latacora.micro.blog/feed.xml'
+  site: https://www.latacora.com/blog/
+  category: security
+  limit: 3
+  maxAgeDays: 365
+  weight: 0.5
+- id: doyensec
+  title: Doyensec
+  url: 'https://blog.doyensec.com/atom.xml'
+  site: https://blog.doyensec.com/
+  category: security
+  limit: 4
+  maxAgeDays: 180
+  weight: 0.3
+- id: watchtowr
+  title: watchTowr Labs
+  url: 'https://labs.watchtowr.com/rss/'
+  site: https://labs.watchtowr.com/
+  category: security
+  limit: 4
+  maxAgeDays: 120
+  weight: 0.3
+- id: unit42
+  title: Unit 42 (Palo Alto Networks)
+  url: 'https://unit42.paloaltonetworks.com/feed/'
+  site: https://unit42.paloaltonetworks.com/
+  category: security
+  limit: 4
+  maxAgeDays: 60
+- id: wiz
+  title: Wiz
+  url: 'https://www.wiz.io/feed/rss.xml'
+  site: https://www.wiz.io/blog
+  category: security
+  limit: 4
+  maxAgeDays: 60
+  weight: -0.3
+- id: krebs
+  title: Krebs on Security
+  url: 'https://krebsonsecurity.com/feed/'
+  site: https://krebsonsecurity.com/
+  category: security
+  limit: 4
+  maxAgeDays: 45
+  weight: -0.5
 
 # ---------- math ----------
 - id: jeremy-kun
