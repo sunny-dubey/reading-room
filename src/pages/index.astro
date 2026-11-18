@@ -6,7 +6,7 @@ import ReadingMast from '../components/ReadingMast.astro';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
 
-const { learning, fetchedAt, now, deepRead, fresh, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
+const { learning, fetchedAt, now, deepRead, deepCands, fresh, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
 const revisit = await getRevisit(now);
 const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -44,16 +44,18 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 {deepRead && (
                     <li class="plan-step" data-step="read" data-link={deepRead.link}>
                         <label class="plan-check"><input type="checkbox" data-plan-step="read" aria-label="Done: read" /><span></span></label>
-                        <div>
-                            <span class="plan-kind">1 · Read deeply</span>
-                            <a class="plan-title" href={deepRead.link} target="_blank" rel="noopener noreferrer" data-read>{deepRead.title}</a>
-                            <span class="plan-meta">{deepRead.feedTitle}{deepRead.brief?.minutes ? ` · ${deepRead.brief.minutes} min` : ''}{deepRead.brief?.depth === 'deep' ? ' · deep dive' : ''}</span>
-                            {deepRead.skill && (
-                                <p class="plan-why">
-                                    You'll get better at <a href={u(`/roadmap/#${deepRead.skill.topic.id}`)}>{deepRead.skill.topic.name}</a>. {deepRead.skill.topic.why}
-                                </p>
-                            )}
-                        </div>
+                        {deepCands.map((d, n) => (
+                            <div data-deep-cand={d.link} hidden={n > 0}>
+                                <span class="plan-kind">1 · Read deeply</span>
+                                <a class="plan-title" href={d.link} target="_blank" rel="noopener noreferrer" data-read>{d.title}</a>
+                                <span class="plan-meta">{d.feedTitle}{d.brief?.minutes ? ` · ${d.brief.minutes} min` : ''}{d.brief?.depth === 'deep' ? ' · deep dive' : ''}</span>
+                                {d.skill && (
+                                    <p class="plan-why">
+                                        You'll get better at <a href={u(`/roadmap/#${d.skill.topic.id}`)}>{d.skill.topic.name}</a>. {d.skill.topic.why}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
                     </li>
                 )}
                 <li class="plan-step" data-step="canon">
@@ -221,7 +223,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
 
 <script>
     import { getSet } from '../lib/progress-client';
-    import { dueForRevisit } from '../lib/history-client';
+    import { dueForRevisit, getHistory } from '../lib/history-client';
     import { nextPart, partId } from '../lib/canon-parts-client';
 
     // ---------- Revisit from your reading history (spaced repetition, no writing needed) ----------
@@ -257,6 +259,32 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
 
     // Today's plan: pick the next unfinished Canon item, rotating through tracks day by day,
     // and remember today's ticks (reset tomorrow).
+    // Deep read: keep today's pick all day; otherwise the best one you haven't opened or been shown before.
+    {
+        const today = new Date().toLocaleDateString('en-CA');
+        const SHOWN = 'plan:deep-shown';
+        let shown: Record<string, string> = {};
+        try { shown = JSON.parse(localStorage.getItem(SHOWN) ?? '{}'); } catch {}
+        const read = new Set(getHistory().map(r => r.u));
+        const cands = [...document.querySelectorAll<HTMLElement>('[data-deep-cand]')];
+        const link = (c: HTMLElement) => c.dataset.deepCand!;
+        const pick = cands.find(c => shown[link(c)] === today)
+            ?? cands.find(c => !read.has(link(c)) && !shown[link(c)])
+            ?? cands.find(c => !read.has(link(c)))
+            ?? cands[0];
+        if (pick) {
+            cands.forEach(c => (c.hidden = c !== pick));
+            const li = pick.closest<HTMLElement>('[data-step="read"]');
+            if (li) { li.dataset.link = link(pick); li.classList.toggle('is-read', read.has(link(pick))); }
+            shown[link(pick)] ??= today;
+            const cutoff = new Date(Date.now() - 60 * 864e5).toLocaleDateString('en-CA');
+            for (const [k, d] of Object.entries(shown)) if (d < cutoff) delete shown[k];
+            try { localStorage.setItem(SHOWN, JSON.stringify(shown)); } catch {}
+            // Don't show the same piece twice on the page.
+            if (pick !== cands[0]) document.querySelectorAll<HTMLElement>('.learn[data-link]').forEach(el => { if (el.dataset.link === link(pick)) el.hidden = true; });
+        }
+    }
+
     const key = `plan:${new Date().toLocaleDateString('en-CA')}`;
     const readSet = (k: string) => { try { return new Set<string>(JSON.parse(localStorage.getItem(k) ?? '[]')); } catch { return new Set<string>(); } };
     const plan = JSON.parse(document.getElementById('plan-canon')?.textContent ?? '[]') as { track: string; cat: string; items: { id: string; title: string; url: string; minutes: number }[] }[];

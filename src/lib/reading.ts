@@ -46,7 +46,11 @@ async function buildReading() {
 
     // Today's deep read: the most worthwhile thing from the last two weeks (postmortems have their own slot).
     const recent = byRank.filter(i => now - +i.date < 14 * DAY && i.category !== 'postmortems' && i.brief?.fetched);
-    const [deepRead] = take(recent.filter(i => (i.brief?.worth ?? 0) >= 4), 1);
+    // Up to 5 candidates in rank order; the page shows the first one you haven't read or been shown on an
+    // earlier day, so the plan's deep read changes daily even when the same post keeps ranking first.
+    const deepCands = recent.filter(i => (i.brief?.worth ?? 0) >= 4 && !used.has(i.link)).slice(0, 5);
+    const deepRead = deepCands[0];
+    if (deepRead) used.add(deepRead.link);
     // Fresh this week: the best of the last 3 days (7 if it's a quiet week), one per track first.
     const freshPool = (days: number) => byRank.filter(i => now - +i.date < days * DAY && i.category !== 'postmortems'
         && (i.brief?.worth ?? 0) >= 3 && (i.skill || isDeep(i)));
@@ -79,7 +83,7 @@ async function buildReading() {
         funding: startup('tc-startups'),
     };
 
-    return { items, learning, status, fetchedAt, now, deepRead, fresh, picks, postmortem, tracks, pulse, startups, roadmap };
+    return { items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */

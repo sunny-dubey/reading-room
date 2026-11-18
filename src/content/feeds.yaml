@@ -1,4 +1,4 @@
-# Sources for The Reading Room. Fetched at build time; the deployed site rebuilds every 6 hours.
+# Sources for The Reading Room. Fetched at build time; the deployed site rebuilds every 3 hours.
 # Every article is summarised at build time (extractive, no AI model) and given a "worth" score,
 # so announcements and news sink and deep explanations rise.
 #
@@ -77,6 +77,38 @@
   limit: 6
   maxAgeDays: 120
   weight: 0.5
+
+- id: jack-vanlightly
+  title: Jack Vanlightly
+  url: 'https://jack-vanlightly.com/blog?format=rss'
+  site: https://jack-vanlightly.com/
+  category: systems
+  limit: 4
+  maxAgeDays: 240
+  weight: 0.8
+- id: transactional
+  title: Alex Miller (transactional.blog)
+  url: 'https://transactional.blog/feed.xml'
+  site: https://transactional.blog/
+  category: systems
+  limit: 4
+  maxAgeDays: 365
+  weight: 0.8
+- id: charapko
+  title: Aleksey Charapko
+  url: 'https://charap.co/feed/'
+  site: https://charap.co/
+  category: systems
+  limit: 4
+  maxAgeDays: 180
+  weight: 0.5
+- id: duckdb
+  title: DuckDB
+  url: 'https://duckdb.org/feed.xml'
+  site: https://duckdb.org/news/
+  category: systems
+  limit: 5
+  maxAgeDays: 90
 
 # ---------- backend ----------
 - id: brandur
@@ -192,6 +224,37 @@
   limit: 5
   maxAgeDays: 60
 
+- id: dropbox
+  title: Dropbox Tech
+  url: 'https://dropbox.tech/feed'
+  site: https://dropbox.tech/
+  category: backend
+  limit: 5
+  maxAgeDays: 120
+- id: pinterest
+  title: Pinterest Engineering
+  url: 'https://medium.com/feed/pinterest-engineering'
+  site: https://medium.com/pinterest-engineering
+  category: backend
+  limit: 5
+  maxAgeDays: 90
+- id: charity
+  title: Charity Majors
+  url: 'https://charity.wtf/feed/'
+  site: https://charity.wtf/
+  category: backend
+  limit: 4
+  maxAgeDays: 180
+  weight: 0.5
+- id: eli-bendersky
+  title: Eli Bendersky
+  url: 'https://eli.thegreenplace.net/feeds/all.atom.xml'
+  site: https://eli.thegreenplace.net/
+  category: backend
+  limit: 4
+  maxAgeDays: 180
+  weight: 0.3
+
 # ---------- ai-eng ----------
 - id: simon-willison
   title: Simon Willison
@@ -248,6 +311,23 @@
   maxAgeDays: 60
   weight: -0.6
 
+- id: vicki-boykis
+  title: Vicki Boykis
+  url: 'https://vickiboykis.com/index.xml'
+  site: https://vickiboykis.com/
+  category: ai-eng
+  limit: 4
+  maxAgeDays: 180
+  weight: 0.3
+- id: answer-ai
+  title: Answer.AI
+  url: 'https://www.answer.ai/index.xml'
+  site: https://www.answer.ai/
+  category: ai-eng
+  limit: 4
+  maxAgeDays: 180
+  weight: 0.5
+
 # ---------- ml ----------
 - id: lilian-weng
   title: Lilian Weng
@@ -298,6 +378,23 @@
   maxAgeDays: 60
   weight: -0.2
 
+- id: fastai
+  title: fast.ai
+  url: 'https://www.fast.ai/index.xml'
+  site: https://www.fast.ai/
+  category: ml
+  limit: 4
+  maxAgeDays: 180
+  weight: 0.3
+- id: tim-dettmers
+  title: Tim Dettmers
+  url: 'https://timdettmers.com/feed/'
+  site: https://timdettmers.com/
+  category: ml
+  limit: 3
+  maxAgeDays: 365
+  weight: 0.8
+
 # ---------- postmortems ----------
 - id: github-availability
   title: GitHub availability reports
@@ -313,6 +410,22 @@
   category: postmortems
   limit: 6
   maxAgeDays: 365
+
+- id: surfing-complexity
+  title: Surfing Complexity (Lorin Hochstein)
+  url: 'https://surfingcomplexity.blog/feed/'
+  site: https://surfingcomplexity.blog/
+  category: postmortems
+  limit: 5
+  maxAgeDays: 120
+  weight: 0.5
+- id: fly-infra-log
+  title: Fly.io infra log
+  url: 'https://fly.io/infra-log/feed.xml'
+  site: https://fly.io/infra-log/
+  category: postmortems
+  limit: 3
+  maxAgeDays: 60
 
 # ---------- pulse ----------
 - id: techmeme

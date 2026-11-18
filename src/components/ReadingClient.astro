@@ -52,10 +52,10 @@ const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.da
         el.textContent = new Date(el.dataset.editionDate!).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     });
     document.querySelectorAll<HTMLElement>('[data-next-edition]').forEach(el => {
-        // Next scheduled build: 00:17, 06:17, 12:17, 18:17 UTC. GitHub often runs a little late, hence "around".
+        // Next scheduled build: every 3 hours at :17 UTC. GitHub often runs a little late, hence "around".
         const now = new Date();
         const mins = now.getUTCHours() * 60 + now.getUTCMinutes();
-        const slots = [17, 377, 737, 1097];
+        const slots = Array.from({ length: 8 }, (_, h) => h * 180 + 17);
         const nextSlot = slots.find(s => s > mins) ?? slots[0] + 1440;
         const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) + nextSlot * 60000);
         const sameDay = next.toDateString() === now.toDateString();

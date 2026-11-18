@@ -5,7 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: '17 */6 * * *'  # refresh feeds and rankings every 6 hours
+    # Every 3 hours. GitHub's scheduler is best-effort (runs can be late or skipped), so more slots
+    # keep the site fresh even when one is dropped.
+    - cron: '17 */3 * * *'
 
 permissions:
   contents: read

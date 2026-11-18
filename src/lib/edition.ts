@@ -1,8 +1,8 @@
-// "Editions": the site rebuilds four times a day (see the cron in .github/workflows/deploy.yml).
+// "Editions": the site rebuilds every 3 hours (see the cron in .github/workflows/deploy.yml).
 // Edition names follow Sunny's clock (IST); times are shown in each reader's own timezone.
 
-/** Scheduled build slots in UTC minutes past midnight: 00:17, 06:17, 12:17, 18:17 (= 5:47, 11:47, 17:47, 23:47 IST). */
-export const SLOTS_UTC = [17, 6 * 60 + 17, 12 * 60 + 17, 18 * 60 + 17];
+/** Scheduled build slots in UTC minutes past midnight (00:17 UTC = 5:47 am IST). */
+export const SLOTS_UTC = Array.from({ length: 8 }, (_, h) => h * 180 + 17); // 00:17, 03:17 … 21:17 UTC
 
 /** Edition name for a build time, by the hour in IST (late or manual builds keep their window's name). */
 export function editionName(d: Date): string {

@@ -1,6 +1,6 @@
 # reading-room
 
-**The Reading Room**: a site for *understanding* (not news) across four tracks: Distributed Systems & Databases, Backend/APIs/Payments, AI Engineering & Agents, ML & LLM Foundations, plus Postmortems. A small `/pulse/` page holds the week's headlines. Sunny's notebook (notes + saved links, written as files) is displayed read-only. Astro 5 static site, GitHub Pages, rebuilt every 6h.
+**The Reading Room**: a site for *understanding* (not news) across four tracks: Distributed Systems & Databases, Backend/APIs/Payments, AI Engineering & Agents, ML & LLM Foundations, plus Postmortems. A small `/pulse/` page holds the week's headlines. Sunny's notebook (notes + saved links, written as files) is displayed read-only. Astro 5 static site, GitHub Pages, rebuilt every 3h (GitHub cron is best-effort). Today's deep read: up to 5 candidates rendered; the client shows the first not read and not shown on an earlier day (localStorage `plan:deep-shown`).
 
 - Sources: `src/content/feeds.yaml`. Tracks: `CATEGORIES` in `src/lib/feeds.ts`. Ranking and Today page selection: `src/lib/reading.ts`.
 - **Build-time article analysis, no AI model, no summaries:** `src/lib/summarize.ts` uses feed full-text or fetches the page (cached in `.cache/articles`, 30 days), then extracts concepts (VOCAB list), reading time, depth and a 1-5 `worth` score used for ranking. Deep reads = worth ≥ 3.5.
