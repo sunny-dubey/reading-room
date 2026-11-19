@@ -1,0 +1,74 @@
+---
+// The week: for days you didn't read. The stories several sources covered, then each desk's
+// best five of the last seven days by worth (not freshness), then the week's incident lessons.
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getReading } from '../lib/reading';
+import { getOutages, fmtDuration } from '../lib/outages';
+import { u } from '../lib/url';
+
+const { week, fetchedAt, now } = await getReading();
+const outages = await getOutages();
+const lessons = outages.cases.filter(i => now - i.start < 7 * 864e5).slice(0, 4);
+const anchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
+const day = (d: Date) => d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
+const from = new Date(+fetchedAt - 7 * 864e5);
+const total = week.desks.reduce((a, d) => a + d.total, 0);
+---
+<Base title="The week" description="The week in every desk: what several sources covered, and each discipline's best five reads of the last seven days." accent="reading">
+    <div class="rd fp week-page">
+        <ReadingMast compact title="The week" sub={`${day(from)} to ${day(fetchedAt)}: the stories several sources covered, then the best five of each desk, ranked by how much they teach rather than how new they are. Chosen from ${total} pieces.`} updated={fetchedAt} />
+
+        {week.big.length > 0 && (
+            <section class="fp-band">
+                <h2 class="fp-band-h"><span>The week's big stories</span></h2>
+                <ol class="wk-big" role="list">
+                    {week.big.map(b => (
+                        <li data-link={b.lead.link}>
+                            <p class="big-k">{b.sources} sources · {day(b.items[0].date)}</p>
+                            <a class="big-h" href={b.lead.link} target="_blank" rel="noopener noreferrer" data-read>{b.lead.title}</a>
+                            <p class="big-cov">{b.items.map((i, n) => <>{n > 0 && ' · '}<a href={i.link} target="_blank" rel="noopener noreferrer">{i.feedTitle.replace(/: .*$/, '')}</a></>)}</p>
+                        </li>
+                    ))}
+                </ol>
+            </section>
+        )}
+
+        <section class="fp-band">
+            <h2 class="fp-band-h"><span>Best of each desk</span></h2>
+            <div class="wk-desks">
+                {week.desks.map(d => (
+                    <section class="wk-desk" data-cat={d.id}>
+                        <h3 class="desk-h"><a href={u(`/${d.slug}/`)}><span class="cat-dot" data-cat={d.id}></span>{d.short}</a> <span class="wk-n">{d.total} this week</span></h3>
+                        <ol role="list">
+                            {d.items.map(i => (
+                                <li data-link={i.link} data-story>
+                                    <a class="desk-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                                    <span class="desk-src">{i.feedTitle} · {day(i.date)}{i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}{i.brief?.depth === 'deep' ? ' · deep dive' : ''}</span>
+                                </li>
+                            ))}
+                        </ol>
+                    </section>
+                ))}
+            </div>
+        </section>
+
+        {lessons.length > 0 && (
+            <section class="fp-band">
+                <h2 class="fp-band-h"><span>Incident lessons this week</span></h2>
+                <ul class="out-lessons" role="list">
+                    {lessons.map(i => (
+                        <li>
+                            <p class="fp-kicker">{i.provider}{i.duration ? ` · ${fmtDuration(i.duration)} to fix` : ''}{i.rca ? ' · postmortem' : ''}</p>
+                            <a class="out-lesson-t" href={u(`/outages/#${anchor(i.id)}`)}>{i.title}</a>
+                            {i.cause && <p class="out-lesson-cause">{i.cause}</p>}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        )}
+        <p class="side-note">Ticks show what you've already opened (kept in this browser). <a href={u('/')}>Today's front page →</a></p>
+    </div>
+    <ReadingClient />
+</Base>

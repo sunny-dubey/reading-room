@@ -2,6 +2,8 @@ import { getCollection } from 'astro:content';
 import { getFeeds, CATEGORIES, SIDE, type FeedItem } from './feeds';
 import { getNotes } from './content';
 import { getRoadmap } from './roadmap';
+import { bigStories } from './bigstory';
+import { isRoundup } from './summarize';
 import { getMeta, makeThumb, cleanDescription } from './meta';
 import { mapLimit } from './summarize';
 
@@ -33,6 +35,9 @@ async function buildReading() {
     const learning = items.filter(i => !SIDE.has(i.category));
     const roadmap = await getRoadmap(learning); // attaches .skill to matched articles
     const byRank = [...learning].sort((a, b) => rank(b, now) - rank(a, now) || +b.date - +a.date);
+    // The big story: the same thing covered by several independent sources (headline feeds count too).
+    const big = await bigStories(items, now);
+    if (process.env.BIG_DEBUG) for (const b of big) console.log('[big]', b.sources, b.items.map(i => `${i.feedTitle}: ${i.title}`).join(' | '));
 
     const used = new Set<string>();
     const take = (pool: FeedItem[], n: number, distinctTrack = false) => {
@@ -90,17 +95,24 @@ async function buildReading() {
     const desks = CATEGORIES.map(c => {
         const mine = learning.filter(i => i.category === c.id && +i.date <= now);
         // Recency-heavy rank (freshness dominates) so the latest leads, but a practical piece beats a same-day essay.
-        let list = mine.filter(i => now - +i.date < 10 * DAY && (i.brief?.worth ?? 0) >= 3).sort((a, b) => rank(b, now) - rank(a, now));
+        // Slow desks (practitioners who post monthly) look back further.
+        const win = c.id === 'hft' ? 30 : 10;
+        let list = mine.filter(i => now - +i.date < win * DAY && (i.brief?.worth ?? 0) >= 3).sort((a, b) => rank(b, now) - rank(a, now));
         if (list.length < 2) list = [...list, ...mine.filter(i => !list.includes(i) && (i.brief?.worth ?? 0) >= 2.5).sort(newest)];
         // Different sources first, so one prolific feed doesn't fill a desk.
         const seen = new Set<string>(), varied = list.filter(i => !seen.has(i.feedTitle) && seen.add(i.feedTitle));
-        return { ...c, items: [...varied, ...list.filter(i => !varied.includes(i))].slice(0, 3) };
+        // Outside the Research desk, a paper listing shouldn't lead: practitioners first, arXiv after.
+        const paper = (i: FeedItem) => Number(c.id !== 'research' && i.feedId.startsWith('arxiv'));
+        varied.sort((a, b) => paper(a) - paper(b));
+        const rest = list.filter(i => !varied.includes(i) && !paper(i)); // and at most one paper per desk
+        return { ...c, items: [...varied, ...rest].slice(0, 3) };
     }).filter(d => d.items.length);
     // The wire: the newest headlines from every desk, for scanning.
     // At most two per source, so a batch publisher (arXiv posts its whole day at once) can't flood it.
     const perFeed = new Map<string, number>();
     const wire = learning.filter(i => +i.date <= now && (i.brief?.worth ?? 0) >= 2.5 && i.link !== deepRead?.link).sort(newest)
-        .filter(i => { const n = perFeed.get(i.feedId) ?? 0; perFeed.set(i.feedId, n + 1); return n < 2; }).slice(0, 10);
+        // All arXiv listings count as one source here, so new-submission batches can't fill the wire.
+        .filter(i => { const k = i.feedId.startsWith('arxiv') ? 'arxiv' : i.feedId; const n = perFeed.get(k) ?? 0; perFeed.set(k, n + 1); return n < 2; }).slice(0, 10);
     // Top stories under the lead: the best recent pieces not already in the wire or the desks.
     const shownElsewhere = new Set([...wire, ...desks.flatMap(d => d.items)].map(i => i.link));
     const topStories = byRank.filter(i => now - +i.date < 7 * DAY && isDeep(i) && !shownElsewhere.has(i.link) && !deepCands.some(d => d.link === i.link) && i.category !== 'postmortems').slice(0, 6);
@@ -117,7 +129,17 @@ async function buildReading() {
     const thumbFor = async (i: FeedItem, w: number) => { if (i.meta?.image) i.meta.thumb = await makeThumb(i.meta.image, w); };
     await mapLimit(deepCands, 4, i => thumbFor(i, 760));
     await mapLimit([...topStories, ...desks.map(d => d.items[0])].filter(Boolean), 6, i => thumbFor(i, 360));
-    return { items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
+    // The week: each desk's best of the last 7 days by worth (not freshness), for days you didn't read.
+    const weekBig = await bigStories(items, now, 7, 6);
+    const weekDesks = CATEGORIES.map(c => {
+        const mine = learning.filter(i => i.category === c.id && +i.date <= now && now - +i.date < 7 * DAY && (i.brief?.worth ?? 0) >= 3 && !isRoundup(i.title));
+        const score = (i: FeedItem) => (i.brief?.worth ?? 2) * 2 + (i.skill?.boost ?? 0) + (i.weight ?? 0);
+        const list = [...mine].sort((a, b) => score(b) - score(a));
+        const seen = new Set<string>(), varied = list.filter(i => !seen.has(i.feedId) && seen.add(i.feedId));
+        return { ...c, total: mine.length, items: [...varied, ...list.filter(i => !varied.includes(i))].slice(0, 5) };
+    }).filter(d => d.items.length);
+
+    return { big, week: { big: weekBig, desks: weekDesks }, items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */

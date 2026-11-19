@@ -20,6 +20,7 @@ const isSaved = path.startsWith(u('/library/'));
             <span class="brand-name">The Reading Room</span>
         </a>
         <div class="nav-links">
+            <a href={u('/week/')} aria-current={path.startsWith(u('/week/')) ? 'page' : undefined}>The week</a>
             <a href={u('/briefing/')} aria-current={path.startsWith(u('/briefing/')) ? 'page' : undefined}>Briefing</a>
             <a href={u('/markets/')} aria-current={path.startsWith(u('/markets/')) ? 'page' : undefined}>Markets</a>
             <a href={u('/outages/')} aria-current={path.startsWith(u('/outages/')) ? 'page' : undefined}>Incidents</a>
@@ -40,6 +41,7 @@ const isSaved = path.startsWith(u('/library/'));
         })}
         {/* On phones the top-bar links live here, so the header is two rows instead of three. */}
         <span class="m-only m-sep" aria-hidden="true"></span>
+        <a class="m-only" href={u('/week/')} aria-current={path.startsWith(u('/week/')) ? 'page' : undefined}>The week</a>
         <a class="m-only" href={u('/briefing/')} aria-current={path.startsWith(u('/briefing/')) ? 'page' : undefined}>Briefing</a>
         <a class="m-only" href={u('/markets/')} aria-current={path.startsWith(u('/markets/')) ? 'page' : undefined}>Markets</a>
         <a class="m-only" href={u('/outages/')} aria-current={path.startsWith(u('/outages/')) ? 'page' : undefined}>Incidents</a>

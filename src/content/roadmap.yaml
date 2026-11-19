@@ -1859,3 +1859,109 @@
     name: "Yield curves, duration and convexity"
     group: "Rates"
     about: "yield curve, bonds, duration, convexity, interest rates"
+- id: hft-low-latency
+  n: 34
+  title: HFT & Low-Latency Engineering
+  track: hft
+  why: Trading systems are where microseconds have a price. The same skills (knowing the hardware, measuring, removing contention) make any system faster.
+  topics:
+  - id: hft-latency-measure
+    name: "Measuring latency: percentiles, histograms, tick-to-trade"
+    group: "Latency fundamentals"
+    about: "latency measurement, tail latency, percentiles, HdrHistogram, tick-to-trade, coordinated omission, jitter"
+  - id: hft-clock-sync
+    name: "Clocks and timestamping (PTP, hardware timestamps)"
+    group: "Latency fundamentals"
+    about: "clock synchronization, PTP, precision time protocol, hardware timestamping, NIC timestamps, TSC"
+  - id: hft-cache-hierarchy
+    name: "CPU caches, cache lines and prefetching"
+    group: "CPU & memory"
+    about: "CPU cache, L1 L2 L3, cache line, cache miss, prefetching, memory hierarchy, TLB"
+  - id: hft-false-sharing
+    name: "False sharing and cache coherence"
+    group: "CPU & memory"
+    about: "false sharing, cache coherence, MESI, contention between cores"
+  - id: hft-branch-simd
+    name: "Branch prediction, SIMD and branch-free code"
+    group: "CPU & memory"
+    about: "branch prediction, branch misprediction, SIMD, AVX, vectorization, branchless code"
+  - id: hft-numa
+    name: "NUMA, huge pages and memory placement"
+    group: "CPU & memory"
+    about: "NUMA, huge pages, memory allocation, page faults, memory placement"
+  - id: hft-memory-ordering
+    name: "Memory ordering and atomics"
+    group: "Concurrency without locks"
+    about: "memory ordering, atomics, acquire release, memory barriers, C++ memory model"
+  - id: hft-spsc-queue
+    name: "Lock-free queues and ring buffers"
+    group: "Concurrency without locks"
+    about: "lock-free queue, ring buffer, SPSC queue, single producer single consumer, wait-free"
+  - id: hft-disruptor
+    name: "The LMAX Disruptor and single-threaded business logic"
+    group: "Concurrency without locks"
+    about: "LMAX Disruptor, single writer principle, mechanical sympathy, event processing"
+  - id: hft-kernel-bypass
+    name: "Kernel bypass networking (DPDK, OpenOnload, ef_vi)"
+    group: "OS & network"
+    about: "kernel bypass, DPDK, OpenOnload, ef_vi, RDMA, user-space networking, zero copy"
+  - id: hft-cpu-isolation
+    name: "Core isolation, pinning and busy polling"
+    group: "OS & network"
+    about: "isolcpus, CPU pinning, affinity, IRQ affinity, busy polling, tickless kernel, frequency scaling"
+  - id: hft-multicast
+    name: "UDP multicast market data and gap recovery"
+    group: "OS & network"
+    about: "UDP multicast, market data feed, packet loss, gap recovery, A/B feed arbitration"
+  - id: hft-fpga
+    name: "FPGAs and hardware in the trading path"
+    group: "Hardware"
+    about: "FPGA, hardware acceleration, smart NIC, tick to trade in hardware, ASIC"
+  - id: hft-microwave
+    name: "Microwave links and the speed of light"
+    group: "Hardware"
+    about: "microwave networks, millimeter wave, fiber latency, speed of light, colocation, Chicago New Jersey"
+  - id: hft-itch-fix
+    name: "Exchange protocols: FIX, ITCH and OUCH"
+    group: "Exchanges"
+    about: "FIX protocol, ITCH, OUCH, binary protocols, order entry, market data protocol"
+  - id: hft-book-building
+    name: "Building an order book from market data"
+    group: "Exchanges"
+    about: "order book reconstruction, book building, level 2, level 3, market by order, add modify cancel"
+  - id: hft-matching-engine
+    name: "Matching engine design"
+    group: "Exchanges"
+    about: "matching engine, price time priority, exchange architecture, order matching, sequencer"
+  - id: hft-colocation
+    name: "Colocation and exchange connectivity"
+    group: "Exchanges"
+    about: "colocation, cross connect, exchange data centre, Mahwah, Carteret, Aurora"
+  - id: hft-market-making
+    name: "Market making and inventory risk"
+    group: "Strategies & market structure"
+    about: "market making, inventory risk, quoting, spread capture, adverse selection"
+  - id: hft-latency-arb
+    name: "Latency arbitrage and queue position"
+    group: "Strategies & market structure"
+    about: "latency arbitrage, queue position, sniping, stale quotes, speed race"
+  - id: hft-batch-auctions
+    name: "Speed bumps and frequent batch auctions"
+    group: "Strategies & market structure"
+    about: "frequent batch auctions, speed bump, IEX, market design, continuous trading"
+  - id: hft-risk-checks
+    name: "Pre-trade risk checks and kill switches"
+    group: "Strategies & market structure"
+    about: "pre-trade risk checks, kill switch, fat finger, Knight Capital, risk limits"
+  - id: hft-hot-path
+    name: "Writing the hot path: no allocation, warm caches"
+    group: "Engineering practice"
+    about: "hot path, low latency C++, no allocation, cache warming, templates, compile time, inlining"
+  - id: hft-profiling
+    name: "Profiling: perf, PMU counters and flame graphs"
+    group: "Engineering practice"
+    about: "perf, performance counters, PMU, flame graphs, top-down analysis, profiling, VTune"
+  - id: hft-replay
+    name: "Deterministic replay and simulation of trading systems"
+    group: "Engineering practice"
+    about: "deterministic replay, event sourcing, market replay, backtesting infrastructure, simulation"

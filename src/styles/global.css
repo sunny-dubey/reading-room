@@ -230,9 +230,9 @@ a.tile:hover, .tile.hoverable:hover { border-color: color-mix(in srgb, var(--acc
 /* ---------- Reading: "The Reading Room" ---------- */
 :root { --serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
         --s-outage: #dc2626; --s-model: #7c3aed; --s-migration: #d97706; --s-security: #db2777; --s-controversy: #0891b2;
-        --cat-news: #2563eb; --cat-ai: #7c3aed; --cat-engineering: #059669; --cat-security: #d97706; --cat-status: #dc2626; --cat-community: #d97706; --cat-posts: #0284c7; --cat-reddit: #ea580c; --cat-systems: #059669; --cat-backend: #2563eb; --cat-ai-eng: #7c3aed; --cat-ml: #db2777; --cat-postmortems: #dc2626; --cat-math: #0891b2; --cat-quant: #65a30d; --cat-macro: #c2410c; --cat-research: #4338ca; }
+        --cat-news: #2563eb; --cat-ai: #7c3aed; --cat-engineering: #059669; --cat-security: #d97706; --cat-status: #dc2626; --cat-community: #d97706; --cat-posts: #0284c7; --cat-reddit: #ea580c; --cat-systems: #059669; --cat-backend: #2563eb; --cat-ai-eng: #7c3aed; --cat-ml: #db2777; --cat-postmortems: #dc2626; --cat-math: #0891b2; --cat-quant: #65a30d; --cat-hft: #a21caf; --cat-macro: #c2410c; --cat-research: #4338ca; }
 [data-theme="dark"] { --s-outage: #f87171; --s-model: #a78bfa; --s-migration: #fbbf24; --s-security: #f472b6; --s-controversy: #22d3ee;
-        --cat-news: #60a5fa; --cat-ai: #a78bfa; --cat-engineering: #34d399; --cat-security: #fbbf24; --cat-status: #f87171; --cat-community: #fbbf24; --cat-posts: #38bdf8; --cat-reddit: #fb923c; --cat-systems: #34d399; --cat-backend: #60a5fa; --cat-ai-eng: #a78bfa; --cat-ml: #f472b6; --cat-postmortems: #f87171; --cat-math: #22d3ee; --cat-quant: #a3e635; --cat-macro: #fb923c; --cat-research: #818cf8; }
+        --cat-news: #60a5fa; --cat-ai: #a78bfa; --cat-engineering: #34d399; --cat-security: #fbbf24; --cat-status: #f87171; --cat-community: #fbbf24; --cat-posts: #38bdf8; --cat-reddit: #fb923c; --cat-systems: #34d399; --cat-backend: #60a5fa; --cat-ai-eng: #a78bfa; --cat-ml: #f472b6; --cat-postmortems: #f87171; --cat-math: #22d3ee; --cat-quant: #a3e635; --cat-hft: #e879f9; --cat-macro: #fb923c; --cat-research: #818cf8; }
 [data-sig="outage"] { --sc: var(--s-outage); }
 [data-sig="model"] { --sc: var(--s-model); }
 [data-sig="migration"] { --sc: var(--s-migration); }
@@ -243,6 +243,7 @@ a.tile:hover, .tile.hoverable:hover { border-color: color-mix(in srgb, var(--acc
 [data-cat="engineering"] { --cc: var(--cat-engineering); }
 [data-cat="security"] { --cc: var(--cat-security); }
 [data-cat="quant"] { --cc: var(--cat-quant); }
+[data-cat="hft"] { --cc: var(--cat-hft); }
 [data-cat="macro"] { --cc: var(--cat-macro); }
 [data-cat="research"] { --cc: var(--cat-research); }
 [data-cat="status"] { --cc: var(--cat-status); }
@@ -1404,3 +1405,36 @@ body { font-size: 15px; line-height: 1.5; }
 details.inc[open] .inc-cause-line { display: none; }
 .inc-cause-line, .inc-facts dd, .inc-text, .out-lesson-cause, .drill p { overflow-wrap: anywhere; }
 .inc, .inc summary, .inc-body { min-width: 0; max-width: 100%; }
+
+/* The big story: same story, several independent sources */
+.big-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0; border-bottom: 1px solid var(--border-2); margin: 0 0 18px; }
+.big-story { padding: 10px 16px 12px; border-left: 3px solid var(--ed-accent); }
+.big-story + .big-story { border-left-width: 1px; border-left-color: var(--border-2); }
+.big-k { margin: 0 0 3px; font: 700 11px var(--sans); text-transform: uppercase; letter-spacing: .12em; color: var(--ed-accent); }
+.big-h { display: block; font: 700 19px/1.25 var(--serif); color: var(--fg); text-decoration: none; }
+.big-h:hover { text-decoration: underline; }
+.big-cov { margin: 5px 0 0; font: 12px var(--sans); color: var(--faint); }
+.big-cov a { color: var(--muted); }
+@media (max-width: 600px) { .big-strip { grid-template-columns: minmax(0, 1fr); } .big-story + .big-story { border-left: 3px solid var(--ed-accent); border-top: 1px solid var(--border-2); } }
+
+/* Macro calendar: one line under the ticker, a table on /markets/ */
+.mc-next { margin: 4px 0 14px; text-align: center; font: 12px var(--sans); color: var(--muted); }
+.mc-next a { color: inherit; text-decoration: none; }
+.mc-next a:hover b { text-decoration: underline; }
+.mc-next-k { font-weight: 700; text-transform: uppercase; letter-spacing: .12em; font-size: 11px; color: var(--ed-accent); margin-right: 8px; }
+.mc-next b { color: var(--fg); font-weight: 600; }
+.mc-table .mc-when time { color: var(--faint); font-size: 12px; margin-left: 4px; }
+@media (max-width: 600px) { .mc-table th:nth-child(3), .mc-table td:nth-child(3) { display: none; } }
+
+/* The week */
+.wk-link { text-align: center; margin: -6px 0 14px; font: 600 12.5px var(--sans); }
+.wk-link a { color: var(--ed-accent); text-decoration: none; }
+.wk-link a:hover { text-decoration: underline; }
+.wk-big { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px 28px; }
+.wk-big li { border-left: 3px solid var(--ed-accent); padding: 4px 0 6px 14px; }
+.wk-desks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 40px; }
+.wk-desk ol { margin: 8px 0 0; padding-left: 20px; }
+.wk-desk li { margin: 0 0 10px; }
+.wk-desk li .desk-title { display: block; }
+.wk-n { font: 500 11px var(--sans); color: var(--faint); text-transform: none; letter-spacing: 0; margin-left: 6px; }
+@media (max-width: 900px) { .wk-desks { grid-template-columns: minmax(0, 1fr); } }

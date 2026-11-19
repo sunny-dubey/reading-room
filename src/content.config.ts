@@ -40,6 +40,8 @@ const feeds = defineCollection({
         limit: z.number().int().positive().default(8),
         maxAgeDays: z.number().int().positive().default(45),
         weight: z.number().min(-2).max(2).default(0), // ranking nudge for this source (depth/quality)
+        onlyTags: z.array(z.string()).optional(),   // keep only items whose own <category> tags include one of these
+        skipTitles: z.string().optional(),          // regex (case-insensitive): drop items whose title matches
     }),
 });
 
@@ -47,7 +49,7 @@ const feeds = defineCollection({
 const canon = defineCollection({
     loader: file('./src/content/canon.yaml'),
     schema: z.object({
-        track: z.enum(['research', 'systems', 'backend', 'ai-eng', 'ml', 'security', 'quant', 'macro', 'math', 'postmortems']),
+        track: z.enum(['research', 'systems', 'backend', 'ai-eng', 'ml', 'security', 'hft', 'quant', 'macro', 'math', 'postmortems']),
         title: z.string(),
         author: z.string(),
         url: z.string().url(),

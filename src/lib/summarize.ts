@@ -127,9 +127,10 @@ const ANNOUNCE = /\b(announc\w*|launch(es|ed|ing)?|introduc(ing|es)|now availabl
 // Roundups and newsletters: long, but a list of links rather than an explanation.
 // The reader wants informative, practical pieces over opinion: titles that signal a take lose worth,
 // titles that signal how-it-works or how-to gain a little.
-const OPINION = /\b(why (i|we|you)\b|my (take|thoughts|view)|thoughts on|in defen[cs]e of|the case (for|against)|unpopular opinion|hot take|rant\b|i think|i believe|reflections on|is (dead|overrated|over|broken)\b|stop (using|doing)|conversation with|in conversation|ask me anything|\bama\b|interview with|op-?ed|opinion)\b/i;
+const OPINION = /\b(why (i|we|you)\b|my (take|thoughts|view)|thoughts on|in defen[cs]e of|the case (for|against)|unpopular opinion|hot take|rant\b|i think|i believe|reflections on|is (dead|overrated|over|broken)\b|stop (using|doing)|conversation with|in conversation|ask me anything|\bama\b|interview with|op-?ed|opinion|manifesto)\b/i;
 const PRACTICAL = /\b(how (to|we|it works|does)|guide|tutorial|walkthrough|deep dive|explained|internals|under the hood|benchmark(s|ing)?|case study|lessons (from|learned)|post-?mortem|step[- ]by[- ]step|implement(ing|ation)|from scratch|primer|introduction to|measur(ing|ed|ement)|nowcast|data on|what the data)\b/i;
-const ROUNDUP = /^\[ainews\]|^ep\d+[:\s]|\bthis week in\b|\bweekly\b|\broundup\b|\bdigest\b|\blinks? (for|of the)\b|\bissue #?\d+|\bnewsletter\b|\bthe pulse\b|\b(day \d+|days? \d+ and \d+)\)?$/i;
+const ROUNDUP = /^\[ainews\]|^ep\d+[:\s]|\bthis week in\b|\bweekly\b|\broundup\b|\bdigest\b|\blinks? (for|of the)\b|\bissue #?\d+|\bnewsletter\b|\bthe pulse\b|\b(day \d+|days? \d+ and \d+)\)?$|\s#\d+\s*$/i;
+export const isRoundup = (title: string) => ROUNDUP.test(title);
 
 // ---------------------------------------------------------------- public API
 export async function makeBrief(i: { title: string; link: string; summary: string; content?: string; category: string }): Promise<Brief> {

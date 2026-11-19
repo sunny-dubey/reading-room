@@ -2,13 +2,34 @@
 import Base from '../layouts/Base.astro';
 import ReadingMast from '../components/ReadingMast.astro';
 import { getMarkets, fmtValue, fmtChange, sparkPath } from '../lib/markets';
+import { getMacroCalendar, upcoming, fmtDays } from '../lib/macro-calendar';
 const markets = await getMarkets();
 const day = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 const groups = [...new Set(markets.map(m => m.group))];
+const cal = upcoming(await getMacroCalendar(), Date.now(), 8);
 ---
 <Base title="Markets" description="The numbers that matter to an engineer who follows tech, macro and quant: last value, change over a week, and the last month." accent="reading">
     <div class="rd markets-page">
         <ReadingMast compact title="Markets" sub="A snapshot taken when this edition was built, not a live feed: the latest value, the change over a week (a month for monthly series) and the trend." />
+        {cal.length > 0 && (
+            <section class="fp-band" id="calendar">
+                <h2 class="fp-band-h"><span>Coming up in macro</span></h2>
+                <table class="bf-table mc-table">
+                    <thead><tr><th>When</th><th>Who</th><th>What</th><th>Where it stands</th></tr></thead>
+                    <tbody>
+                        {cal.map(e => (
+                            <tr>
+                                <td class="mc-when"><b>{fmtDays(e)}</b> <time data-rel datetime={new Date(e.end).toISOString()}></time></td>
+                                <td><a href={e.url} target="_blank" rel="noopener noreferrer">{e.who}</a></td>
+                                <td>{e.what}</td>
+                                <td>{e.now ?? '—'}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                <p class="side-note">Fed and ECB dates come from their official calendars, read when this edition was built. RBI dates come from the RBI's 2026-27 schedule, and US CPI dates from the BLS schedule (checked by hand; BLS doesn't allow automated access). Current rates: FRED and the RBI's homepage.</p>
+            </section>
+        )}
         {groups.map(g => (
             <section class="fp-band">
                 <h2 class="fp-band-h"><span>{g}</span></h2>

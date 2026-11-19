@@ -1,0 +1,15 @@
+# Hand-kept macro dates for sources that can't be read automatically. Fed (FOMC) and ECB dates are
+# fetched from their official calendars at build time; everything here is checked by hand.
+# Update once a year (the build warns when the last date here has passed).
+#
+# RBI MPC: from the RBI press release of 23 Mar 2026, "Meeting Schedule of the Monetary Policy Committee
+#   for 2026-2027" (https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx?prid=62422). Decision on the last day.
+# US CPI: BLS blocks automated access to its schedule (https://www.bls.gov/schedule/news_release/cpi.htm),
+#   so these were checked by hand. 8:30 a.m. ET. Re-check against bls.gov when updating.
+rbi:
+  - { start: 2026-12-02, end: 2026-12-04 }
+  - { start: 2027-02-03, end: 2027-02-05 }
+uscpi:
+  - { date: 2026-12-10, covers: November 2026 }
+  - { date: 2027-01-13, covers: December 2026 }
+  - { date: 2027-02-11, covers: January 2027 }

@@ -8,6 +8,7 @@
 #   ai-eng       AI Engineering & Agents
 #   ml           ML & LLM Foundations
 #   security     Security: web, crypto, cloud, detection, exploitation
+#   hft          HFT & low-latency engineering: CPU/memory performance, kernel bypass, exchanges, microstructure
 #   quant        Quantitative finance: pricing, risk, microstructure, trading systems
 #   macro        Macro & markets: central banks, inflation, growth (informative, data-led sources only)
 #   research     CS research: algorithms, theory, performance
@@ -33,7 +34,7 @@
   category: research
   limit: 4
   maxAgeDays: 90
-  weight: 0.3
+  weight: 0             # science journalism about research, not the research itself
 - id: windows-on-theory
   title: "Windows on Theory (Boaz Barak)"
   url: 'https://www.windowsontheory.org/feed/'
@@ -49,6 +50,7 @@
   category: research
   limit: 3
   maxAgeDays: 60
+  weight: -0.8          # often essays and opinion; keep, but below the papers
 - id: complexity-blog
   title: "Computational Complexity (Fortnow & Gasarch)"
   url: 'https://blog.computationalcomplexity.org/feeds/posts/default'
@@ -64,6 +66,30 @@
   category: research
   limit: 5
   maxAgeDays: 10
+
+# Systems and database research, straight from the source (arXiv new submissions, capped so they can't flood).
+- id: arxiv-cs-dc
+  title: "arXiv: Distributed Computing"
+  url: 'https://rss.arxiv.org/rss/cs.DC'
+  site: https://arxiv.org/list/cs.DC/new
+  category: research
+  limit: 3
+  maxAgeDays: 7
+- id: arxiv-cs-db
+  title: "arXiv: Databases"
+  url: 'https://rss.arxiv.org/rss/cs.DB'
+  site: https://arxiv.org/list/cs.DB/new
+  category: research
+  limit: 3
+  maxAgeDays: 7
+- id: sigops
+  title: "ACM SIGOPS blog"
+  url: 'https://www.sigops.org/feed/'
+  site: https://www.sigops.org/blog/
+  category: research
+  limit: 3
+  maxAgeDays: 180
+  weight: 0.8
 
 # ---------- systems ----------
 - id: marc-brooker
@@ -380,6 +406,17 @@
   maxAgeDays: 180
   weight: 0.5
 
+- id: openai-engineering
+  title: "OpenAI: engineering and launches"
+  url: 'https://openai.com/news/rss.xml'
+  site: https://openai.com/news/
+  category: ai-eng
+  limit: 5
+  maxAgeDays: 30
+  weight: 0.4
+  onlyTags: [Engineering, Product]
+  skipTitles: '\bfor (Sales|Law|Business|Teams|Enterprise|Education|Government|Nonprofits|Healthcare)\b|partner|customers?\b|leaders'
+
 # ---------- ml ----------
 - id: lilian-weng
   title: Lilian Weng
@@ -446,6 +483,50 @@
   limit: 3
   maxAgeDays: 365
   weight: 0.8
+
+# Frontier labs: primary sources (Anthropic and Meta AI publish no RSS; their news reaches the desk via Simon Willison and the wire).
+- id: openai-research
+  title: "OpenAI: research and safety"
+  url: 'https://openai.com/news/rss.xml'
+  site: https://openai.com/research/
+  category: ml
+  limit: 6
+  maxAgeDays: 30
+  weight: 0.6
+  onlyTags: [Research, Safety]
+- id: deepmind
+  title: "Google DeepMind"
+  url: 'https://deepmind.google/blog/rss.xml'
+  site: https://deepmind.google/discover/blog/
+  category: ml
+  limit: 6
+  maxAgeDays: 30
+  weight: 0.5
+- id: google-research
+  title: "Google Research"
+  url: 'https://research.google/blog/rss/'
+  site: https://research.google/blog/
+  category: ml
+  limit: 5
+  maxAgeDays: 30
+  weight: 0.5
+- id: msr
+  title: "Microsoft Research"
+  url: 'https://www.microsoft.com/en-us/research/feed/'
+  site: https://www.microsoft.com/en-us/research/blog/
+  category: ml
+  limit: 5
+  maxAgeDays: 30
+  weight: 0.3
+  skipTitles: 'Research Focus|podcast|Abstracts:'
+- id: bair
+  title: "Berkeley AI Research (BAIR)"
+  url: 'https://bair.berkeley.edu/blog/feed.xml'
+  site: https://bair.berkeley.edu/blog/
+  category: ml
+  limit: 3
+  maxAgeDays: 120
+  weight: 1
 
 # ---------- postmortems ----------
 - id: github-availability
@@ -622,6 +703,58 @@
   maxAgeDays: 45
   weight: -0.5
 
+# ---------- HFT & low-latency engineering ----------
+# Practitioners of performance: compilers, CPU microarchitecture, profiling, and trading-system engineering.
+# HRT, Optiver, IMC, Jump and Databento publish no usable RSS (or block readers); Jane Street is above.
+- id: godbolt
+  title: "Matt Godbolt (xania.org)"
+  url: 'https://xania.org/feed'
+  site: https://xania.org/
+  category: hft
+  limit: 4
+  maxAgeDays: 365
+  weight: 1
+- id: brendan-gregg
+  title: "Brendan Gregg"
+  url: 'https://www.brendangregg.com/blog/rss.xml'
+  site: https://www.brendangregg.com/blog/
+  category: hft
+  limit: 3
+  maxAgeDays: 365
+  weight: 1
+- id: johnnysswlab
+  title: "Johnny's Software Lab"
+  url: 'https://johnnysswlab.com/feed/'
+  site: https://johnnysswlab.com/
+  category: hft
+  limit: 3
+  maxAgeDays: 365
+  weight: 0.8
+- id: computer-enhance
+  title: "Computer, Enhance! (Casey Muratori)"
+  url: 'https://www.computerenhance.com/feed'
+  site: https://www.computerenhance.com/
+  category: hft
+  limit: 3
+  maxAgeDays: 120
+  weight: 0.3
+- id: chips-and-cheese
+  title: "Chips and Cheese"
+  url: 'https://chipsandcheese.com/feed/'
+  site: https://chipsandcheese.com/
+  category: hft
+  limit: 3
+  maxAgeDays: 60
+  weight: 0.5
+- id: arxiv-qfin-tr
+  title: "arXiv: Trading and Market Microstructure"
+  url: 'https://rss.arxiv.org/rss/q-fin.TR'
+  site: https://arxiv.org/list/q-fin.TR/new
+  category: hft
+  limit: 2
+  maxAgeDays: 7
+  weight: -1.5          # papers are often trading-strategy theory, not engineering; practitioners lead the desk
+
 # ---------- quantitative finance ----------
 - id: quantocracy
   title: "Quantocracy"
@@ -658,10 +791,10 @@
   title: "Jane Street Tech Blog"
   url: 'https://blog.janestreet.com/feed.xml'
   site: https://blog.janestreet.com/
-  category: quant
+  category: hft
   limit: 4
   maxAgeDays: 180
-  weight: 0.5
+  weight: 1
 - id: robot-wealth
   title: "Robot Wealth"
   url: 'https://robotwealth.com/feed/'

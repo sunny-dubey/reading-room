@@ -12,6 +12,7 @@ export interface FeedItem {
     summary: string;
     embedText?: string;  // title + start of article, for topic matching
     weight?: number;     // source-level ranking nudge from feeds.yaml
+    movedFrom?: string;  // original desk when the article was moved to the desk its topic belongs to (roadmap.ts)
     skill?: import('./roadmap').SkillMatch; // closest Roadmap topic (build time)
     meta?: { description?: string; image?: string; thumb?: string }; // the article's own description and preview thumbnail
     classic?: { id: string; title: string; url: string; author: string; sim: number }; // closest Canon read (Old meets new)
@@ -28,6 +29,7 @@ export const CATEGORIES = [
     { id: 'ai-eng', slug: 'ai-engineering', label: 'Agentic AI & AI Engineering', short: 'Agentic AI', blurb: 'Agents, evals, retrieval, tool use and LLMs in production' },
     { id: 'ml', slug: 'foundations', label: 'ML & LLM Foundations', short: 'ML Foundations', blurb: 'How transformers, training, fine-tuning and inference actually work' },
     { id: 'security', slug: 'security', label: 'Security', short: 'Security', blurb: 'How attacks work and how to build systems that survive them: web, crypto, cloud, detection' },
+    { id: 'hft', slug: 'hft', label: 'HFT & Low-Latency Engineering', short: 'HFT tech', blurb: 'Trading systems where microseconds matter: CPU caches, kernel bypass, lock-free queues, exchanges and market microstructure' },
     { id: 'quant', slug: 'quant', label: 'Quantitative Finance', short: 'Quant', blurb: 'Markets as systems: probability, pricing, risk, microstructure and the engineering behind trading' },
     { id: 'macro', slug: 'macro', label: 'Macro & Markets', short: 'Macro', blurb: 'Central banks, inflation, growth, jobs and trade, from the data and the people who produce it' },
     { id: 'math', slug: 'math', label: 'Applied Mathematics', short: 'Applied Maths', blurb: 'Probability, optimisation, numerical methods and the maths behind systems, ML and markets' },
@@ -87,7 +89,7 @@ function atomLink(links: any[]): string {
     return typeof l === 'string' ? l : l?.['@_href'] ?? '';
 }
 
-type Parsed = Omit<FeedItem, 'feedId' | 'feedTitle' | 'category'>;
+type Parsed = Omit<FeedItem, 'feedId' | 'feedTitle' | 'category'> & { tags?: string[] };
 
 function parseFeed(xml: string): Parsed[] {
     const doc = parser.parse(xml);
@@ -101,6 +103,7 @@ function parseFeed(xml: string): Parsed[] {
                 date: new Date(text(i.pubDate) || text(i['dc:date'])),
                 summary: clean(raw),
                 content: text(i['content:encoded']) || raw,
+                tags: arr(i.category).map((c: any) => text(c).trim()).filter(Boolean),
             };
             // lobste.rs: description is only a comments link.
             if (/^Comments$/.test(base.summary)) return { ...base, summary: '', comments: text(i.comments) || undefined };
@@ -139,9 +142,11 @@ async function load(): Promise<{ items: FeedItem[]; status: FeedStatus[]; fetche
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const items = parseFeed(await res.text())
                 .filter(i => i.link && i.title && !isNaN(+i.date) && +i.date >= cutoff && +i.date <= Date.now() + 864e5)
+                .filter(i => !data.onlyTags || (i.tags ?? []).some(t => data.onlyTags!.includes(t)))
+                .filter(i => !data.skipTitles || !new RegExp(data.skipTitles, 'i').test(i.title))
                 .sort((a, b) => +b.date - +a.date)
                 .slice(0, data.limit)
-                .map(i => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, weight: data.weight }));
+                .map(({ tags, ...i }) => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, weight: data.weight }));
             return { status: { ...base, ok: true, count: items.length }, items };
         } catch (err) {
             const error = err instanceof Error ? err.message : String(err);

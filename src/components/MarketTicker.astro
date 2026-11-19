@@ -3,6 +3,8 @@
 // A build-time snapshot, labelled as such; each item links to /markets/.
 import { getMarkets, fmtValue, fmtChange, sparkPath } from '../lib/markets';
 import { u } from '../lib/url';
+import { getMacroCalendar, upcoming, fmtDays } from '../lib/macro-calendar';
+const next = upcoming(await getMacroCalendar(), Date.now(), 4);
 const markets = await getMarkets();
 const now = Date.now();
 const day = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
@@ -33,4 +35,7 @@ const items = markets.map(m => ({
             </span>
         </span>
     </a>
+)}
+{next.length > 0 && (
+    <p class="mc-next"><a href={u('/markets/#calendar')}><span class="mc-next-k">Coming up</span>{next.map((e, n) => <>{n > 0 && <span class="mc-sep"> · </span>}<span><b>{e.who.replace(/ \(.*\)$/, '')}</b> {fmtDays(e)}</span></>)}</a></p>
 )}

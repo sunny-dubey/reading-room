@@ -20,7 +20,7 @@ import { getPuzzles } from '../lib/puzzles';
 import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
 import WebPuzzleList from '../components/WebPuzzleList.astro';
 
-const { learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap } = await getReading();
+const { big, learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
 const { question, rabbitHoles, twoTakes, quickCands, explainer, readMap } = await getToday();
 const STEP_NAMES = ['Start here', 'Go deeper', 'Master it'];
@@ -57,7 +57,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         <!-- ===== Masthead ===== -->
         <header class="fp-mast">
             <h1 class="fp-title">The Reading Room</h1>
-            <p class="fp-for">A daily paper for engineers who read like researchers: CS research, distributed systems, system design, agentic AI, security, quant finance, macro, applied maths and puzzles. The latest from the best experts in each, informative over opinion.</p>
+            <p class="fp-for">A daily paper for engineers who read like researchers: CS research, distributed systems, system design, agentic AI, security, HFT tech, quant finance, macro, applied maths and puzzles. The latest from the best experts in each, informative over opinion.</p>
             <div class="fp-dateline">
                 <span>No. {issue}</span>
                 <span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span>
@@ -68,8 +68,18 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         </header>
         <MarketTicker />
 
-
-
+        <!-- ===== The big story: one thing covered by several independent sources ===== -->
+        {big.length > 0 && (
+            <section class="big-strip" aria-label="The big story">
+                {big.map(b => (
+                    <div class="big-story" data-link={b.lead.link}>
+                        <p class="big-k">The big story · {b.sources} sources</p>
+                        <a class="big-h" href={b.lead.link} target="_blank" rel="noopener noreferrer" data-read>{b.lead.title}</a>
+                        <p class="big-cov">{b.items.map((i, n) => <>{n > 0 && ' · '}<a href={i.link} target="_blank" rel="noopener noreferrer">{i.feedTitle.replace(/: .*$/, '')}</a></>)}</p>
+                    </div>
+                ))}
+            </section>
+        )}
 
         <!-- ===== Front: the lead story and the wire ===== -->
         <section class="fp-front">
@@ -140,6 +150,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 </div>
                 <p class="desk-pick-note">Hidden desks also leave the wire and top stories. Saved in this browser only.</p>
             </details>
+            <p class="wk-link"><a href={u('/week/')}>Missed a few days? The week in every desk →</a></p>
             <div class="desks">
                 {desks.map(d => (
                     <section class="desk" data-cat={d.id}>

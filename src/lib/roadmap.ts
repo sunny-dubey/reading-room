@@ -46,7 +46,8 @@ const ALLOWED: Record<string, string[]> = {
     postmortems: ['backend', 'systems', 'security'],
     'ai-eng': ['ai-eng', 'ml', 'backend', 'security'],
     security: ['security', 'backend', 'systems'],
-    quant: ['quant', 'math', 'ml', 'backend'],
+    quant: ['quant', 'math', 'ml', 'backend', 'hft'],
+    hft: ['hft', 'quant', 'systems', 'backend'],
     macro: ['macro', 'quant', 'math'],
     research: ['math', 'systems', 'ml', 'backend', 'security'],
     ml: ['ml', 'ai-eng', 'math'],
@@ -139,8 +140,14 @@ async function build(articles: FeedItem[]) {
             ? [{ t: topics.get(pinned)!, sim: 1 }]
             : best(av[idx], 1, ALLOWED[i.category]);
         // Maths and security posts use different vocabulary from topic names, so they get a slightly lower bar.
-        const bar = ['math', 'security', 'quant', 'macro', 'research'].includes(i.category) ? MATCH - 0.03 : MATCH;
+        const bar = ['math', 'security', 'hft', 'quant', 'macro', 'research'].includes(i.category) ? MATCH - 0.03 : MATCH;
         if (!top || top.sim < bar) return;
+        // General research blogs post off-topic now and then (a security bug on an algorithms blog):
+        // move a research-desk post to the desk its topic belongs to when the match is clear.
+        if (i.category === 'research' && !pinned && !i.feedId.startsWith('arxiv') && ['security', 'ml', 'ai-eng'].includes(top.t.track) && top.sim >= bar + 0.07) {
+            i.movedFrom = i.category;
+            i.category = top.t.track;
+        }
         const covered = learned.has(top.t.id) ? 3
             : (notesByTopic.get(top.t.id) ?? 0) + (savedByTopic.get(top.t.id) ?? 0) * 0.5 + (canonDoneTopics.get(top.t.id) ?? 0);
         const gap = covered === 0 ? 1 : covered < 3 ? 0.6 : 0.3;

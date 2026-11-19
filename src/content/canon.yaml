@@ -1,6 +1,6 @@
 # The Canon: foundational reads per track, in suggested order.
 # Progress is tracked in your browser. Edit freely: add, remove, reorder.
-# track: research | systems | backend | ai-eng | ml | security | quant | macro | math | postmortems
+# track: research | systems | backend | ai-eng | ml | security | hft | quant | macro | math | postmortems
 # kind: paper | article | book | video | course | docs
 # minutes: rough reading/watching time
 # parts: chapters (or sittings) of a long work, in reading order. Today's plan and the Canon
@@ -49,7 +49,7 @@
   why: How replicated systems agree on one log. The basis of etcd, Consul, CockroachDB.
 - id: dynamo
   track: systems
-  title: 'Dynamo: Amazon''s Highly Available Key-value Store'
+  title: "'Dynamo: Amazon''s Highly Available Key-value Store'"
   author: DeCandia et al.
   url: https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
   kind: paper
@@ -81,7 +81,7 @@
   why: The log as the source of truth and everything else as derived views. Explains Kafka-style architectures.
 - id: pg-mvcc
   track: systems
-  title: 'PostgreSQL: Concurrency Control (MVCC)'
+  title: "'PostgreSQL: Concurrency Control (MVCC)'"
   author: PostgreSQL docs
   url: https://www.postgresql.org/docs/current/mvcc.html
   kind: docs
@@ -191,7 +191,7 @@
   url: https://12factor.net/
   kind: article
   minutes: 20
-  why: 'The baseline contract for deployable services: config, logs, processes, disposability.'
+  why: "'The baseline contract for deployable services: config, logs, processes, disposability.'"
 - id: vogels-eventually-consistent
   track: backend
   title: Eventually Consistent, Revisited
@@ -218,7 +218,7 @@
   why: Separating reads from writes, when it helps scale and when it just adds complexity.
 - id: saga
   track: backend
-  title: 'Pattern: Saga'
+  title: "'Pattern: Saga'"
   author: Chris Richardson (microservices.io)
   url: https://microservices.io/patterns/data/saga.html
   kind: article
@@ -303,7 +303,7 @@
   url: https://www.allthingsdistributed.com/2016/03/10-lessons-from-10-years-of-aws.html
   kind: article
   minutes: 15
-  why: 'Architecture lessons from building the largest cloud: design for failure, primitives over frameworks, automation.'
+  why: "'Architecture lessons from building the largest cloud: design for failure, primitives over frameworks, automation.'"
 - id: s3-pretty-big
   track: backend
   title: Building and operating a pretty big storage system called S3
@@ -311,7 +311,7 @@
   url: https://www.allthingsdistributed.com/2023/07/building-and-operating-a-pretty-big-storage-system.html
   kind: article
   minutes: 30
-  why: 'What scale really means: heat management, durability and the human side of running S3.'
+  why: "'What scale really means: heat management, durability and the human side of running S3.'"
 - id: slack-shared-channels
   track: backend
   title: How Slack Built Shared Channels
@@ -367,7 +367,7 @@
   url: https://huyenchip.com/2024/07/25/genai-platform.html
   kind: article
   minutes: 45
-  why: 'The full architecture: context, guardrails, routers, caching, observability.'
+  why: "'The full architecture: context, guardrails, routers, caching, observability.'"
 - id: chip-agents
   track: ai-eng
   title: Agents
@@ -402,7 +402,7 @@
   why: The standard way agents connect to tools and data.
 - id: zero-to-hero
   track: ml
-  title: 'Neural Networks: Zero to Hero'
+  title: "'Neural Networks: Zero to Hero'"
   author: Andrej Karpathy
   url: https://karpathy.ai/zero-to-hero.html
   kind: course
@@ -442,7 +442,7 @@
   why: The paper again, as runnable PyTorch, line by line.
 - id: lets-build-gpt
   track: ml
-  title: 'Let''s build GPT: from scratch, in code, spelled out'
+  title: "'Let''s build GPT: from scratch, in code, spelled out'"
   author: Andrej Karpathy
   url: https://www.youtube.com/watch?v=kCc8FmEb1nY
   kind: video
@@ -478,7 +478,7 @@
   why: Scaling laws. How model size, data and compute trade off.
 - id: lora
   track: ml
-  title: 'LoRA: Low-Rank Adaptation of Large Language Models'
+  title: "'LoRA: Low-Rank Adaptation of Large Language Models'"
   author: Hu et al.
   url: https://arxiv.org/abs/2106.09685
   kind: paper
@@ -502,7 +502,7 @@
   why: KV cache, quantization, distillation, sparsity. Why inference is expensive and how it's made cheaper.
 - id: monosemanticity
   track: ml
-  title: 'Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet'
+  title: "'Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet'"
   author: Anthropic
   url: https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html
   kind: paper
@@ -510,7 +510,7 @@
   why: What is actually going on inside a model, and how interpretability research finds out.
 - id: postmortem-culture
   track: postmortems
-  title: 'Postmortem Culture: Learning from Failure'
+  title: "'Postmortem Culture: Learning from Failure'"
   author: Google SRE book
   url: https://sre.google/sre-book/postmortem-culture/
   kind: book
@@ -921,6 +921,96 @@
     - { title: "Set 2 \u00b7 Block crypto", minutes: 180, url: "https://cryptopals.com/sets/2" }
     - { title: "Set 3 \u00b7 Block and stream crypto", minutes: 180, url: "https://cryptopals.com/sets/3" }
     - { title: "Set 4 \u00b7 Stream crypto and randomness", minutes: 180, url: "https://cryptopals.com/sets/4" }
+
+# ---------- HFT & Low-Latency Engineering ----------
+- id: drepper-memory
+  track: hft
+  title: What Every Programmer Should Know About Memory
+  author: Ulrich Drepper
+  url: https://people.freebsd.org/~lstewart/articles/cpumemory.pdf
+  kind: paper
+  minutes: 300
+  why: Caches, cache lines, TLBs and NUMA from the hardware up. Every low-latency trick assumes you know this.
+  parts:
+    - { title: "1–3. Commodity hardware, RAM and CPU caches", minutes: 120 }
+    - { title: "4–5. Virtual memory and NUMA", minutes: 60 }
+    - { title: "6. What programmers can do", minutes: 90 }
+    - { title: "7. Memory performance tools", minutes: 30 }
+- id: false-sharing
+  track: hft
+  title: False Sharing
+  author: Martin Thompson (Mechanical Sympathy)
+  url: https://mechanical-sympathy.blogspot.com/2011/07/false-sharing.html
+  kind: article
+  minutes: 15
+  why: Two threads, two variables, one cache line, and throughput collapses. The classic demonstration, with numbers.
+- id: lmax-architecture
+  track: hft
+  title: The LMAX Architecture
+  author: Martin Fowler
+  url: https://martinfowler.com/articles/lmax.html
+  kind: article
+  minutes: 40
+  why: "How an exchange processed 6 million orders a second on one thread: in-memory state, event sourcing and no locks."
+- id: disruptor-paper
+  track: hft
+  title: "Disruptor: High performance alternative to bounded queues for exchanging data between concurrent threads"
+  author: "Martin Thompson, Dave Farley, Michael Barker, Patricia Gee, Andrew Stewart"
+  url: https://lmax-exchange.github.io/disruptor/disruptor.html
+  kind: paper
+  minutes: 45
+  why: Why queues are slow (contention, cache misses, allocation) and the ring-buffer design that fixed it.
+- id: rigtorp-ringbuffer
+  track: hft
+  title: Optimizing a ring buffer for throughput
+  author: Erik Rigtorp
+  url: https://rigtorp.se/ringbuffer/
+  kind: article
+  minutes: 20
+  why: A single-producer single-consumer queue made several times faster step by step, with the reason for each step.
+- id: rigtorp-low-latency
+  track: hft
+  title: Low latency tuning guide
+  author: Erik Rigtorp
+  url: https://rigtorp.se/low-latency-guide/
+  kind: article
+  minutes: 30
+  why: "The Linux checklist: isolated cores, IRQ affinity, frequency scaling, huge pages, and how to measure each change."
+- id: carl-cook-microsecond
+  track: hft
+  title: "When a Microsecond Is an Eternity: High Performance Trading Systems in C++"
+  author: Carl Cook (CppCon 2017)
+  url: https://www.youtube.com/watch?v=NH1Tta7purM
+  kind: video
+  minutes: 60
+  why: "How a trading firm writes C++ for the hot path: no allocation, warm caches, branch-free code and measuring end to end."
+- id: nasdaq-itch
+  track: hft
+  title: Nasdaq TotalView-ITCH 5.0 specification
+  author: Nasdaq
+  url: https://www.nasdaqtrader.com/content/technicalsupport/specifications/dataproducts/NQTVITCHspecification.pdf
+  kind: docs
+  minutes: 60
+  why: "What raw market data actually looks like: binary messages that let you rebuild the full order book yourself."
+- id: budish-arms-race
+  track: hft
+  title: The High-Frequency Trading Arms Race, and Quantifying the HFT Arms Race
+  author: "Eric Budish, Peter Cramton, John Shim; Matteo Aquilina, Eric Budish, Peter O'Neill"
+  url: https://ericbudish.org/
+  kind: paper
+  minutes: 120
+  why: Why continuous markets reward speed races, how much they cost, and the frequent batch auction alternative. Both papers are linked from the author's page.
+- id: agner-optimize
+  track: hft
+  title: Software optimization resources (manuals 1–3)
+  author: Agner Fog
+  url: https://www.agner.org/optimize/
+  kind: docs
+  minutes: 240
+  why: "The reference for how x86 cores really execute code: pipelines, ports, latencies, and how to write for them."
+  parts:
+    - { title: "1. Optimizing software in C++", minutes: 120 }
+    - { title: "3. The microarchitecture of Intel, AMD and VIA CPUs", minutes: 120 }
 
 # ---------- Quantitative Finance ----------
 - id: mit-18s096
