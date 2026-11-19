@@ -1,0 +1,685 @@
+# The daily puzzle on Today. One per day, rotating through the types.
+# type:   bug (click the line) · estimate (type a number) · scenario / interleave / complexity (pick one)
+# answer: bug → list of correct line numbers (1-based); estimate → number; choice → index of the right option (0-based)
+# tolerance: estimate only, accepted factor either way (default 3, i.e. right order of magnitude)
+# proof:  how the answer was checked (code run, orderings enumerated, arithmetic shown)
+# read:   canon:<id> or topic:<id>, the read that teaches the idea
+
+# ---------- Spot the bug (each one was run to prove the bug) ----------
+- id: bug-check-then-act
+  type: bug
+  title: Two withdrawals, one balance
+  prompt: Two requests each withdraw 80 from a balance of 100 at the same moment. Click the line that lets the balance go negative.
+  lang: python
+  code: |
+    balance = 100
+    def withdraw(amount):
+        global balance
+        if balance >= amount:
+            time.sleep(0.001)   # some work
+            balance -= amount
+  answer: [4, 6]
+  hint: Both requests can pass one line before either reaches the next.
+  explain: Check-then-act without a lock. Both threads see 100 ≥ 80 before either subtracts, so both withdraw. Make the check and the update one atomic step, e.g. `UPDATE accounts SET balance = balance - 80 WHERE id = ? AND balance >= 80` and check the row count.
+  proof: Run with two threads, final balance -60.
+  read: topic:concurrency-and-parallelism
+
+- id: bug-waitgroup-add
+  type: bug
+  title: Waiting for nothing
+  prompt: This should wait for all 50 goroutines. Sometimes it returns early, and sometimes the Go runtime panics. Click the line at fault.
+  lang: go
+  code: |
+    var wg sync.WaitGroup
+    for i := 0; i < 50; i++ {
+        go func() {
+            wg.Add(1)
+            defer wg.Done()
+            work()
+        }()
+    }
+    wg.Wait()
+  answer: [4]
+  hint: What if Wait runs before any goroutine has started?
+  explain: wg.Add runs inside the goroutine, so Wait can see a counter of zero and return before the work is registered. Call wg.Add(1) before the `go` statement.
+  proof: Ran it 200 times, Go panicked with "WaitGroup misuse, Add called concurrently with Wait".
+  read: topic:concurrency-and-parallelism
+
+- id: bug-app-side-update
+  type: bug
+  title: The lost update
+  prompt: Two payments for the same account run at once. Afterwards one of them has vanished from the balance. Click the line to fix.
+  lang: python
+  code: |
+    row = db.execute("SELECT balance FROM accounts WHERE id = ?", (uid,)).fetchone()
+    new_balance = row.balance - amount
+    db.execute("UPDATE accounts SET balance = ? WHERE id = ?", (new_balance, uid))
+  answer: [3, 1]
+  hint: Each request computes the new balance from what it read, not from what's there now.
+  explain: A read-modify-write in the application. Both read the same balance, both write their own result, the second overwrites the first. Let the database do it atomically (`SET balance = balance - ?`) or lock the row with `SELECT … FOR UPDATE`.
+  read: canon:pg-mvcc
+
+- id: bug-pagination-floor
+  type: bug
+  title: Where did the last five go?
+  prompt: 25 items, page size 10. Only 20 items ever come back. Click the line.
+  lang: python
+  code: |
+    def pages(items, size):
+        count = len(items) // size
+        return [items[i*size:(i+1)*size] for i in range(count)]
+  answer: [2]
+  hint: 25 // 10 is 2.
+  explain: Floor division drops the partial last page. Use ceiling division, `-(-len(items) // size)`, or `math.ceil`.
+  proof: Ran it, 20 of 25 items returned.
+  read: topic:pagination
+
+- id: bug-mutable-default
+  type: bug
+  title: Tags from nowhere
+  prompt: A brand new post gets tags it never had. Click the line.
+  lang: python
+  code: |
+    def add_tag(tag, tags=[]):
+        tags.append(tag)
+        return tags
+
+    a = add_tag("db")
+    b = add_tag("cache")   # b is ['db', 'cache']
+  answer: [1]
+  hint: When is the default value created?
+  explain: Default arguments are evaluated once, when the function is defined, so every call shares one list. Use `tags=None` and create a new list inside.
+  proof: Ran it, both calls return ['db', 'cache'].
+  read: topic:python
+
+- id: bug-n-plus-one
+  type: bug
+  title: Slow page, fast database
+  prompt: Each query takes 1 ms, yet this report takes 4 seconds for 4,000 orders. Click the line that makes it slow.
+  lang: python
+  code: |
+    orders = db.query("SELECT * FROM orders WHERE day = ?", day)
+    for o in orders:
+        customer = db.query("SELECT * FROM customers WHERE id = ?", o.customer_id)
+        print(o.id, customer.name)
+  answer: [3]
+  hint: Count the queries.
+  explain: The N+1 query problem, one query per order. Join once (`… JOIN customers ON …`) or fetch all customers with `WHERE id IN (…)`.
+  read: topic:query-optimization
+
+- id: bug-retry-double-charge
+  type: bug
+  title: Charged twice
+  prompt: The payment provider was slow for a minute and some customers were charged two or three times. Click the line.
+  lang: python
+  code: |
+    def charge(user, amount):
+        for attempt in range(3):
+            try:
+                return payments.post("/charges", {"user": user, "amount": amount}, timeout=2)
+            except Timeout:
+                continue
+  answer: [4]
+  hint: A timeout doesn't mean the charge failed.
+  explain: Retrying a non-idempotent POST. The first request may have succeeded and only the response was slow. Send an idempotency key that stays the same across retries so the provider can return the original result.
+  read: canon:stripe-idempotency
+
+- id: bug-split-bill
+  type: bug
+  title: The missing cent
+  prompt: Split ₹100.00 three ways. The shares add up to 99.99. Click the line.
+  lang: python
+  code: |
+    def split_bill(total, people):
+        share = round(total / people, 2)
+        return [share] * people
+  answer: [2, 3]
+  hint: Rounding each share loses the remainder.
+  explain: Work in integer paise and hand the leftover to some shares, e.g. 3334 + 3333 + 3333. Never let rounding silently create or destroy money.
+  proof: Ran it, [33.33, 33.33, 33.33] sums to 99.99.
+  read: canon:floating-point
+
+- id: bug-js-sort
+  type: bug
+  title: The p50 that wasn't
+  prompt: This reports a median latency of 450 ms. The real median is 120 ms. Click the line.
+  lang: javascript
+  code: |
+    const latencies = [120, 95, 1003, 87, 450];
+    latencies.sort();
+    const p50 = latencies[Math.floor(latencies.length / 2)];
+  answer: [2]
+  hint: What does sort() compare by default?
+  explain: Array.prototype.sort compares as strings, so "1003" < "120" < "450" < "87" < "95". Pass a comparator, `sort((a, b) => a - b)`.
+  proof: Ran it in Node, sorted to [1003, 120, 450, 87, 95].
+  read: topic:percentiles-tails
+
+- id: bug-cache-delete-first
+  type: bug
+  title: Stale forever
+  prompt: After a profile update some users keep seeing their old name until the cache expires an hour later. Click the line.
+  lang: python
+  code: |
+    def update_user(uid, data):
+        cache.delete(f"user:{uid}")
+        db.update(uid, data)
+
+    def get_user(uid):
+        return cache.get(f"user:{uid}") or cache.set(f"user:{uid}", db.get(uid))
+  answer: [2]
+  hint: What can a reader do between line 2 and line 3?
+  explain: A reader can miss the cache after the delete, read the old row, and put it back before the write lands. Write first, then invalidate, and use short TTLs or versioned keys for the remaining race.
+  read: topic:cache-invalidation
+
+- id: bug-go-unbuffered
+  type: bug
+  title: All goroutines are asleep
+  prompt: This program never prints. Click the line where it gets stuck.
+  lang: go
+  code: |
+    func main() {
+        ch := make(chan int)
+        ch <- 1
+        fmt.Println(<-ch)
+    }
+  answer: [3]
+  hint: Who is receiving while main is sending?
+  explain: A send on an unbuffered channel blocks until someone receives, and the only receiver is the same goroutine on the next line. Use a buffered channel or send from another goroutine.
+  proof: Ran it, "fatal error, all goroutines are asleep - deadlock!"
+  read: topic:concurrency-and-parallelism
+
+- id: bug-null-equals
+  type: bug
+  title: No active users
+  prompt: The admin page says there are zero active users. Click the line.
+  lang: sql
+  code: |
+    SELECT count(*)
+    FROM users
+    WHERE deleted_at = NULL;
+  answer: [3]
+  hint: What is NULL = NULL?
+  explain: Comparing with NULL gives NULL (unknown), never true, so no rows match. Use `IS NULL`.
+  proof: Ran it in SQLite, `= NULL` returns 0 rows and `IS NULL` returns 1.
+  read: topic:postgresql
+
+- id: bug-generator-twice
+  type: bug
+  title: Processed nothing
+  prompt: The log says "5 rows", then nothing gets processed. Click the line.
+  lang: python
+  code: |
+    ids = (row.id for row in rows)
+    print(len(list(ids)), "rows")
+    process(ids)
+  answer: [1, 2]
+  hint: How many times can you walk a generator?
+  explain: A generator can be consumed once. Line 2 used it up, so line 3 gets nothing. Build a list once (`ids = [row.id for row in rows]`).
+  proof: Ran it, the second pass is empty.
+  read: topic:python
+
+- id: bug-binary-search-overflow
+  type: bug
+  title: A bug that hid for 20 years
+  prompt: With large int32 indexes this binary search goes negative. Click the line.
+  lang: go
+  code: |
+    func search(a []int, x int32) int32 {
+        var lo, hi int32 = 0, int32(len(a) - 1)
+        for lo <= hi {
+            mid := (lo + hi) / 2
+            if int32(a[mid]) < x { lo = mid + 1 } else { hi = mid - 1 }
+        }
+        return lo
+    }
+  answer: [4]
+  hint: What is lo + hi when both are near 2 billion?
+  explain: lo + hi overflows int32. Use `lo + (hi-lo)/2`. This exact bug sat in the JDK's binary search for years.
+  proof: Ran it with lo=1.5e9, hi=2e9, mid came out as -397483648.
+  read: topic:big-o-asymptotics
+
+# ---------- Back of the envelope (accepted within 3×) ----------
+- id: est-servers
+  type: estimate
+  title: How many servers?
+  prompt: 50,000 requests per second. Each request needs 20 ms of CPU. Servers have 8 cores and you want them at most 50% busy. How many servers?
+  unit: servers
+  answer: 250
+  hint: How many requests per second can one core do?
+  explain: One core does 1 / 0.020 = 50 req/s. Eight cores give 400, and at 50% that's 200 per server. 50,000 / 200 = 250 servers.
+  proof: 50000 / (50 × 8 × 0.5) = 250
+  read: topic:capacity-estimation
+
+- id: est-tweets-storage
+  type: estimate
+  title: A year of posts
+  prompt: 500 million posts a day, about 500 bytes each with metadata (no media). How many terabytes per year?
+  unit: TB
+  answer: 91
+  hint: Per day first.
+  explain: 500M × 500 B = 250 GB a day. × 365 ≈ 91 TB a year, before replication and indexes.
+  proof: 500e6 × 500 × 365 / 1e12 = 91.25
+  read: topic:storage-estimation
+
+- id: est-video-bandwidth
+  type: estimate
+  title: The streaming bill
+  prompt: 10 million people each watch 30 minutes of 1080p video a day at 5 Mbps. How many petabytes do you serve per day?
+  unit: PB
+  answer: 11
+  hint: Megabits to megabytes is ÷ 8.
+  explain: 30 min = 1,800 s. 5 Mbps = 0.625 MB/s, so 1,125 MB per viewer. × 10M = 11.25 PB a day. This is why video runs on CDNs.
+  proof: 10e6 × 1800 × 5e6 / 8 / 1e15 = 11.25
+  read: topic:bandwidth-estimation
+
+- id: est-ssd-scan
+  type: estimate
+  title: Scan a terabyte (SSD)
+  prompt: How many minutes to read 1 TB sequentially from one NVMe SSD (about 3 GB/s)?
+  unit: minutes
+  answer: 5.6
+  explain: 1,000 GB / 3 GB/s ≈ 333 s ≈ 5.6 minutes.
+  proof: 1e12 / 3e9 / 60 = 5.56
+  read: canon:latency-numbers
+
+- id: est-hdd-scan
+  type: estimate
+  title: Scan a terabyte (spinning disk)
+  prompt: How many hours to read 1 TB sequentially from a hard disk (about 150 MB/s)?
+  unit: hours
+  answer: 1.85
+  explain: 1,000,000 MB / 150 MB/s ≈ 6,667 s ≈ 1.85 hours. Twenty times slower than the SSD, and random reads are far worse.
+  proof: 1e12 / 150e6 / 3600 = 1.85
+  read: canon:latency-numbers
+
+- id: est-avg-rps
+  type: estimate
+  title: Requests per second from users
+  prompt: 100 million daily active users, each making 20 requests a day. Average requests per second?
+  unit: req/s
+  answer: 23000
+  hint: A day has about 86,400 seconds (call it 100,000).
+  explain: 2 billion requests / 86,400 s ≈ 23,000 req/s on average. Plan for peaks of 2 to 3× that.
+  proof: 100e6 × 20 / 86400 = 23,148
+  read: topic:traffic-estimation
+
+- id: est-session-cache
+  type: estimate
+  title: Sessions in memory
+  prompt: 10 million active sessions at about 1 KB each. How many GB of RAM?
+  unit: GB
+  answer: 10
+  explain: 10M × 1 KB = 10 GB, plus overhead (Redis adds a good deal per key). It fits comfortably on one big node, or a few smaller ones for redundancy.
+  proof: 10e6 × 1e3 / 1e9 = 10
+  read: topic:distributed-caching
+
+- id: est-rtt-fibre
+  type: estimate
+  title: The speed of light tax
+  prompt: Mumbai to Northern Virginia is about 13,000 km of fibre. Light in fibre travels about 200,000 km/s. Minimum round-trip time in ms?
+  unit: ms
+  answer: 130
+  tolerance: 1.5
+  explain: One way 13,000 / 200,000 = 65 ms, so 130 ms round trip before any processing. No software can beat it, so put data near users.
+  proof: 2 × 13000 / 200000 × 1000 = 130
+  read: canon:latency-numbers
+
+- id: est-uuid-birthday
+  type: estimate
+  title: When do UUIDs collide?
+  prompt: Random v4 UUIDs have 122 random bits. Roughly how many must you generate for a 50% chance of any collision? (Scientific notation is fine, e.g. 3e18.)
+  unit: UUIDs
+  answer: 2.7e18
+  hint: The birthday bound is around the square root of the space.
+  explain: √(2 ln 2 × 2¹²²) ≈ 2.7 × 10¹⁸. At a billion a second that's about 85 years. Random IDs are safe; short random IDs are not.
+  proof: sqrt(2 × ln 2 × 2^122) = 2.71e18
+  read: topic:hashing-probability
+
+- id: est-kafka-disk
+  type: estimate
+  title: Retention isn't free
+  prompt: 1 million messages a second, 1 KB each, replication factor 3, kept for 7 days. How many petabytes of disk?
+  unit: PB
+  answer: 1.8
+  explain: 1 GB/s × 86,400 × 7 ≈ 605 TB, × 3 replicas ≈ 1.8 PB. Retention times replication drives the bill.
+  proof: 1e6 × 1e3 × 86400 × 7 × 3 / 1e15 = 1.81
+  read: topic:apache-kafka
+
+- id: est-littles-law
+  type: estimate
+  title: How many in flight?
+  prompt: A service handles 2,000 requests per second with an average latency of 150 ms. On average, how many requests are in progress at once?
+  unit: requests
+  answer: 300
+  tolerance: 1.5
+  hint: Little's Law, L = λW.
+  explain: L = 2,000/s × 0.15 s = 300 concurrent requests. That's your minimum thread or connection pool size.
+  proof: 2000 × 0.150 = 300
+  read: topic:queueing-theory
+
+- id: est-pg-connections
+  type: estimate
+  title: Too many connections
+  prompt: Each Postgres connection uses about 10 MB of memory. Your 40 app servers each open a pool of 50. How many GB does that cost the database?
+  unit: GB
+  answer: 20
+  explain: 40 × 50 = 2,000 connections × 10 MB = 20 GB, before any queries run. This is why PgBouncer exists.
+  proof: 2000 × 10e6 / 1e9 = 20
+  read: topic:connection-pooling
+
+# ---------- What happens next? (distributed systems) ----------
+- id: sc-raft-minority-leader
+  type: scenario
+  title: The leader on the wrong side
+  prompt: A 5-node Raft cluster partitions. The old leader is cut off with one follower (2 nodes); the other 3 elect a new leader. A client sends x=5 to the old leader. What happens to that write?
+  options:
+    - It's committed on the old leader's side and merged when the partition heals
+    - The old leader appends it but can never commit it; it's discarded when the partition heals
+    - The old leader rejects it immediately because it knows it's partitioned
+    - Both sides commit it, so x=5 everywhere
+  answer: 1
+  explain: Committing needs a majority (3 of 5). The old leader can append the entry but never commit it, so the client times out. When the partition heals it sees a higher term, steps down, and the new leader's log overwrites the entry.
+  read: canon:raft
+
+- id: sc-stale-leader-read
+  type: scenario
+  title: A read from yesterday's leader
+  prompt: Same partition. A client reads x from the old leader, which answers from its local state without checking with a majority. Is the read linearizable?
+  options:
+    - Yes, a leader always has the latest data
+    - No, it can return a value the new leader has already overwritten
+    - Yes, because reads don't change state
+  answer: 1
+  explain: The old leader doesn't know it's been replaced. Linearizable reads need a ReadIndex round trip to a majority, or a leader lease with bounded clock drift.
+  read: topic:strong-consistency
+
+- id: sc-quorum-r1
+  type: scenario
+  title: Quorums that don't overlap
+  prompt: N=3 replicas, writes wait for W=2, reads ask R=1. Can a read return a value older than a write that already succeeded?
+  options:
+    - No, two replicas have it
+    - Yes, because R + W ≤ N, so the read can hit the one replica that missed the write
+    - Only if a node crashes
+  answer: 1
+  explain: Read and write sets are only guaranteed to overlap when R + W > N. With R=1 you may ask exactly the replica the write skipped.
+  read: topic:quorum
+
+- id: sc-lww-skew
+  type: scenario
+  title: Last write wins, sometimes
+  prompt: Two clients update the same key a few milliseconds apart. Both get "OK". The store resolves conflicts by last-write-wins using server timestamps, and one server's clock runs 50 ms fast. What can happen?
+  options:
+    - Both writes are kept as siblings
+    - The later write can be silently discarded, even though it was acknowledged
+    - The store detects the skew and rejects one write
+  answer: 1
+  explain: The write stamped by the fast clock looks newer and wins, so a write that happened later in real time is thrown away. That's acknowledged data loss. Use vector clocks or CRDTs, or avoid concurrent writers.
+  read: canon:lamport-clocks
+
+- id: sc-commit-before-process
+  type: scenario
+  title: Commit, then crash
+  prompt: A consumer commits the Kafka offset as soon as it receives a message, then processes it. It crashes mid-processing. After restart, that message is…
+  options:
+    - Processed again (duplicate)
+    - Never processed (lost)
+    - Sometimes duplicated, sometimes lost
+  answer: 1
+  explain: Committing first gives at-most-once delivery, so a crash loses the message. Process first, then commit (at-least-once), and make processing idempotent.
+  read: topic:at-most-once
+
+- id: sc-process-before-commit
+  type: scenario
+  title: Process, then crash
+  prompt: Now the consumer processes the message first and commits the offset after. It crashes between the two. After restart, that message is…
+  options:
+    - Processed again (duplicate)
+    - Never processed (lost)
+    - Processed exactly once
+  answer: 0
+  explain: At-least-once. The offset wasn't saved, so the message comes back. That's why consumers must be idempotent, e.g. dedupe on a message ID inside the same transaction as the effect.
+  read: topic:exactly-once-semantics
+
+- id: sc-2pc-coordinator
+  type: scenario
+  title: The coordinator vanishes
+  prompt: In two-phase commit, all participants vote "yes" and then the coordinator crashes before sending the decision. What do the participants do?
+  options:
+    - Commit, since everyone voted yes
+    - Abort after a timeout
+    - Wait, holding their locks, until the coordinator comes back
+  answer: 2
+  explain: A participant that voted yes can't decide alone, because others might have been told to abort. 2PC blocks, which is why it's avoided across services (use sagas) or run with a replicated coordinator.
+  read: topic:two-phase-commit-2pc
+
+- id: sc-lease-gc-pause
+  type: scenario
+  title: The 15-second pause
+  prompt: A client holds a 10-second lock lease, then hits a 15-second GC pause. Meanwhile another client takes the lock. The first wakes up and writes to storage. What prevents corruption?
+  options:
+    - Nothing; a lease guarantees exclusivity
+    - Shorter leases
+    - A fencing token that increases with every lease, checked by the storage
+    - Checking the clock before writing
+  answer: 2
+  explain: The paused client can't know its lease expired. Storage must reject writes carrying an older token. Clock checks fail for the same reason the lease did.
+  read: topic:distributed-locking
+
+- id: sc-read-your-writes
+  type: scenario
+  title: "Where's my edit?"
+  prompt: A user saves their profile (written to the primary). The next page reads from an asynchronous replica and shows the old profile. Which guarantee was broken?
+  options:
+    - Linearizability
+    - Read-your-writes
+    - Durability
+  answer: 1
+  explain: Read-your-writes. Fixes include reading the user's own data from the primary for a short window, or waiting until the replica has caught up to the write's log position.
+  read: topic:read-your-writes-consistency
+
+- id: sc-two-node-failover
+  type: scenario
+  title: Two nodes, one link
+  prompt: A two-node database with automatic failover and no third witness. The network between them breaks, but both are healthy. What happens?
+  options:
+    - The replica waits, so the primary keeps serving
+    - Both may become primary and accept conflicting writes (split brain)
+    - Both stop serving writes
+  answer: 1
+  explain: Neither node can tell a dead peer from a broken link. Without a third vote (a witness or quorum), automatic failover risks two primaries. Use three voters or fencing.
+  read: topic:split-brain-problem
+
+- id: sc-hot-key-expiry
+  type: scenario
+  title: The hot key expires
+  prompt: One cache key serves 100,000 reads a second. Its TTL expires. What's the best mitigation for what happens next?
+  options:
+    - A longer TTL
+    - Request coalescing (single-flight) or serving stale while one request refreshes
+    - More database replicas
+  answer: 1
+  explain: Every reader misses at once and stampedes the database. Let one request rebuild the value while others wait or get the stale copy, and add jitter to TTLs.
+  read: topic:cache-stampede
+
+- id: sc-causal-order
+  type: scenario
+  title: Which happened first?
+  prompt: Server 1 logs event A at 10:00:00.100 and sends a message. Server 2 receives it and logs event B at 10:00:00.050 (its clock is behind). Sorting by timestamp puts B before A, though A caused B. What orders them correctly?
+  options:
+    - NTP with tighter sync
+    - Lamport or vector clocks carried on the message
+    - Sorting by server ID
+  answer: 1
+  explain: Physical clocks can't capture causality. A logical clock attached to the message guarantees that if A caused B, A's timestamp is lower.
+  read: canon:lamport-clocks
+
+# ---------- Interleavings (every ordering enumerated by a script) ----------
+- id: il-two-increments
+  type: interleave
+  title: Two increments
+  prompt: "x = 0. Two threads each run: r = x; x = r + 1. What are all the possible final values of x?"
+  options: ["{2}", "{1, 2}", "{0, 1, 2}", "{1}"]
+  answer: 1
+  explain: If both read 0 before either writes, both write 1 and one increment is lost. Otherwise you get 2.
+  proof: Enumerated all 6 orderings, final values {1, 2}.
+  read: topic:concurrency-and-parallelism
+
+- id: il-inc-and-double
+  type: interleave
+  title: Add one, double it
+  prompt: "x = 0. Thread A: r = x; x = r + 1. Thread B: r = x; x = r * 2. All possible final values?"
+  options: ["{1, 2}", "{0, 1, 2}", "{2}", "{0, 2}"]
+  answer: 1
+  explain: A then B gives 2, B then A gives 1, and if both read 0 the last writer wins, giving 1 or 0. So 0 is possible even though one thread adds 1.
+  proof: Enumerated all orderings, final values {0, 1, 2}.
+  read: topic:concurrency-and-parallelism
+
+- id: il-two-by-two
+  type: interleave
+  title: Two threads, two increments each
+  prompt: "x = 0. Two threads each do (r = x; x = r + 1) twice. What's the smallest possible final x?"
+  options: ["1", "2", "3", "4"]
+  answer: 1
+  explain: The possible values are {2, 3, 4}. To lose two updates, a thread's stale write must overwrite the other's progress twice, but the overwriting thread has still done its own increments, so the floor is 2.
+  proof: Enumerated all 70 orderings, final values {2, 3, 4}.
+  read: topic:concurrency-and-parallelism
+
+- id: il-store-buffering
+  type: interleave
+  title: Store buffering
+  prompt: "x = y = 0. Thread 1: x = 1; r1 = y. Thread 2: y = 1; r2 = x. Under sequential consistency, which outcome is impossible, though a real x86 CPU can produce it?"
+  options: ["r1=0, r2=1", "r1=1, r2=0", "r1=1, r2=1", "r1=0, r2=0"]
+  answer: 3
+  explain: Under sequential consistency one write comes first, so at least one thread sees a 1. Real CPUs buffer stores, so both reads can run before either write is visible, giving (0, 0). That's why memory fences and atomics exist.
+  proof: Enumerated all SC orderings, outcomes {(0,1), (1,0), (1,1)}.
+  read: topic:concurrency-and-parallelism
+
+- id: il-check-then-append
+  type: interleave
+  title: At most one?
+  prompt: "lst = []. Two threads each run: if len(lst) < 1: lst.append(me). What are the possible final lengths?"
+  options: ["{1}", "{1, 2}", "{0, 1}", "{2}"]
+  answer: 1
+  explain: Both can pass the check before either appends. "At most one" needs the check and the append to be one atomic step, such as a lock or a unique constraint.
+  proof: Enumerated all orderings, lengths {1, 2}.
+  read: topic:concurrency-and-parallelism
+
+- id: il-three-increments
+  type: interleave
+  title: Three threads, one increment each
+  prompt: "x = 0. Three threads each run r = x; x = r + 1 once. All possible final values?"
+  options: ["{3}", "{2, 3}", "{1, 2, 3}", "{0, 1, 2, 3}"]
+  answer: 2
+  explain: If all three read 0, every write is 1. Any count of lost updates from 0 to 2 is possible, so x ends at 1, 2 or 3.
+  proof: Enumerated all orderings, final values {1, 2, 3}.
+  read: topic:concurrency-and-parallelism
+
+# ---------- Complexity and bit tricks ----------
+- id: cx-power-of-two
+  type: complexity
+  title: A one-liner
+  prompt: "For n > 0, what does (n & (n - 1)) == 0 test?"
+  options: ["n is even", "n is a power of two", "n is odd", "n has its top bit set"]
+  answer: 1
+  explain: n - 1 flips the lowest set bit and every bit below it. Only if n had exactly one set bit does the AND come out zero.
+  read: topic:big-o-asymptotics
+
+- id: cx-lowest-bit
+  type: complexity
+  title: x & -x
+  prompt: "In two's complement, what does x & -x give you?"
+  options: ["x with its lowest set bit cleared", "Only the lowest set bit of x", "The absolute value of x", "Always 0"]
+  answer: 1
+  explain: -x is ~x + 1, which flips everything above the lowest set bit. ANDing keeps just that bit. Fenwick trees are built on this.
+  read: topic:big-o-asymptotics
+
+- id: cx-heapify
+  type: complexity
+  title: Building a heap
+  prompt: What's the time complexity of building a binary heap from n unsorted elements (bottom-up heapify)?
+  options: ["O(n log n)", "O(n)", "O(log n)", "O(n²)"]
+  answer: 1
+  explain: Most nodes are near the bottom and sift down only a little. The sum over levels is n × Σ h/2^h, which converges, so O(n).
+  read: canon:jeff-algorithms
+
+- id: cx-dynamic-array
+  type: complexity
+  title: Appending to a growing array
+  prompt: A dynamic array doubles its capacity when full. What's the amortised cost of one append?
+  options: ["O(1)", "O(log n)", "O(n)", "O(√n)"]
+  answer: 0
+  explain: Copies total n + n/2 + n/4 + … < 2n over n appends, so O(1) each on average. If it grew by a constant amount instead, appends would be O(n).
+  read: topic:amortized-analysis
+
+- id: cx-doubling-loop
+  type: complexity
+  title: The doubling loop
+  prompt: "for i in range(n): j = 1; while j < n: j *= 2. Complexity?"
+  options: ["O(n)", "O(n log n)", "O(n²)", "O(log n)"]
+  answer: 1
+  explain: The inner loop runs log₂ n times for each of the n outer iterations.
+  read: topic:big-o-asymptotics
+
+- id: cx-min-max
+  type: complexity
+  title: Max and min together
+  prompt: About how many comparisons do you need to find both the maximum and the minimum of n numbers?
+  options: ["2n", "3n/2", "n log n", "n"]
+  answer: 1
+  explain: Compare elements in pairs, then compare the larger with the max and the smaller with the min. That's 3 comparisons per 2 elements.
+  read: canon:jeff-algorithms
+
+- id: cx-int-overflow
+  type: complexity
+  title: One more than the maximum
+  prompt: In 32-bit signed arithmetic (two's complement, wrapping), what is 2147483647 + 1?
+  options: ["2147483648", "0", "-2147483648", "-1"]
+  answer: 2
+  explain: It wraps to the most negative value. In C it's undefined behaviour; in Go and Java it wraps. Real-world example, the binary search bug above.
+  read: topic:big-o-asymptotics
+
+- id: cx-xor-single
+  type: complexity
+  title: The odd one out
+  prompt: Every number in an array appears twice except one. How do you find it in O(n) time and O(1) space?
+  options: ["Sort and scan", "A hash set", "XOR all the numbers together", "Sum minus twice the sum of distinct values"]
+  answer: 2
+  explain: a ^ a = 0 and a ^ 0 = a, and XOR is order-independent, so the pairs cancel and the single number remains. Sorting is O(n log n); a set uses O(n) space.
+  read: topic:big-o-asymptotics
+
+- id: cx-bloom-negatives
+  type: complexity
+  title: Can a Bloom filter lie?
+  prompt: Which errors can a standard Bloom filter make?
+  options: ["False positives only", "False negatives only", "Both", "Neither"]
+  answer: 0
+  explain: Bits are only ever set, so an added item's bits stay set and "definitely not present" is always true. Other items can set the same bits, so "maybe present" can be wrong.
+  read: canon:bloom-filters
+
+- id: cx-radix
+  type: complexity
+  title: Sorting a billion integers
+  prompt: You need to sort 1 billion 32-bit integers. Which beats any comparison sort asymptotically?
+  options: ["Quicksort", "Merge sort", "Radix sort", "Heap sort"]
+  answer: 2
+  explain: Comparison sorts need Ω(n log n). Radix sort on fixed-width keys is O(n × passes), and with 8-bit digits that's 4 passes.
+  read: canon:jeff-algorithms
+
+- id: cx-hash-collisions
+  type: complexity
+  title: The worst day of a hash table
+  prompt: An attacker sends keys that all hash to the same bucket of a chained hash table. What does each lookup cost?
+  options: ["O(1)", "O(log n)", "O(n)", "O(n²)"]
+  answer: 2
+  explain: Every key is in one chain, so a lookup walks the whole list. This was a real denial-of-service attack (2011), which is why languages now seed their hash functions randomly.
+  read: topic:hashing-probability
+
+- id: cx-percentile-merge
+  type: complexity
+  title: Averaging percentiles
+  prompt: Ten servers each report their p99 latency. Is the average of the ten p99s the fleet's p99?
+  options: ["Yes", "No, percentiles don't average; merge histograms instead", "Only if traffic is equal across servers"]
+  answer: 1
+  explain: Percentiles aren't linear. Even with equal traffic, the average of p99s isn't the p99 of the combined data. Merge histograms or sketches (HDR, t-digest) and compute from those.
+  read: topic:percentiles-tails

@@ -1,0 +1,27 @@
+---
+// "Numbers you should know": every card is rendered; the browser shows the one that's due.
+import type { NumberCard } from '../lib/puzzles';
+interface Props { cards: NumberCard[] }
+const { cards } = Astro.props;
+const fmt = (n: number) => (Math.abs(n) >= 1e7 || (Math.abs(n) < 0.01 && n !== 0) ? n.toExponential(2).replace('e+', ' × 10^') : n.toLocaleString('en-US', { maximumSignificantDigits: 4 }));
+---
+<section class="nums" data-numbers>
+    <h3 class="fp-box-h">Numbers you should know</h3>
+    {cards.map((c, i) => (
+        <div class="num-card" data-card={c.id} data-answer={c.answer} data-tol={c.tolerance ?? 2} hidden={i > 0}>
+            <p class="num-q">{c.q}</p>
+            <form class="pz-estimate" data-num-form>
+                <input type="text" inputmode="decimal" autocomplete="off" placeholder="Guess" aria-label={`Your guess${c.unit ? ` in ${c.unit}` : ''}`} />
+                {c.unit && <span class="pz-unit">{c.unit}</span>}
+                <button type="submit">Check</button>
+            </form>
+            <div class="num-result" data-num-result hidden>
+                <p class="pz-verdict" data-num-verdict></p>
+                <p class="num-a">{fmt(c.answer)} {c.unit}</p>
+                <p class="num-how">{c.how}</p>
+                <p class="num-src">Source: {c.source}</p>
+            </div>
+        </div>
+    ))}
+    <p class="num-meta" data-num-meta></p>
+</section>

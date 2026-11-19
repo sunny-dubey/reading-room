@@ -77,7 +77,7 @@ async function build(articles: FeedItem[]) {
     ]);
 
     const practiceTopics = areas.filter(a => a.data.n === 24).flatMap(a => a.data.topics.filter(t => /^Design a /i.test(t.name)));
-    const empty = { areas, topics, enabled: false, practice: practiceTopics.map(t => ({ id: t.id, name: t.name, topics: [] as Topic[], canon: [] as CollectionEntry<'canon'>[] })), itemsByTopic: new Map<string, FeedItem[]>(), canonByTopic: new Map<string, CollectionEntry<'canon'>[]>(), notesByTopic: new Map<string, number>(), savedByTopic: new Map<string, number>(), topicMap: [] as MapPoint[] };
+    const empty = { areas, topics, enabled: false, practice: practiceTopics.map(t => ({ id: t.id, name: t.name, topics: [] as Topic[], canon: [] as CollectionEntry<'canon'>[] })), itemsByTopic: new Map<string, FeedItem[]>(), canonByTopic: new Map<string, CollectionEntry<'canon'>[]>(), notesByTopic: new Map<string, number>(), savedByTopic: new Map<string, number>(), topicMap: [] as MapPoint[], topicVec: new Map<string, number[]>() };
     if (!all) return empty;
 
     let k = 0;
@@ -187,7 +187,8 @@ async function build(articles: FeedItem[]) {
         return { id: t.id, name: t.name, topics: near, canon: reads };
     });
 
-    return { areas, topics, enabled: true, itemsByTopic, canonByTopic, notesByTopic, savedByTopic, practice, topicMap };
+    const topicVec = new Map(topicList.map((t, i) => [t.id, tv[i]] as [string, number[]]));
+    return { areas, topics, enabled: true, itemsByTopic, canonByTopic, notesByTopic, savedByTopic, practice, topicMap, topicVec };
 }
 
 export interface MapPoint { id: string; x: number; y: number }

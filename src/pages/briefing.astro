@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getBriefing } from '../lib/briefing';
+import { getOutages, internetWeather } from '../lib/outages';
+import { u } from '../lib/url';
+
+const b = await getBriefing();
+const out = await getOutages();
+const wx = internetWeather(out.incidents, out.now);
+const day = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const when = (d: number) => d === 0 ? 'today' : d > 0 ? `in ${d} ${d === 1 ? 'day' : 'days'}` : `${-d} ${d === -1 ? 'day' : 'days'} ago`;
+const jobsShown = b.jobs.filter(j => j.score >= 3).slice(0, 60);
+---
+<Base title="The briefing" description="What changed for engineers: releases, end-of-life dates, exploited vulnerabilities, new papers, hiring and internet weather." accent="reading">
+    <div class="rd fp briefing">
+        <ReadingMast compact title="The briefing" sub="What changed in the world your code runs in: weather, releases, obituaries, exploited vulnerabilities, new papers and who's hiring. Facts, from public sources, refreshed every 3 hours." updated={new Date(b.now)} />
+        <nav class="bf-index" aria-label="Sections">
+            <a href="#weather">Internet weather</a><a href="#releases">Release radar</a><a href="#eol">Obituaries</a><a href="#cves">CVE watch</a><a href="#papers">Paper drop</a><a href="#hiring">Classifieds</a>
+        </nav>
+
+        <section class="fp-band" id="weather">
+            <h2 class="fp-band-h"><span>Internet weather</span></h2>
+            <p class="bf-lede">{wx.line}. {wx.ongoing ? `${wx.ongoing} incident${wx.ongoing === 1 ? '' : 's'} ongoing.` : 'Nothing ongoing.'} {wx.global ? `${wx.global} more had no stated location.` : ''}</p>
+            <div class="wx-grid">
+                {wx.regions.map(r => (
+                    <div class={`wx wx-${r.cond}`}><span class="wx-icon" aria-hidden="true"></span><b>{r.region}</b><span>{r.cond === 'clear' ? 'Clear' : `${r.cond[0].toUpperCase()}${r.cond.slice(1)} · ${r.count} in 24h${r.live ? ` · ${r.live} ongoing` : ''}`}</span></div>
+                ))}
+            </div>
+            <p class="fp-more-link"><a href={u('/outages/')}>The outage map and every investigation →</a></p>
+        </section>
+
+        <div class="bf-two">
+            <section class="fp-band" id="releases">
+                <h2 class="fp-band-h"><span>Release radar · last 30 days</span></h2>
+                <table class="bf-table">
+                    <thead><tr><th>Project</th><th>Version</th><th>Released</th></tr></thead>
+                    <tbody>
+                        {b.releases.map(r => (
+                            <tr><td>{r.product}{r.newCycle && <span class="bf-tag new">new major</span>}{r.others > 0 && <span class="bf-date"> +{r.others} older {r.others === 1 ? 'line' : 'lines'}</span>}</td><td class="mono">{r.link ? <a href={r.link} target="_blank" rel="noopener noreferrer">{r.version}</a> : r.version}</td><td>{day(r.date)}</td></tr>
+                        ))}
+                    </tbody>
+                </table>
+                <p class="side-note">Watching {b.watched} projects (<code>src/content/stack.yaml</code>), via endoflife.date.</p>
+            </section>
+
+            <section class="fp-band" id="eol">
+                <h2 class="fp-band-h"><span>Obituaries · end of life</span></h2>
+                <table class="bf-table">
+                    <thead><tr><th>Version</th><th>End of support</th><th></th></tr></thead>
+                    <tbody>
+                        {b.eols.map(e => (
+                            <tr class:list={{ dead: e.days < 0, soon: e.days >= 0 && e.days <= 30 }}>
+                                <td><a href={`https://endoflife.date/${e.slug}`} target="_blank" rel="noopener noreferrer">{e.product} {e.cycle}</a></td>
+                                <td>{day(e.date)}</td>
+                                <td class="bf-when">{e.days < 0 ? `died ${when(e.days)}` : `dies ${when(e.days)}`}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                <p class="side-note">Versions whose support ends within 200 days, or ended in the last 45.</p>
+            </section>
+        </div>
+
+        <section class="fp-band" id="cves">
+            <h2 class="fp-band-h"><span>CVE watch · exploited in the wild, last 21 days</span></h2>
+            <p class="bf-lede">{b.cves.length} vulnerabilities added to CISA's Known Exploited Vulnerabilities catalogue in three weeks ({b.kevTotal.toLocaleString()} in total). These aren't theoretical: attackers are using them now. Rows marked <span class="bf-tag mine">your stack</span> name a vendor you use.</p>
+            <div class="bf-cves">
+                {b.cves.map(c => (
+                    <details class:list={['bf-cve', { mine: c.mine }]}>
+                        <summary>
+                            <span class="mono bf-cve-id">{c.id}</span>
+                            <span class="bf-cve-name"><b>{c.vendor} {c.product}</b> · {c.name.replace(new RegExp(`^${c.vendor}\\s+(${c.product}\\s+)?`, 'i'), '')}</span>
+                            <span class="bf-cve-tags">{c.mine && <span class="bf-tag mine">your stack</span>}{c.ransomware && <span class="bf-tag ransom">ransomware</span>}<span class="bf-date">added {day(c.added)}</span></span>
+                        </summary>
+                        <p>{c.summary}</p>
+                        <p class="bf-meta">Patch deadline for US agencies: {day(c.due)}{c.cwe ? ` · ${c.cwe}` : ''} · <a href={`https://nvd.nist.gov/vuln/detail/${c.id}`} target="_blank" rel="noopener noreferrer">NVD entry →</a></p>
+                    </details>
+                ))}
+            </div>
+        </section>
+
+        <section class="fp-band" id="papers">
+            <h2 class="fp-band-h"><span>Paper drop · new on arXiv this week</span></h2>
+            <p class="bf-lede">The papers closest to your Roadmap out of {b.papersSeen} new ones in {Object.keys(b.cats).length} categories. Read the abstract; open the paper only if it earns it.</p>
+            <div class="bf-papers">
+                {b.papers.map(p => (
+                    <article class="bf-paper">
+                        <p class="fp-kicker">{b.cats[p.cat].label} · <a href={u(`/roadmap/#${p.topic!.id}`)}>{p.topic!.name}</a></p>
+                        <h3><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a></h3>
+                        <p class="bf-by">{p.authors.split(',').slice(0, 3).join(',')}{p.authors.split(',').length > 3 ? ' et al.' : ''}</p>
+                        <details><summary>Abstract</summary><p>{p.abstract}</p></details>
+                    </article>
+                ))}
+            </div>
+        </section>
+
+        <section class="fp-band" id="hiring">
+            <h2 class="fp-band-h"><span>Classifieds · {b.thread?.title ?? 'Who is hiring?'}</span></h2>
+            <div class="out-controls" role="group" aria-label="Filter jobs">
+                <div class="out-seg">
+                    <button type="button" data-job-where="remote-india" aria-pressed="true">Open to India (remote worldwide or in India)</button>
+                    <button type="button" data-job-where="remote" aria-pressed="false">Remote</button>
+                    <button type="button" data-job-where="all" aria-pressed="false">Anywhere</button>
+                </div>
+            </div>
+            <ul class="bf-jobs" role="list">
+                {jobsShown.map(j => (
+                    <li data-remote={j.remote ? '1' : undefined} data-anywhere={j.remoteAnywhere ? '1' : undefined} data-india={j.india ? '1' : undefined}>
+                        <a href={j.url} target="_blank" rel="noopener noreferrer">
+                            <span class="bf-job-h"><b>{j.company}</b> · {j.role}</span>
+                            <span class="bf-job-meta">{[j.location, j.remote && !/remote/i.test(j.location) ? (j.remoteAnywhere ? 'remote' : 'remote, region-limited') : '', j.tags.join(', ')].filter(Boolean).join(' · ')}</span>
+                        </a>
+                    </li>
+                ))}
+            </ul>
+            <p class="side-note">From {b.thread ? <a href={b.thread.url} target="_blank" rel="noopener noreferrer">this month's thread</a> : 'the monthly thread'} ({b.thread?.count ?? 0} posts), ranked for backend, infra, distributed systems, payments and AI roles. Read each post before applying.</p>
+        </section>
+    </div>
+    <ReadingClient />
+</Base>
+
+<script>
+    const apply = (w: string) => document.querySelectorAll<HTMLElement>('.bf-jobs li').forEach(li => {
+        li.hidden = w === 'all' ? false : w === 'remote' ? !li.dataset.remote : !(li.dataset.anywhere || li.dataset.india);
+    });
+    document.querySelectorAll<HTMLButtonElement>('[data-job-where]').forEach(b => b.addEventListener('click', () => {
+        document.querySelectorAll('[data-job-where]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        apply(b.dataset.jobWhere!);
+    }));
+    apply('remote-india');
+</script>

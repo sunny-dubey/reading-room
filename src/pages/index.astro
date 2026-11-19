@@ -8,19 +8,30 @@ import { editionName, istTime, istDate } from '../lib/edition';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
 import { getToday } from '../lib/today';
-import { getOutages, fmtDuration } from '../lib/outages';
+import { getOutages, fmtDuration, internetWeather } from '../lib/outages';
+import { getBriefing } from '../lib/briefing';
 import OutageMap from '../components/OutageMap.astro';
+import PuzzleCard from '../components/PuzzleCard.astro';
+import NumbersCard from '../components/NumbersCard.astro';
+import IncidentDrill from '../components/IncidentDrill.astro';
+import PuzzleClient from '../components/PuzzleClient.astro';
+import { getPuzzles } from '../lib/puzzles';
 
 const { learning, fetchedAt, now, deepRead, deepCands, fresh, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
 const { question, rabbitHoles, twoTakes, quickCands, explainer, readMap } = await getToday();
 const STEP_NAMES = ['Start here', 'Go deeper', 'Master it'];
 const ROMAN = ['I', 'II', 'III'];
+const pz = await getPuzzles();
+const bf = await getBriefing();
+const bfDay = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const bfJobs = bf.jobs.filter(j => j.score >= 3 && (j.remoteAnywhere || j.india)).slice(0, 5);
 // Outage map panel: the last 72 hours (a week if it's been quiet).
 const outages = await getOutages();
 const recentOut = (h: number) => outages.incidents.filter(i => outages.now - i.start < h * 3600e3);
 const outWindow = recentOut(72).length >= 3 ? 72 : 168;
 const outShown = recentOut(outWindow);
+const wx = internetWeather(outages.incidents, outages.now);
 const outAnchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
 const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
 const mins = (m?: number) => (m ? `${m} min` : '');
@@ -52,10 +63,10 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         <!-- ===== Masthead ===== -->
         <header class="fp-mast">
             <div class="fp-ears">
-                <div class="fp-ear">
-                    <span class="fp-ear-k">Your streak</span>
-                    <span class="fp-ear-v"><span data-ear-streak>Open a read to start one</span></span>
-                </div>
+                <a class="fp-ear" href={u('/briefing/#weather')}>
+                    <span class="fp-ear-k">Internet weather</span>
+                    <span class="fp-ear-v">{wx.line}{wx.ongoing ? ` · ${wx.ongoing} ongoing` : ''}</span>
+                </a>
                 <div class="fp-ear right">
                     <span class="fp-ear-k">This edition</span>
                     <span class="fp-ear-v">{newReads === 0 ? 'No new reads since the last edition' : `${newReads} new ${newReads === 1 ? 'read' : 'reads'} since the last edition`} · <span data-next-edition>next in 3 hours</span></span>
@@ -195,6 +206,21 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             </aside>
         </section>
 
+        <!-- ===== The puzzle page ===== -->
+        {pz.today && (
+            <section class="fp-band reveal puzzle-band">
+                <h2 class="fp-band-h"><span>The puzzle page</span></h2>
+                <div class="puzzle-grid">
+                    <PuzzleCard p={pz.today} featured />
+                    <div class="puzzle-side">
+                        <NumbersCard cards={pz.numbers} />
+                        {pz.drill && <IncidentDrill i={pz.drill} />}
+                        <a class="fp-more" href={u('/puzzles/')}>All {pz.puzzles.length} puzzles and the full numbers deck →</a>
+                    </div>
+                </div>
+            </section>
+        )}
+
         <!-- ===== Fresh this week ===== -->
         {fresh.length > 0 && (
             <section class="fp-band reveal">
@@ -202,6 +228,33 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 <div class="fp-cols">{fresh.map(i => <Story i={i} cover />)}</div>
             </section>
         )}
+
+        <!-- ===== The briefing ===== -->
+        <section class="fp-band reveal bf-front">
+            <h2 class="fp-band-h"><span>The briefing</span></h2>
+            <div class="bf-boxes">
+                <div class="bf-box">
+                    <h3 class="fp-box-h"><a href={u('/briefing/#releases')}>Release radar</a></h3>
+                    <ul role="list">{bf.releases.slice(0, 6).map(r => <li><b>{r.product}</b> <span class="mono">{r.version}</span>{r.newCycle && <span class="bf-tag new">new</span>}<span class="bf-date">{bfDay(r.date)}</span></li>)}</ul>
+                </div>
+                <div class="bf-box">
+                    <h3 class="fp-box-h"><a href={u('/briefing/#eol')}>Obituaries</a></h3>
+                    <ul role="list">{bf.eols.filter(e => e.days >= -14).slice(0, 6).map(e => <li class:list={{ dead: e.days < 0 }}><b>{e.product} {e.cycle}</b><span class="bf-date">{e.days < 0 ? `died ${-e.days}d ago` : e.days === 0 ? 'dies today' : `dies in ${e.days}d`}</span></li>)}</ul>
+                </div>
+                <div class="bf-box">
+                    <h3 class="fp-box-h"><a href={u('/briefing/#cves')}>CVE watch · exploited now</a></h3>
+                    <ul role="list">{bf.cves.slice(0, 5).map(c => <li class:list={{ mine: c.mine }}><b>{c.vendor} {c.product}</b>{c.ransomware && <span class="bf-tag ransom">ransomware</span>}<span class="bf-date">{bfDay(c.added)}</span></li>)}</ul>
+                </div>
+                <div class="bf-box">
+                    <h3 class="fp-box-h"><a href={u('/briefing/#papers')}>Paper drop</a></h3>
+                    <ul role="list">{bf.papers.slice(0, 4).map(p => <li><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a><span class="bf-date">{p.topic?.name}</span></li>)}</ul>
+                </div>
+                <div class="bf-box">
+                    <h3 class="fp-box-h"><a href={u('/briefing/#hiring')}>Classifieds · hiring</a></h3>
+                    <ul role="list">{bfJobs.map(j => <li><a href={j.url} target="_blank" rel="noopener noreferrer"><b>{j.company}</b> · {j.role}</a><span class="bf-date">{j.india ? 'India' : 'remote'}{j.tags.length ? ` · ${j.tags.slice(0, 2).join(', ')}` : ''}</span></li>)}</ul>
+                </div>
+            </div>
+        </section>
 
         <!-- ===== The outage map ===== -->
         {outages.incidents.length > 0 && (
@@ -386,6 +439,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         </section>
     </div>
     <ReadingClient />
+    <PuzzleClient />
 </Base>
 
 <script>

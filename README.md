@@ -26,6 +26,8 @@ It covers the areas a strong engineer needs:
 | **Canon** (`/canon/`) | 93 hand-picked foundational reads in order: papers, books, courses and classic articles |
 | **Notebook** (`/notebook/`) | Notes on what I've understood, in my own words |
 | **Saved** (`/library/`) | Links worth keeping, each with a line on why |
+| **Briefing** (`/briefing/`) | Facts that change weekly: internet weather by region, release radar and end-of-life dates for your stack, vulnerabilities being exploited right now (CISA), new arXiv papers matched to your Roadmap, and hiring from HN's monthly thread |
+| **Puzzles** (`/puzzles/`) | 56 engineering puzzles (spot the bug, back-of-the-envelope, distributed-systems scenarios, interleavings, complexity), each verified by running code or enumerating cases, plus 40 "numbers you should know" cards. Today shows the daily puzzle, a flash card and an incident drill built from a real outage |
 | **Outages** (`/outages/`) | A world map of outages from 18 public status pages (cloud, CDN, developer tools, AI APIs, communication), each opening into an investigation report: where, how long, the provider's own timeline, and the postmortem when published. A small version sits on Today |
 | **Startups** (`/startups/`) | What the best new companies are building (Launch HN, Show HN, Product Hunt, funding news) |
 | **Pulse** (`/pulse/`) | The week's ten headlines, kept off the front page on purpose |
@@ -70,6 +72,8 @@ The site is **read-only**: there's no editing in the browser. Add content as fil
 | A topic to learn | Add it to `src/content/roadmap.yaml` |
 | Progress on every device | List Canon ids or topic ids in `src/content/progress.yaml` (ticks on the site are kept per browser) |
 | Change the daily questions or explainers | Edit `src/content/questions.yaml` or `src/content/explainers.yaml` |
+| Add a puzzle or number card | `src/content/puzzles.yaml` / `src/content/numbers.yaml` (verify it and note how in `proof`) |
+| Watch another project's releases / end of life | Add it to `src/content/stack.yaml` (its endoflife.date id) |
 | Watch another status page | Add it to `src/content/status-pages.yaml` |
 | Change the weekly design prompts | Edit `src/content/practice.yaml` (topics, reads, the hard question) |
 | Fix a bad "Why read" match | Pin a topic (or `none`) for a URL in `src/content/overrides.yaml` |

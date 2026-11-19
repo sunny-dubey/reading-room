@@ -246,3 +246,24 @@ export function fmtDuration(ms?: number) {
     if (h < 48) return `${h}h ${m % 60 ? `${m % 60}m` : ''}`.trim();
     return `${Math.round(h / 24)} days`;
 }
+
+/** Internet weather: a one-line forecast per region from the last 24 hours of incidents. */
+export function internetWeather(incidents: Incident[], now: number) {
+    const REGIONS = ['North America', 'Europe', 'Asia-Pacific', 'Latin America', 'Middle East & Africa'];
+    const recent = incidents.filter(i => i.ongoing || now - (i.end ?? i.start) < DAY);
+    const regions = REGIONS.map(r => {
+        const list = recent.filter(i => i.region === r);
+        const major = list.some(i => i.severity === 'major'), live = list.some(i => i.ongoing);
+        const cond = !list.length ? 'clear' : live && major ? 'severe' : major || list.length >= 3 ? 'stormy' : 'cloudy';
+        return { region: r, cond, count: list.length, live: list.filter(i => i.ongoing).length };
+    });
+    const global = recent.filter(i => !i.places.length);
+    const rank = { severe: 3, stormy: 2, cloudy: 1, clear: 0 } as const;
+    const worst = [...regions].sort((a, b) => rank[b.cond as keyof typeof rank] - rank[a.cond as keyof typeof rank] || b.count - a.count);
+    const words = { severe: 'Severe weather', stormy: 'Stormy', cloudy: 'Cloudy', clear: 'Clear' } as const;
+    const bad = worst.filter(r => r.cond !== 'clear');
+    const line = bad.length
+        ? bad.slice(0, 2).map(r => `${words[r.cond as keyof typeof words]} over ${r.region}`).join(' · ') + (bad.length < regions.length ? ' · clear elsewhere' : '')
+        : 'Clear skies across every region';
+    return { regions, line, global: global.length, ongoing: incidents.filter(i => i.ongoing).length };
+}

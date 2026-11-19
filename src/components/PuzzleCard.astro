@@ -1,0 +1,51 @@
+---
+// One puzzle, interactive in the browser (src/lib/puzzle-client.ts wires it up).
+import { TYPE_LABEL, type Puzzle } from '../lib/puzzles';
+import { md } from '../lib/inline-md';
+import { u } from '../lib/url';
+interface Props { p: Puzzle; featured?: boolean }
+const { p, featured = false } = Astro.props;
+const lines = p.code ? p.code.replace(/\n$/, '').split('\n') : [];
+const answerText = p.type === 'bug' ? `Line ${(p.answer as number[]).join(' or ')}`
+    : p.type === 'estimate' ? `≈ ${Number(p.answer).toLocaleString('en-US', { maximumSignificantDigits: 3 })} ${p.unit ?? ''}`
+    : p.options?.[p.answer as number] ?? '';
+---
+<article class:list={['pz', `pz-t-${p.type}`, { featured }]} id={`pz-${p.id}`} data-puzzle={p.id} data-type={p.type}
+    data-answer={JSON.stringify(p.answer)} data-tol={p.tolerance ?? 3}>
+    <p class="fp-kicker">{TYPE_LABEL[p.type]}{featured && <span class="pz-streak" data-pz-streak></span>}</p>
+    <h3 class="pz-title">{p.title}</h3>
+    <p class="pz-prompt" set:html={md(p.prompt)} />
+
+    {p.type === 'bug' && (
+        <ol class="pz-code" role="list" data-lang={p.lang}>
+            {lines.map((l, n) => (
+                <li><button type="button" data-line={n + 1} aria-label={`Line ${n + 1}`}><span class="ln">{n + 1}</span><code>{l || ' '}</code></button></li>
+            ))}
+        </ol>
+    )}
+    {p.type === 'estimate' && (
+        <form class="pz-estimate" data-pz-form>
+            <input type="text" inputmode="decimal" autocomplete="off" placeholder="Your estimate" aria-label={`Your estimate in ${p.unit}`} />
+            <span class="pz-unit">{p.unit}</span>
+            <button type="submit">Check</button>
+        </form>
+    )}
+    {p.options && (
+        <div class="pz-options">
+            {p.options.map((o, i) => <button type="button" data-opt={i} set:html={md(o)} />)}
+        </div>
+    )}
+
+    <div class="pz-foot">
+        {p.hint && <details class="pz-hint"><summary>Hint</summary><p set:html={md(p.hint)} /></details>}
+        <button type="button" class="pz-reveal" data-pz-reveal>Show the answer</button>
+    </div>
+
+    <div class="pz-result" data-pz-result hidden>
+        <p class="pz-verdict" data-pz-verdict></p>
+        <p class="pz-answer"><span>Answer</span>{answerText}</p>
+        <p class="pz-explain" set:html={md(p.explain)} />
+        {p.proof && <p class="pz-proof"><span>Checked</span>{p.proof}</p>}
+        {p.readLink && <p class="pz-read"><span>Learn it properly</span><a href={p.readLink.external ? p.readLink.href : u(p.readLink.href)} target={p.readLink.external ? '_blank' : undefined} rel={p.readLink.external ? 'noopener noreferrer' : undefined}>{p.readLink.title}</a></p>}
+    </div>
+</article>

@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import PuzzleCard from '../components/PuzzleCard.astro';
+import PuzzleClient from '../components/PuzzleClient.astro';
+import { getPuzzles, TYPE_LABEL, type PuzzleType } from '../lib/puzzles';
+
+const { puzzles, today, numbers } = await getPuzzles();
+const types = Object.keys(TYPE_LABEL) as PuzzleType[];
+const fmt = (n: number) => (Math.abs(n) >= 1e7 ? n.toExponential(2).replace('e+', ' × 10^') : n.toLocaleString('en-US', { maximumSignificantDigits: 4 }));
+---
+<Base title="Puzzles" description="Engineering puzzles: spot the bug, back-of-the-envelope estimates, distributed-systems scenarios, interleavings, complexity, and the numbers every engineer should know." accent="reading">
+    <div class="rd puzzles-page">
+        <ReadingMast compact title="The puzzle page" sub={`${puzzles.length} puzzles, each checked by running the code, enumerating every ordering or showing the arithmetic.`} />
+        <p class="pz-solved-line">Solved so far: <strong data-pz-solved>0</strong> of {puzzles.length}<span data-pz-streak></span></p>
+
+        <div class="out-controls" role="group" aria-label="Filter puzzles">
+            <div class="out-kinds">
+                <button type="button" data-pz-filter="all" aria-pressed="true">All</button>
+                {types.map(t => <button type="button" data-pz-filter={t} aria-pressed="false">{TYPE_LABEL[t]} · {puzzles.filter(p => p.type === t).length}</button>)}
+                <button type="button" data-pz-filter="unsolved" aria-pressed="false">Unsolved</button>
+            </div>
+        </div>
+
+        {today && (
+            <section class="fp-band">
+                <h2 class="fp-band-h"><span>Today's puzzle</span></h2>
+                <PuzzleCard p={today} featured />
+            </section>
+        )}
+
+        <section class="fp-band">
+            <h2 class="fp-band-h"><span>Every puzzle</span></h2>
+            <div class="pz-grid">
+                {puzzles.filter(p => p !== today).map(p => <PuzzleCard p={p} />)}
+            </div>
+        </section>
+
+        <section class="fp-band" id="numbers">
+            <h2 class="fp-band-h"><span>Numbers you should know</span></h2>
+            <p class="side-note">The full deck. Today shows one a day; here you can study them all. Cover the right side and test yourself.</p>
+            <dl class="num-deck">
+                {numbers.map(c => (
+                    <div><dt>{c.q}</dt><dd><b>{fmt(c.answer)} {c.unit}</b><span>{c.how}</span><em>{c.source}</em></dd></div>
+                ))}
+            </dl>
+        </section>
+    </div>
+    <ReadingClient />
+    <PuzzleClient />
+</Base>
+
+<script>
+    const results = (() => { try { return JSON.parse(localStorage.getItem('puzzles:results') ?? '{}'); } catch { return {}; } })();
+    document.querySelectorAll<HTMLButtonElement>('[data-pz-filter]').forEach(b => b.addEventListener('click', () => {
+        const f = b.dataset.pzFilter!;
+        document.querySelectorAll('[data-pz-filter]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        document.querySelectorAll<HTMLElement>('.pz-grid [data-puzzle]').forEach(c => {
+            c.hidden = f === 'all' ? false : f === 'unsolved' ? !!results[c.dataset.puzzle!] : c.dataset.type !== f;
+        });
+    }));
+</script>

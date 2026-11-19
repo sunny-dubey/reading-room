@@ -1,0 +1,41 @@
+---
+// Incident drill: a real outage, replayed one status update at a time. Write your hypothesis first.
+import { checklist } from '../lib/puzzles';
+import { fmtDuration, type Incident } from '../lib/outages';
+import { u } from '../lib/url';
+interface Props { i: Incident }
+const { i } = Astro.props;
+const [first, ...rest] = i.updates;
+const t = (ms: number) => new Date(ms).toISOString().slice(11, 16) + ' UTC';
+const elapsed = (ms: number) => `+${fmtDuration(ms - first.at) || '0 min'}`;
+const anchor = `inc-${i.id.replace(/[^a-z0-9]+/gi, '-')}`;
+---
+<section class="drill" data-drill={i.id}>
+    <h3 class="fp-box-h">Incident drill · you're on call</h3>
+    <p class="drill-setup">A real incident at <b>{i.provider}</b> on {new Date(i.start).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })}{i.places.length ? `, ${i.places.map(p => p.name).join(', ')}` : ''}. Here's the first thing anyone knew:</p>
+    <div class="drill-first">
+        <span class="drill-t">{t(first.at)} · {first.status}</span>
+        <p>{i.title}. {first.text.length > 280 ? first.text.slice(0, 277) + '…' : first.text}</p>
+    </div>
+    <label class="drill-q" for={`drill-note-${i.id}`}>What's your first hypothesis, and what would you check?</label>
+    <textarea id={`drill-note-${i.id}`} rows="3" data-drill-note placeholder="Saved in this browser only"></textarea>
+    <details class="pz-hint"><summary>Stuck? First things to check</summary>
+        <ul>{checklist(`${i.title} ${first.text}`).map(c => <li>{c}</li>)}</ul>
+    </details>
+    <ol class="drill-steps" role="list">
+        {rest.map(up => (
+            <li hidden data-drill-step>
+                <span class="drill-t">{t(up.at)} · {elapsed(up.at)} · {up.status}</span>
+                <p>{up.text.length > 360 ? up.text.slice(0, 357) + '…' : up.text}</p>
+            </li>
+        ))}
+    </ol>
+    <div class="drill-end" data-drill-end hidden>
+        <p><b>Resolved after {fmtDuration(i.duration)}.</b>{i.identifiedAfter !== undefined ? ` Cause found after ${fmtDuration(i.identifiedAfter)}.` : ''} How close was your first guess?</p>
+        <p class="inc-links">
+            <a href={u(`/outages/#${anchor}`)}>The full investigation report →</a>
+            {i.rca && <a class="inc-rca" href={i.rca.url} target="_blank" rel="noopener noreferrer">Postmortem: {i.rca.title} →</a>}
+        </p>
+    </div>
+    <button type="button" class="pz-reveal" data-drill-next>Show the next update ({rest.length} left)</button>
+</section>

@@ -1,0 +1,36 @@
+# The stack the Briefing watches (Release radar, End-of-life notices) and the names CVE watch highlights.
+# slug: the product id on endoflife.date · watch: extra vendor/product words to highlight in CVE watch
+products:
+  - { slug: postgresql, name: PostgreSQL }
+  - { slug: mysql, name: MySQL }
+  - { slug: redis, name: Redis }
+  - { slug: valkey, name: Valkey }
+  - { slug: mongodb, name: MongoDB }
+  - { slug: sqlite, name: SQLite }
+  - { slug: clickhouse, name: ClickHouse }
+  - { slug: duckdb, name: DuckDB }
+  - { slug: elasticsearch, name: Elasticsearch }
+  - { slug: apache-kafka, name: Kafka }
+  - { slug: python, name: Python }
+  - { slug: go, name: Go }
+  - { slug: nodejs, name: Node.js }
+  - { slug: eclipse-temurin, name: Java (Temurin) }
+  - { slug: kotlin, name: Kotlin }
+  - { slug: dotnet, name: .NET }
+  - { slug: deno, name: Deno }
+  - { slug: bun, name: Bun }
+  - { slug: django, name: Django }
+  - { slug: spring-boot, name: Spring Boot }
+  - { slug: rails, name: Rails }
+  - { slug: react, name: React }
+  - { slug: nextjs, name: Next.js }
+  - { slug: vue, name: Vue }
+  - { slug: angular, name: Angular }
+  - { slug: kubernetes, name: Kubernetes }
+  - { slug: docker-engine, name: Docker Engine }
+  - { slug: terraform, name: Terraform }
+  - { slug: nginx, name: nginx }
+  - { slug: linux, name: Linux kernel }
+  - { slug: ubuntu, name: Ubuntu }
+  - { slug: debian, name: Debian }
+watch: [PostgreSQL, Redis, Kafka, Kubernetes, Linux, Docker, nginx, Apache, Python, Node.js, Go, Java, Spring, Django, React, Next.js, OpenSSL, OpenSSH, GitLab, GitHub, Jenkins, Cloudflare, AWS, Google, Microsoft, Atlassian, Confluence, Jira, Elastic, MongoDB, MySQL, Oracle, VMware, Citrix, Fortinet, Palo Alto, Ivanti, Cisco]

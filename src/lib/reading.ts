@@ -54,9 +54,9 @@ async function buildReading() {
     // Fresh this week: the best of the last 3 days (7 if it's a quiet week), one per track first.
     const freshPool = (days: number) => byRank.filter(i => now - +i.date < days * DAY && i.category !== 'postmortems'
         && (i.brief?.worth ?? 0) >= 3 && (i.skill || isDeep(i)));
-    const pool = freshPool(3).length >= 3 ? freshPool(3) : freshPool(7);
+    const pool = freshPool(3).length >= 6 ? freshPool(3) : freshPool(7);
     const fresh = take(pool, 4, true);
-    fresh.push(...take(pool, 6 - fresh.length));
+    fresh.push(...take(pool, 8 - fresh.length));
     // More worth your time: one per track first, then fill.
     const picks = take(byRank.filter(i => now - +i.date < 21 * DAY && isDeep(i) && i.category !== 'postmortems'), 4, true);
     picks.push(...take(byRank.filter(i => now - +i.date < 21 * DAY && isDeep(i) && i.category !== 'postmortems'), 6 - picks.length));
