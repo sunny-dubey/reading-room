@@ -3,33 +3,19 @@ import Base from '../layouts/Base.astro';
 import ReadingMast from '../components/ReadingMast.astro';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getBriefing } from '../lib/briefing';
-import { getOutages, internetWeather } from '../lib/outages';
 import { u } from '../lib/url';
 
 const b = await getBriefing();
-const out = await getOutages();
-const wx = internetWeather(out.incidents, out.now);
 const day = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const when = (d: number) => d === 0 ? 'today' : d > 0 ? `in ${d} ${d === 1 ? 'day' : 'days'}` : `${-d} ${d === -1 ? 'day' : 'days'} ago`;
 const jobsShown = b.jobs.filter(j => j.score >= 3).slice(0, 60);
 ---
-<Base title="The briefing" description="What changed for engineers: releases, end-of-life dates, exploited vulnerabilities, new papers, hiring and internet weather." accent="reading">
+<Base title="The briefing" description="What changed for engineers: releases, end-of-life dates, exploited vulnerabilities, new papers and hiring." accent="reading">
     <div class="rd fp briefing">
-        <ReadingMast compact title="The briefing" sub="What changed in the world your code runs in: weather, releases, obituaries, exploited vulnerabilities, new papers and who's hiring. Facts, from public sources, refreshed with every edition." updated={new Date(b.now)} />
+        <ReadingMast compact title="The briefing" sub="What changed in the world your code runs in: releases, obituaries, exploited vulnerabilities, new papers and who's hiring. Facts, from public sources, refreshed with every edition." updated={new Date(b.now)} />
         <nav class="bf-index" aria-label="Sections">
-            <a href="#weather">Internet weather</a><a href="#releases">Release radar</a><a href="#eol">Obituaries</a><a href="#cves">CVE watch</a><a href="#papers">Paper drop</a><a href="#hiring">Classifieds</a><a href={u('/startups/')}>Startups →</a><a href={u('/pulse/')}>Pulse: the week's headlines →</a>
+            <a href="#releases">Release radar</a><a href="#eol">Obituaries</a><a href="#cves">CVE watch</a><a href="#papers">Paper drop</a><a href="#hiring">Classifieds</a><a href={u('/startups/')}>Startups →</a><a href={u('/pulse/')}>Pulse: the week's headlines →</a>
         </nav>
-
-        <section class="fp-band" id="weather">
-            <h2 class="fp-band-h"><span>Internet weather</span></h2>
-            <p class="bf-lede">{wx.line}. {wx.ongoing ? `${wx.ongoing} incident${wx.ongoing === 1 ? '' : 's'} ongoing.` : 'Nothing ongoing.'} {wx.global ? `${wx.global} more had no stated location.` : ''}</p>
-            <div class="wx-grid">
-                {wx.regions.map(r => (
-                    <div class={`wx wx-${r.cond}`}><span class="wx-icon" aria-hidden="true"></span><b>{r.region}</b><span>{r.cond === 'clear' ? 'Clear' : `${r.cond[0].toUpperCase()}${r.cond.slice(1)} · ${r.count} in 24h${r.live ? ` · ${r.live} ongoing` : ''}`}</span></div>
-                ))}
-            </div>
-            <p class="fp-more-link"><a href={u('/outages/')}>The outage map and every investigation →</a></p>
-        </section>
 
         <div class="bf-two">
             <section class="fp-band" id="releases">

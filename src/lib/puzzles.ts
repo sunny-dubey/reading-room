@@ -48,7 +48,7 @@ async function build() {
     // Incident drill: a real, resolved incident with a story (several updates), preferably with a report.
     const drills = outages.incidents
         .filter(i => !i.ongoing && i.updates.length >= 4 && i.end)
-        .sort((a, b) => (b.rca ? 1 : 0) - (a.rca ? 1 : 0) || b.updates.length - a.updates.length)
+        .sort((a, b) => (b.rca ? 1 : 0) - (a.rca ? 1 : 0) || (b.cause ? 1 : 0) - (a.cause ? 1 : 0) || b.updates.length - a.updates.length)
         .slice(0, 14);
     const drill: Incident | undefined = drills.length ? drills[day % drills.length] : undefined;
 

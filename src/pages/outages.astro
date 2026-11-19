@@ -1,58 +1,73 @@
 ---
+// Incident lessons: real outages as case studies (stated cause or postmortem), a reliability table per provider,
+// and a plain list of everything else. URL stays /outages/ so old links keep working.
 import Base from '../layouts/Base.astro';
 import ReadingMast from '../components/ReadingMast.astro';
 import ReadingClient from '../components/ReadingClient.astro';
-import OutageMap from '../components/OutageMap.astro';
 import IncidentReport from '../components/IncidentReport.astro';
 import { getOutages, fmtDuration, KINDS } from '../lib/outages';
 import { u } from '../lib/url';
 
-const { now, incidents, featured, status, stats } = await getOutages();
-const REGIONS = ['North America', 'Europe', 'Asia-Pacific', 'Latin America', 'Middle East & Africa', 'Global or not stated'];
-const byRegion = REGIONS.map(r => ({ r, list: incidents.filter(i => i.region === r && i !== featured) })).filter(g => g.list.length);
-const kinds = Object.entries(KINDS).filter(([k]) => incidents.some(i => i.kind === k));
+const { now, incidents, cases, reliability, status, stats } = await getOutages();
+const caseIds = new Set(cases.map(i => i.id));
+const rest = incidents.filter(i => !caseIds.has(i.id));
 const failing = status.filter(s => !s.ok);
+const day = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 ---
-<Base title="Outage map" description="Where the internet broke this month: outages from public status pages, each with its timeline and investigation report." accent="reading">
+<Base title="Incident lessons" description="Real outages as case studies: what failed, the cause in the provider's words, and how long it took to fix." accent="reading">
     <div class="rd outages">
-        <ReadingMast compact title="Outage map" sub={`Where the internet broke in the last 30 days, from ${status.length} public status pages. Every incident opens into its investigation report.`} updated={new Date(now)} />
-
-        <div class="out-controls" role="group" aria-label="Filter incidents">
-            <div class="out-seg" data-out-window>
-                <button type="button" data-hours="24">24 hours</button>
-                <button type="button" data-hours="168" aria-pressed="true">7 days</button>
-                <button type="button" data-hours="720">30 days</button>
-            </div>
-            <div class="out-kinds">
-                {kinds.map(([k, label]) => <button type="button" data-kind-btn={k} aria-pressed="true">{label}</button>)}
-            </div>
-        </div>
-
-        <OutageMap incidents={incidents} now={now} size="large" />
+        <ReadingMast compact title="Incident lessons" sub={`Real outages from ${status.length} public status pages, last 30 days, read as case studies: what failed, the cause in the provider's own words, and how long it took to fix. For live status, use the provider's own page.`} updated={new Date(now)} />
 
         <div class="out-stats">
-            <div><strong data-out-count>{stats.week}</strong><span>incidents shown</span></div>
-            <div><strong>{stats.ongoing}</strong><span>ongoing now</span></div>
-            <div><strong>{stats.longest ? fmtDuration(stats.longest.duration) : '—'}</strong><span>longest this week{stats.longest ? ` (${stats.longest.provider})` : ''}</span></div>
-            <div><strong>{incidents.filter(i => i.rca).length}</strong><span>with an investigation report</span></div>
+            <div><strong>{cases.length}</strong><span>case studies</span></div>
+            <div><strong>{incidents.filter(i => i.rca).length}</strong><span>with a postmortem</span></div>
+            <div><strong>{stats.explained}</strong><span>of {incidents.length} incidents gave a cause</span></div>
+            <div><strong>{stats.ongoing}</strong><span>still open at this edition</span></div>
         </div>
 
-        {featured && (
-            <section class="fp-band out-featured">
-                <h2 class="fp-band-h"><span>The investigation of the week</span></h2>
-                <IncidentReport i={featured} now={now} open featured />
-            </section>
-        )}
+        <section class="fp-band">
+            <h2 class="fp-band-h"><span>Case studies</span></h2>
+            {cases.length
+                ? cases.map((i, n) => <IncidentReport i={i} now={now} open={n === 0} featured={n === 0} />)
+                : <p class="out-empty">No incident in the last 30 days came with a stated cause or a postmortem. See the <a href={u('/postmortems/')}>Postmortems desk</a> for older write-ups.</p>}
+            <p class="side-note">A case study is a resolved incident with a postmortem, or one where the provider stated the cause and the impact was real (major, or 30+ minutes). At most two per provider.</p>
+        </section>
 
         <section class="fp-band">
-            <h2 class="fp-band-h"><span>Every incident, by region</span></h2>
-            {byRegion.map(g => (
-                <div class="out-region" data-region-group>
-                    <h3 class="fp-box-h">{g.r} <span class="out-n" data-region-count>{g.list.length}</span></h3>
-                    {g.list.map(i => <IncidentReport i={i} now={now} />)}
-                </div>
-            ))}
-            <p class="out-empty" data-out-empty hidden>Nothing in this window. A quiet week for the internet.</p>
+            <h2 class="fp-band-h"><span>Reliability, last 30 days</span></h2>
+            <div class="out-table-wrap">
+                <table class="bf-table out-rel">
+                    <thead><tr><th>Provider</th><th>Incidents</th><th>Major</th><th>Typical fix</th><th>Longest</th><th>Cause given</th></tr></thead>
+                    <tbody>
+                        {reliability.map(r => (
+                            <tr>
+                                <td><b>{r.provider}</b> <span class="out-kind">{KINDS[r.kind]}</span></td>
+                                <td>{r.count}</td>
+                                <td>{r.major || '—'}</td>
+                                <td>{r.median !== undefined ? fmtDuration(r.median) : '—'}{r.timed && r.timed < r.count ? <span class="out-n" title="incidents with real timings"> ({r.timed} timed)</span> : ''}</td>
+                                <td>{r.longest !== undefined ? fmtDuration(r.longest) : '—'}</td>
+                                <td>{r.explained}/{r.count}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <p class="side-note">"Typical fix" is the median time from the start of the problem (as the provider stated it, else its first update) to resolved. Incidents posted only after they ended have no real timing and are left out of it. Counts depend on how much each provider reports, so compare carefully.</p>
+        </section>
+
+        <section class="fp-band">
+            <details class="out-rest">
+                <summary>Every other incident ({rest.length})</summary>
+                <ul class="out-rest-list" role="list">
+                    {rest.map(i => (
+                        <li class:list={[`sev-${i.severity}`, { ongoing: i.ongoing }]}>
+                            <span class="bf-date">{day(i.start)}</span>
+                            <a href={i.url} target="_blank" rel="noopener noreferrer"><b>{i.provider}</b> · {i.title}</a>
+                            <span class="bf-date">{i.ongoing ? 'open' : i.duration ? fmtDuration(i.duration) : ''}{i.severity === 'major' ? ' · major' : ''}</span>
+                        </li>
+                    ))}
+                </ul>
+            </details>
         </section>
 
         <section class="fp-band out-sources">
@@ -60,61 +75,31 @@ const failing = status.filter(s => !s.ok);
             <ul role="list">
                 {status.map(s => <li><span class={s.ok ? 'ok' : 'bad'}></span>{s.name}<span class="n">{s.ok ? s.count : 'unreachable'}</span></li>)}
             </ul>
-            <p class="side-note">Facts come from each provider's own status page; locations come from the region names they use. Providers that report vaguely appear as "global or not stated". {failing.length > 0 && `${failing.length} unreachable this build.`} Sources live in <code>src/content/status-pages.yaml</code>. <a href={u('/postmortems/')}>Postmortems →</a></p>
+            <p class="side-note">Facts come from each provider's own status page. Some pages (Cloudflare, Twilio) fill their feed with planned maintenance, so few real incidents reach us from them. {failing.length > 0 && `${failing.length} unreachable this build.`} Sources live in <code>src/content/status-pages.yaml</code>. <a href={u('/postmortems/')}>Postmortems desk →</a></p>
         </section>
     </div>
     <ReadingClient />
 </Base>
 
 <script>
-    // Local times, filters (time window × kind), and deep links that open a report.
+    // Local times, and deep links that open a case study.
     document.querySelectorAll<HTMLTimeElement>('time[data-local]').forEach(t => {
         const d = new Date(t.dateTime);
         let s = d.toLocaleString(undefined, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-        // Prefer a familiar abbreviation (IST) where the locale only offers GMT+5:30.
         if (/GMT[+-]/.test(s)) {
             const alt = new Intl.DateTimeFormat('en-IN', { timeZoneName: 'short' }).formatToParts(d).find(p => p.type === 'timeZoneName')?.value;
             if (alt && !/GMT[+-]/.test(alt)) s = s.replace(/GMT[+-][\d:]+/, alt);
         }
         t.textContent = s;
     });
-    let hours = 168;
-    const kinds = new Set([...document.querySelectorAll<HTMLElement>('[data-kind-btn]')].map(b => b.dataset.kindBtn!));
-    function apply() {
-        const ok = (el: HTMLElement) => Number(el.dataset.ageH) <= hours && kinds.has(el.dataset.kind!);
-        document.querySelectorAll<SVGElement>('.omap-mk').forEach(m => m.classList.toggle('is-off', !ok(m as unknown as HTMLElement)));
-        let shown = 0;
-        document.querySelectorAll<HTMLElement>('details.inc:not(.featured)').forEach(d => { d.hidden = !ok(d); if (!d.hidden) shown++; });
-        document.querySelectorAll<HTMLElement>('[data-region-group]').forEach(g => {
-            const n = g.querySelectorAll('details.inc:not([hidden])').length;
-            g.hidden = n === 0;
-            const c = g.querySelector('[data-region-count]'); if (c) c.textContent = String(n);
-        });
-        const featured = document.querySelector<HTMLElement>('details.inc.featured');
-        const c = document.querySelector('[data-out-count]'); if (c) c.textContent = String(shown + (featured && ok(featured) ? 1 : 0));
-        document.querySelector<HTMLElement>('[data-out-empty]')!.hidden = shown > 0;
-    }
-    document.querySelectorAll<HTMLButtonElement>('[data-hours]').forEach(b => b.addEventListener('click', () => {
-        hours = Number(b.dataset.hours);
-        document.querySelectorAll('[data-hours]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-        apply();
-    }));
-    document.querySelectorAll<HTMLButtonElement>('[data-kind-btn]').forEach(b => b.addEventListener('click', () => {
-        const on = b.getAttribute('aria-pressed') !== 'true';
-        b.setAttribute('aria-pressed', String(on));
-        on ? kinds.add(b.dataset.kindBtn!) : kinds.delete(b.dataset.kindBtn!);
-        apply();
-    }));
     function openHash() {
         const el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
         if (el instanceof HTMLDetailsElement) {
-            if (el.hidden) { hours = 720; document.querySelectorAll('[data-hours]').forEach(x => x.setAttribute('aria-pressed', String((x as HTMLElement).dataset.hours === '720'))); apply(); }
             el.open = true;
             el.scrollIntoView({ block: 'start' });
             el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
         }
     }
     window.addEventListener('hashchange', openHash);
-    apply();
     openHash();
 </script>

@@ -1,5 +1,6 @@
 ---
-// One incident as an investigation report: facts, the provider's own timeline, and the postmortem when published.
+// One incident as a case study: the stated cause, real timings (or none when it was posted after the fact),
+// the provider's own timeline, and the postmortem when published.
 import { fmtDuration, KINDS, type Incident } from '../lib/outages';
 interface Props { i: Incident; now: number; open?: boolean; featured?: boolean }
 const { i, now, open = false, featured = false } = Astro.props;
@@ -9,7 +10,7 @@ const where = i.places.length ? i.places.map(p => p.name + (p.approx ? ' (approx
 const clip = (t: string) => (t.length > 320 ? t.slice(0, 317).replace(/\s+\S*$/, '') + '…' : t);
 ---
 <details class:list={['inc', `sev-${i.severity}`, { featured, ongoing: i.ongoing }]} id={anchor} open={open}
-    data-kind={i.kind} data-age-h={Math.round((now - i.start) / 3600e3)} data-region={i.region}>
+    data-kind={i.kind}>
     <summary>
         <span class="inc-tags">
             <span class="inc-sev">{i.severity === 'major' ? 'Major' : 'Minor'}</span>
@@ -17,16 +18,18 @@ const clip = (t: string) => (t.length > 320 ? t.slice(0, 317).replace(/\s+\S*$/,
             <span class="inc-kind">{KINDS[i.kind]}</span>
         </span>
         <span class="inc-title"><b>{i.provider}</b> · {i.title}</span>
-        <span class="inc-meta">{where} · <time data-rel datetime={new Date(i.start).toISOString()}></time>{i.duration ? ` · lasted ${fmtDuration(i.duration)}` : ''}</span>
+        <span class="inc-meta">{i.places.length ? `${where} · ` : ''}<time data-rel datetime={new Date(i.start).toISOString()}></time>{i.duration ? ` · lasted ${fmtDuration(i.duration)}` : ''}{i.rca ? ' · postmortem' : ''}</span>
+        {i.cause && <span class="inc-cause-line">{i.cause}</span>}
     </summary>
     <div class="inc-body">
         <dl class="inc-facts">
+            {i.cause && <div class="wide"><dt>Cause, in the provider's words</dt><dd>{i.cause}</dd></div>}
             <div><dt>Where</dt><dd>{where}</dd></div>
-            <div><dt>Started</dt><dd><time data-local datetime={new Date(i.start).toISOString()}>{utc(i.start)}</time></dd></div>
+            <div><dt>{i.timing === 'stated' ? 'Started (as stated)' : 'Started'}</dt><dd><time data-local datetime={new Date(i.start).toISOString()}>{utc(i.start)}</time></dd></div>
             <div><dt>Resolved</dt><dd>{i.end ? <time data-local datetime={new Date(i.end).toISOString()}>{utc(i.end)}</time> : i.ongoing ? 'Not yet' : 'Not reported'}</dd></div>
             <div><dt>Cause found after</dt><dd>{fmtDuration(i.identifiedAfter) || '—'}</dd></div>
             <div><dt>Mitigated after</dt><dd>{fmtDuration(i.mitigatedAfter) || '—'}</dd></div>
-            <div><dt>Total</dt><dd>{fmtDuration(i.duration) || (i.ongoing ? fmtDuration(now - i.start) + ' so far' : '—')}</dd></div>
+            <div><dt>Total</dt><dd>{fmtDuration(i.duration) || (i.ongoing ? fmtDuration(now - i.start) + ' so far' : i.timing === 'unknown' ? 'Not known: posted after the fact' : '—')}</dd></div>
             {i.affected.length > 0 && <div class="wide"><dt>Affected</dt><dd>{i.affected.join(', ')}</dd></div>}
         </dl>
         <h4 class="inc-h">Timeline, as the provider reported it</h4>

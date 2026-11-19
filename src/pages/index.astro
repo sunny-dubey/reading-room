@@ -9,9 +9,8 @@ import { editionName, istTime, istDate } from '../lib/edition';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
 import { getToday } from '../lib/today';
-import { getOutages, fmtDuration, internetWeather } from '../lib/outages';
+import { getOutages, fmtDuration, KINDS } from '../lib/outages';
 import { getBriefing } from '../lib/briefing';
-import OutageMap from '../components/OutageMap.astro';
 import MarketTicker from '../components/MarketTicker.astro';
 import PuzzleCard from '../components/PuzzleCard.astro';
 import NumbersCard from '../components/NumbersCard.astro';
@@ -31,12 +30,8 @@ const bf = await getBriefing();
 const webPicks = todaysPicks(await getWebPuzzles(), now);
 const bfDay = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const bfJobs = bf.jobs.filter(j => j.score >= 3 && (j.remoteAnywhere || j.india)).slice(0, 5);
-// Outage map panel: the last 72 hours (a week if it's been quiet).
+// Incident lessons: case studies picked in outages.ts.
 const outages = await getOutages();
-const recentOut = (h: number) => outages.incidents.filter(i => outages.now - i.start < h * 3600e3);
-const outWindow = recentOut(72).length >= 3 ? 72 : 168;
-const outShown = recentOut(outWindow);
-const wx = internetWeather(outages.incidents, outages.now);
 const outAnchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
 const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
 const mins = (m?: number) => (m ? `${m} min` : '');
@@ -190,31 +185,20 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             </div>
         </section>
 
-        <!-- ===== The outage map ===== -->
-        {outages.incidents.length > 0 && (
+        <!-- ===== Incident lessons: real outages with a stated cause or a postmortem ===== -->
+        {outages.cases.length > 0 && (
             <section class="fp-band reveal out-front">
-                <h2 class="fp-band-h"><span>The outage map</span></h2>
-                <div class="out-front-grid">
-                    <OutageMap incidents={outShown} now={outages.now} size="small" />
-                    <div class="out-front-side">
-                        <p class="out-front-stats">
-                            <strong>{outages.stats.week}</strong> incidents this week{outages.stats.ongoing ? <> · <strong class="live">{outages.stats.ongoing} ongoing</strong></> : ''}
-                            {outages.stats.longest && <> · longest <strong>{fmtDuration(outages.stats.longest.duration)}</strong> ({outages.stats.longest.provider})</>}
-                        </p>
-                        <ul class="out-latest" role="list">
-                            {outShown.slice(0, 4).map(i => (
-                                <li class:list={[`sev-${i.severity}`, { ongoing: i.ongoing }]}>
-                                    <a href={u(`/outages/#${outAnchor(i.id)}`)}>
-                                        <span class="out-latest-t"><b>{i.provider}</b> · {i.title}</span>
-                                        <span class="story-by">{i.places[0]?.name ?? 'Global'} · <time data-rel datetime={new Date(i.start).toISOString()}></time>{i.ongoing ? ' · ongoing' : i.duration ? ` · ${fmtDuration(i.duration)}` : ''}</span>
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                        {outages.featured && <p class="out-front-inv"><span>Investigation of the week</span><a href={u(`/outages/#${outAnchor(outages.featured.id)}`)}>{outages.featured.provider}: {outages.featured.title}</a></p>}
-                        <a class="fp-more" href={u('/outages/')}>Open the full map and every investigation →</a>
-                    </div>
-                </div>
+                <h2 class="fp-band-h"><span>Incident lessons</span></h2>
+                <ul class="out-lessons" role="list">
+                    {outages.cases.slice(0, 3).map(i => (
+                        <li>
+                            <p class="fp-kicker">{i.provider} · {KINDS[i.kind]}{i.duration ? ` · ${fmtDuration(i.duration)} to fix` : ''}{i.rca ? ' · postmortem' : ''}</p>
+                            <a class="out-lesson-t" href={u(`/outages/#${outAnchor(i.id)}`)}>{i.title}</a>
+                            {i.cause && <p class="out-lesson-cause">{i.cause}</p>}
+                        </li>
+                    ))}
+                </ul>
+                <a class="fp-more" href={u('/outages/')}>All case studies and the reliability table →</a>
             </section>
         )}
 

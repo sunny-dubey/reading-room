@@ -2,13 +2,11 @@
 // Incident drill: a real outage, replayed one status update at a time. Write your hypothesis first.
 import { checklist } from '../lib/puzzles';
 import { fmtDuration, type Incident } from '../lib/outages';
-import { u } from '../lib/url';
 interface Props { i: Incident }
 const { i } = Astro.props;
 const [first, ...rest] = i.updates;
 const t = (ms: number) => new Date(ms).toISOString().slice(11, 16) + ' UTC';
 const elapsed = (ms: number) => `+${fmtDuration(ms - first.at) || '0 min'}`;
-const anchor = `inc-${i.id.replace(/[^a-z0-9]+/gi, '-')}`;
 ---
 <section class="drill" data-drill={i.id}>
     <h3 class="fp-box-h">Incident drill · you're on call</h3>
@@ -30,9 +28,9 @@ const anchor = `inc-${i.id.replace(/[^a-z0-9]+/gi, '-')}`;
         ))}
     </ol>
     <div class="drill-end" data-drill-end hidden>
-        <p><b>Resolved after {fmtDuration(i.duration)}.</b>{i.identifiedAfter !== undefined ? ` Cause found after ${fmtDuration(i.identifiedAfter)}.` : ''} How close was your first hypothesis?</p>
+        <p>{i.duration ? <b>Resolved after {fmtDuration(i.duration)}.</b> : <b>Resolved.</b>}{i.cause ? ` The stated cause: ${i.cause}` : ''}{i.identifiedAfter !== undefined ? ` Cause found after ${fmtDuration(i.identifiedAfter)}.` : ''} How close was your first hypothesis?</p>
         <p class="inc-links">
-            <a href={u(`/outages/#${anchor}`)}>The full investigation report →</a>
+            <a href={i.url} target="_blank" rel="noopener noreferrer">The provider's status page →</a>
             {i.rca && <a class="inc-rca" href={i.rca.url} target="_blank" rel="noopener noreferrer">Postmortem: {i.rca.title} →</a>}
         </p>
     </div>
