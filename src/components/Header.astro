@@ -23,6 +23,7 @@ const isSaved = path.startsWith(u('/library/'));
         <div class="nav-links">
             <a href={u('/startups/')} aria-current={path.startsWith(u('/startups/')) ? 'page' : undefined}>Startups</a>
             <a href={u('/pulse/')} aria-current={path.startsWith(u('/pulse/')) ? 'page' : undefined}>Pulse</a>
+            <a href={u('/outages/')} aria-current={path.startsWith(u('/outages/')) ? 'page' : undefined}>Outages</a>
             <a href={u('/notebook/')} aria-current={isNotebook ? 'page' : undefined}>Notebook</a>
             <a href={u('/library/')} aria-current={isSaved ? 'page' : undefined}>Saved</a>
         </div>
@@ -44,5 +45,6 @@ const isSaved = path.startsWith(u('/library/'));
         <a class="m-only" href={u('/library/')} aria-current={isSaved ? 'page' : undefined}>Saved</a>
         <a class="m-only" href={u('/startups/')} aria-current={path.startsWith(u('/startups/')) ? 'page' : undefined}>Startups</a>
         <a class="m-only" href={u('/pulse/')} aria-current={path.startsWith(u('/pulse/')) ? 'page' : undefined}>Pulse</a>
+        <a class="m-only" href={u('/outages/')} aria-current={path.startsWith(u('/outages/')) ? 'page' : undefined}>Outages</a>
     </nav>
 </div>

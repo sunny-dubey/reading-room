@@ -1,0 +1,49 @@
+---
+// One incident as an investigation report: facts, the provider's own timeline, and the postmortem when published.
+import { fmtDuration, KINDS, type Incident } from '../lib/outages';
+interface Props { i: Incident; now: number; open?: boolean; featured?: boolean }
+const { i, now, open = false, featured = false } = Astro.props;
+const anchor = `inc-${i.id.replace(/[^a-z0-9]+/gi, '-')}`;
+const utc = (t: number) => new Date(t).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+const where = i.places.length ? i.places.map(p => p.name + (p.approx ? ' (approx.)' : '')).join(', ') : 'Global or not stated';
+const clip = (t: string) => (t.length > 320 ? t.slice(0, 317).replace(/\s+\S*$/, '') + '…' : t);
+---
+<details class:list={['inc', `sev-${i.severity}`, { featured, ongoing: i.ongoing }]} id={anchor} open={open}
+    data-kind={i.kind} data-age-h={Math.round((now - i.start) / 3600e3)} data-region={i.region}>
+    <summary>
+        <span class="inc-tags">
+            <span class="inc-sev">{i.severity === 'major' ? 'Major' : 'Minor'}</span>
+            {i.ongoing && <span class="inc-live">Ongoing</span>}
+            <span class="inc-kind">{KINDS[i.kind]}</span>
+        </span>
+        <span class="inc-title"><b>{i.provider}</b> · {i.title}</span>
+        <span class="inc-meta">{where} · <time data-rel datetime={new Date(i.start).toISOString()}></time>{i.duration ? ` · lasted ${fmtDuration(i.duration)}` : ''}</span>
+    </summary>
+    <div class="inc-body">
+        <dl class="inc-facts">
+            <div><dt>Where</dt><dd>{where}</dd></div>
+            <div><dt>Started</dt><dd><time data-local datetime={new Date(i.start).toISOString()}>{utc(i.start)}</time></dd></div>
+            <div><dt>Resolved</dt><dd>{i.end ? <time data-local datetime={new Date(i.end).toISOString()}>{utc(i.end)}</time> : i.ongoing ? 'Not yet' : 'Not reported'}</dd></div>
+            <div><dt>Cause found after</dt><dd>{fmtDuration(i.identifiedAfter) || '—'}</dd></div>
+            <div><dt>Mitigated after</dt><dd>{fmtDuration(i.mitigatedAfter) || '—'}</dd></div>
+            <div><dt>Total</dt><dd>{fmtDuration(i.duration) || (i.ongoing ? fmtDuration(now - i.start) + ' so far' : '—')}</dd></div>
+            {i.affected.length > 0 && <div class="wide"><dt>Affected</dt><dd>{i.affected.join(', ')}</dd></div>}
+        </dl>
+        <h4 class="inc-h">Timeline, as the provider reported it</h4>
+        <ol class="inc-timeline" role="list">
+            {i.updates.map(up => (
+                <li data-status={up.status.toLowerCase()}>
+                    <span class="inc-when"><time data-local datetime={new Date(up.at).toISOString()}>{utc(up.at)}</time></span>
+                    <span class="inc-status">{up.status}</span>
+                    <span class="inc-text">{clip(up.text)}</span>
+                </li>
+            ))}
+        </ol>
+        <p class="inc-links">
+            <a href={i.url} target="_blank" rel="noopener noreferrer">Official status page →</a>
+            {i.rca
+                ? <a class="inc-rca" href={i.rca.url} target="_blank" rel="noopener noreferrer">Investigation report: {i.rca.title} ({i.rca.source}) →</a>
+                : <span class="inc-norca">No postmortem published yet. It will appear here when {i.provider} or the Postmortems feeds publish one.</span>}
+        </p>
+    </div>
+</details>

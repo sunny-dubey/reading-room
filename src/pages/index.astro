@@ -8,12 +8,20 @@ import { editionName, istTime, istDate } from '../lib/edition';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
 import { getToday } from '../lib/today';
+import { getOutages, fmtDuration } from '../lib/outages';
+import OutageMap from '../components/OutageMap.astro';
 
 const { learning, fetchedAt, now, deepRead, deepCands, fresh, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
 const { question, rabbitHoles, twoTakes, quickCands, explainer, readMap } = await getToday();
 const STEP_NAMES = ['Start here', 'Go deeper', 'Master it'];
 const ROMAN = ['I', 'II', 'III'];
+// Outage map panel: the last 72 hours (a week if it's been quiet).
+const outages = await getOutages();
+const recentOut = (h: number) => outages.incidents.filter(i => outages.now - i.start < h * 3600e3);
+const outWindow = recentOut(72).length >= 3 ? 72 : 168;
+const outShown = recentOut(outWindow);
+const outAnchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
 const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
 const mins = (m?: number) => (m ? `${m} min` : '');
 const revisit = await getRevisit(now);
@@ -192,6 +200,34 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             <section class="fp-band reveal">
                 <h2 class="fp-band-h"><span>Fresh this week</span></h2>
                 <div class="fp-cols">{fresh.map(i => <Story i={i} cover />)}</div>
+            </section>
+        )}
+
+        <!-- ===== The outage map ===== -->
+        {outages.incidents.length > 0 && (
+            <section class="fp-band reveal out-front">
+                <h2 class="fp-band-h"><span>The outage map</span></h2>
+                <div class="out-front-grid">
+                    <OutageMap incidents={outShown} now={outages.now} size="small" />
+                    <div class="out-front-side">
+                        <p class="out-front-stats">
+                            <strong>{outages.stats.week}</strong> incidents this week{outages.stats.ongoing ? <> · <strong class="live">{outages.stats.ongoing} ongoing</strong></> : ''}
+                            {outages.stats.longest && <> · longest <strong>{fmtDuration(outages.stats.longest.duration)}</strong> ({outages.stats.longest.provider})</>}
+                        </p>
+                        <ul class="out-latest" role="list">
+                            {outShown.slice(0, 4).map(i => (
+                                <li class:list={[`sev-${i.severity}`, { ongoing: i.ongoing }]}>
+                                    <a href={u(`/outages/#${outAnchor(i.id)}`)}>
+                                        <span class="out-latest-t"><b>{i.provider}</b> · {i.title}</span>
+                                        <span class="story-by">{i.places[0]?.name ?? 'Global'} · <time data-rel datetime={new Date(i.start).toISOString()}></time>{i.ongoing ? ' · ongoing' : i.duration ? ` · ${fmtDuration(i.duration)}` : ''}</span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                        {outages.featured && <p class="out-front-inv"><span>Investigation of the week</span><a href={u(`/outages/#${outAnchor(outages.featured.id)}`)}>{outages.featured.provider}: {outages.featured.title}</a></p>}
+                        <a class="fp-more" href={u('/outages/')}>Open the full map and every investigation →</a>
+                    </div>
+                </div>
             </section>
         )}
 
