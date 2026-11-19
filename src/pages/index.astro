@@ -69,7 +69,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 </a>
                 <div class="fp-ear right">
                     <span class="fp-ear-k">This edition</span>
-                    <span class="fp-ear-v">{newReads === 0 ? 'No new reads since the last edition' : `${newReads} new ${newReads === 1 ? 'read' : 'reads'} since the last edition`} · <span data-next-edition>next in 3 hours</span></span>
+                    <span class="fp-ear-v">{newReads === 0 ? 'No new reads since the last edition' : `${newReads} new ${newReads === 1 ? 'read' : 'reads'} in the last six hours`} · published <time data-rel datetime={fetchedAt.toISOString()}></time></span>
                 </div>
             </div>
             <h1 class="fp-title">The Reading Room</h1>

@@ -3,11 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-  schedule:
-    # Every 3 hours. GitHub's scheduler is best-effort (runs can be late or skipped), so more slots
-    # keep the site fresh even when one is dropped.
-    - cron: '17 */3 * * *'
+  workflow_dispatch:   # also runnable by hand from the Actions tab
+  # No schedule: a new edition is published when it's pushed (or run by hand), not on a timer.
 
 permissions:
   contents: read

@@ -21,7 +21,7 @@ const { title, kicker, sub, updated, compact = false, cat, edition } = Astro.pro
     )}
     {edition && (
         <p class="rd-next">
-            <span data-next-edition>Next edition every 3 hours</span>
+            <span data-next-edition>A new edition each time it's published</span>
             <span class="ed-sep" aria-hidden="true">·</span>
             <span>{edition.newReads === 0 ? 'No new reads since the last edition' : `${edition.newReads} new ${edition.newReads === 1 ? 'read' : 'reads'} since the last edition`}</span>
         </p>

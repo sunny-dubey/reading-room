@@ -46,7 +46,7 @@ Everything happens **at build time**. There's no server, no database, no API key
 4. **Rank.** `rank = worth × 2 + freshness + topic boost + source weight`. Depth comes first, but freshness counts for a lot (+2.5 today, halving every 4 days), so a good new post beats a slightly better old one. Topics you haven't covered yet get a boost, and authors known for depth get a small nudge (`src/lib/reading.ts`).
 5. **Render.** Astro builds static pages, deployed to GitHub Pages.
 
-The site **rebuilds itself every 3 hours** (GitHub runs scheduled builds on a best-effort basis, so one can be late or skipped) through GitHub Actions (`.github/workflows/deploy.yml`), so new articles appear without anyone pushing. After each deploy, a separate job checks that every Canon link still works.
+**Editions are published on demand.** There's no timer: each push to `main` (or a manual run of the workflow from the Actions tab) fetches everything fresh, builds and deploys a new edition. To publish today's edition, push or run the workflow. After each deploy, a separate job checks that every Canon link still works.
 
 ## Running it locally
 

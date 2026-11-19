@@ -1,4 +1,4 @@
-# Status pages behind the Outage map (/outages/). Fetched at build time, every 3 hours.
+# Status pages behind the Outage map (/outages/). Fetched at build time, once per published edition.
 # format: statuspage (Atlassian Statuspage history.atom: timestamped updates) | gcp (Google Cloud feed) | aws (AWS RSS)
 # kind:   cloud | edge | devtools | ai | comms
 # where:  optional default location when the provider only runs in one place (leave empty for global services)

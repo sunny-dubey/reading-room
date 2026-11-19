@@ -1,4 +1,4 @@
-// "Editions": the site rebuilds every 3 hours (see the cron in .github/workflows/deploy.yml).
+// "Editions": the site is rebuilt and published on each push (no schedule; see .github/workflows/deploy.yml).
 // Edition names follow Sunny's clock (IST); times are shown in each reader's own timezone.
 
 /** Scheduled build slots in UTC minutes past midnight (00:17 UTC = 5:47 am IST). */

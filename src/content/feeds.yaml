@@ -1,4 +1,4 @@
-# Sources for The Reading Room. Fetched at build time; the deployed site rebuilds every 3 hours.
+# Sources for The Reading Room. Fetched at build time, once per published edition.
 # Every article is summarised at build time (extractive, no AI model) and given a "worth" score,
 # so announcements and news sink and deep explanations rise.
 #

@@ -15,7 +15,7 @@ const jobsShown = b.jobs.filter(j => j.score >= 3).slice(0, 60);
 ---
 <Base title="The briefing" description="What changed for engineers: releases, end-of-life dates, exploited vulnerabilities, new papers, hiring and internet weather." accent="reading">
     <div class="rd fp briefing">
-        <ReadingMast compact title="The briefing" sub="What changed in the world your code runs in: weather, releases, obituaries, exploited vulnerabilities, new papers and who's hiring. Facts, from public sources, refreshed every 3 hours." updated={new Date(b.now)} />
+        <ReadingMast compact title="The briefing" sub="What changed in the world your code runs in: weather, releases, obituaries, exploited vulnerabilities, new papers and who's hiring. Facts, from public sources, refreshed with every edition." updated={new Date(b.now)} />
         <nav class="bf-index" aria-label="Sections">
             <a href="#weather">Internet weather</a><a href="#releases">Release radar</a><a href="#eol">Obituaries</a><a href="#cves">CVE watch</a><a href="#papers">Paper drop</a><a href="#hiring">Classifieds</a>
         </nav>
