@@ -32,6 +32,8 @@ const fullTitle = title ? `${title} · The Reading Room` : 'The Reading Room';
             var h = new Date().getHours();
             document.documentElement.setAttribute('data-ed', h >= 5 && h < 11 ? 'morning' : h >= 11 && h < 17 ? 'midday' : h >= 17 && h < 23 ? 'evening' : 'late');
             document.documentElement.classList.add('js');
+            // AI features on/off (content written by Claude, marked "AI"). Remembered per browser; on by default.
+            try { document.documentElement.setAttribute('data-ai', localStorage.getItem('ai') === 'off' ? 'off' : 'on'); } catch (e) { document.documentElement.setAttribute('data-ai', 'on'); }
         })();
     </script>
 </head>
@@ -46,6 +48,21 @@ const fullTitle = title ? `${title} · The Reading Room` : 'The Reading Room';
             if (dark) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', 'dark');
             try { localStorage.setItem('theme', dark ? 'light' : 'dark'); } catch {}
         }));
+        // AI features toggle.
+        const paintAi = () => {
+            const on = document.documentElement.getAttribute('data-ai') !== 'off';
+            document.querySelectorAll<HTMLButtonElement>('[data-ai-toggle]').forEach(b => {
+                b.setAttribute('aria-pressed', String(on));
+                b.title = on ? 'AI features are on: show content written by Claude (each piece is marked AI). Click to hide.' : 'AI features are off: only non-AI content is shown. Click to show AI content.';
+            });
+        };
+        document.querySelectorAll('[data-ai-toggle]').forEach(btn => btn.addEventListener('click', () => {
+            const on = document.documentElement.getAttribute('data-ai') !== 'off';
+            document.documentElement.setAttribute('data-ai', on ? 'off' : 'on');
+            try { localStorage.setItem('ai', on ? 'off' : 'on'); } catch {}
+            paintAi();
+        }));
+        paintAi();
         // Reveal sections gently as they scroll into view (skipped when the reader prefers less motion).
         if (matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
             const io = new IntersectionObserver(entries => entries.forEach(e => {

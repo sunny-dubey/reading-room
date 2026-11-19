@@ -8,11 +8,20 @@ import { readFileSync } from 'node:fs';
 import { createConnection } from 'node:net';
 
 const t0 = Date.now();
+const build = () => {
+    const b = spawnSync('npx', ['astro', 'build'], { encoding: 'utf8' });
+    const out = (b.stdout ?? '') + (b.stderr ?? '');
+    if (b.status !== 0) { console.error(out.split('\n').filter(l => /error/i.test(l)).slice(0, 20).join('\n') || out.slice(-3000)); process.exit(1); }
+    return out.match(/(\d+) page\(s\) built/)?.[1] ?? '?';
+};
 console.log('Building a fresh edition (feeds, outages, CVEs, papers, jobs)…');
-const b = spawnSync('npx', ['astro', 'build'], { encoding: 'utf8' });
-const out = (b.stdout ?? '') + (b.stderr ?? '');
-if (b.status !== 0) { console.error(out.split('\n').filter(l => /error/i.test(l)).slice(0, 20).join('\n') || out.slice(-3000)); process.exit(1); }
-const pages = out.match(/(\d+) page\(s\) built/)?.[1] ?? '?';
+let pages = build();
+
+// AI features run here, locally only. Exit code 10 means new AI content was written: rebuild to show it.
+const ai = spawnSync('node', ['scripts/ai-edition.mjs', ...process.argv.slice(2).filter(a => a === '--no-ai' || a === '--force-ai').map(a => a === '--force-ai' ? '--force' : a)], { encoding: 'utf8' });
+const aiLog = ((ai.stdout ?? '') + (ai.stderr ?? '')).trim();
+if (ai.status === 10) { console.log('AI content written; rebuilding to include it…'); pages = build(); }
+else if (ai.status !== 0) console.warn(`AI step failed (the edition is fine without it):\n${aiLog}`);
 
 const html = readFileSync('dist/index.html', 'utf8');
 const text = s => s.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
@@ -38,6 +47,7 @@ console.log(`  Puzzle:      ${puzzle}`);
 console.log(`  Question:    ${question}`);
 console.log(`  Weather:     ${weather}`);
 console.log(`  Outages:     ${outages}`);
+console.log(`  AI:          ${aiLog.split('\n').filter(l => l.startsWith('AI:')).join(' ') || '—'}`);
 console.log(`  Briefing:    ${releases.length} releases (${releases.slice(0, 4).join(', ')}) · ${count(box('Obituaries'))} end-of-life · ${count(box('CVE watch'))} CVEs · ${count(box('Paper drop'))} papers · ${count(box('Classifieds'))} jobs`);
 
 // Is the preview server up? It serves dist/, so a running one already shows this edition.
@@ -47,4 +57,4 @@ else if (process.argv.includes('--serve')) {
     spawn('npx', ['astro', 'preview', '--port', '4321'], { detached: true, stdio: 'ignore' }).unref();
     console.log('\nStarted the preview: http://localhost:4321/reading-room/');
 } else console.log('\nPreview not running. Start it with: npm run preview -- --port 4321 (or npm run edition -- --serve)');
-console.log('Not published. To publish: push to main, or run `gh workflow run deploy.yml`.');
+console.log('Not published. To publish: push to main (this also commits new AI content in src/content/ai/), or run `gh workflow run deploy.yml`.');

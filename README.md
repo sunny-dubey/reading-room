@@ -78,6 +78,34 @@ The site is **read-only**: there's no editing in the browser. Add content as fil
 | Change the weekly design prompts | Edit `src/content/practice.yaml` (topics, reads, the hard question) |
 | Fix a bad "Why read" match | Pin a topic (or `none`) for a URL in `src/content/overrides.yaml` |
 
+## Open source: run your own Reading Room
+
+The Reading Room is open source. Fork or clone it and run your own paper:
+
+```bash
+git clone https://github.com/sunny-dubey/reading-room && cd reading-room
+npm install
+npm run edition -- --serve      # builds today's edition and opens it at http://localhost:4321/reading-room/
+```
+
+Make it yours by editing the files in `src/content/`: your sources (`feeds.yaml`), what you're learning (`roadmap.yaml`), your foundational reads (`canon.yaml`), your stack (`stack.yaml`), puzzles and status pages. To publish on GitHub Pages, change `site` and `base` in `astro.config.mjs` and enable Pages (GitHub Actions) in your repo settings.
+
+**Anyone can turn on the AI features with their own Claude API key.** Nothing AI-related is required: without a key you get the complete paper, and with one you also get the AI-written parts. Your key stays on your machine; it's never committed, and the public build never calls Claude.
+
+## AI features (optional, local)
+
+The site works fully without AI. AI features use Claude and run **only on your machine**, through either:
+
+- **A Claude API key** (pay per use, about $0.05–0.10 a day): get one at https://console.anthropic.com, then `cp .env.example .env` and set `ANTHROPIC_API_KEY` (git-ignored, never committed). Best for anyone running their own copy, and for automation.
+- **Your Claude Code CLI**, if you use it: with `claude` installed and logged in, nothing else is needed. It runs on your Claude subscription. Keep this to your own machine (never in CI).
+
+With a key it uses the API; without one it uses the CLI (force either with `AI_BACKEND=api` or `cli` in `.env`). Then:
+
+1. Run `npm run edition`. It builds the edition, then writes the day's AI content to `src/content/ai/<date>.json` (once a day).
+2. Commit and push: the public site shows that committed content, labelled with its date. GitHub Actions has no key and never calls Claude.
+
+Readers can switch AI content off with the **AI** button in the header. Today the AI writes one thing: the **editor's note** under the masthead, from that day's front page only.
+
 ## Project layout
 
 ```

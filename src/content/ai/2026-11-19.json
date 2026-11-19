@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-19",
+  "generatedAt": "2026-11-19T07:02:56.844Z",
+  "model": "claude-opus-5-5",
+  "backend": "cli",
+  "editorsNote": {
+    "headline": "A bug you can replay is one you can fix",
+    "body": "Martin Fowler's Deterministic Simulation Testing teaches you to make every distributed failure reproducible, which is the best way to catch one-in-a-million bugs. Murat Demirbas's piece on TLAPS-Bench goes further and formally proves real-world system specifications correct with TLA+. The ScaleBench paper offers a reproducible platform for Kubernetes autoscaling research, and Shopify's Cyber Chaos Monkey uses AI agents to test security on purpose. Fly.io's LAX region outage, one of 49 this week, is the kind of failure these methods help you understand.",
+    "focus": "If you read one thing: Martin Fowler's Deterministic Simulation Testing (26 minutes), because it shows how to make distributed bugs show up again whenever you need them."
+  },
+  "usage": {
+    "input": 3904,
+    "output": 992,
+    "usd": 0.0511
+  }
+}
