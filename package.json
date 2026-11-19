@@ -13,7 +13,6 @@
     "edition": "node scripts/edition.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.10.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
     "@fontsource-variable/newsreader": "^5.3.0",

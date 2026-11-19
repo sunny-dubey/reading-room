@@ -233,9 +233,9 @@ a.tile:hover, .tile.hoverable:hover { border-color: color-mix(in srgb, var(--acc
 /* ---------- Reading: "The Reading Room" ---------- */
 :root { --serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
         --s-outage: #dc2626; --s-model: #7c3aed; --s-migration: #d97706; --s-security: #db2777; --s-controversy: #0891b2;
-        --cat-news: #2563eb; --cat-ai: #7c3aed; --cat-engineering: #059669; --cat-security: #d97706; --cat-status: #dc2626; --cat-community: #d97706; --cat-posts: #0284c7; --cat-reddit: #ea580c; --cat-systems: #059669; --cat-backend: #2563eb; --cat-ai-eng: #7c3aed; --cat-ml: #db2777; --cat-postmortems: #dc2626; --cat-math: #0891b2; }
+        --cat-news: #2563eb; --cat-ai: #7c3aed; --cat-engineering: #059669; --cat-security: #d97706; --cat-status: #dc2626; --cat-community: #d97706; --cat-posts: #0284c7; --cat-reddit: #ea580c; --cat-systems: #059669; --cat-backend: #2563eb; --cat-ai-eng: #7c3aed; --cat-ml: #db2777; --cat-postmortems: #dc2626; --cat-math: #0891b2; --cat-quant: #65a30d; }
 [data-theme="dark"] { --s-outage: #f87171; --s-model: #a78bfa; --s-migration: #fbbf24; --s-security: #f472b6; --s-controversy: #22d3ee;
-        --cat-news: #60a5fa; --cat-ai: #a78bfa; --cat-engineering: #34d399; --cat-security: #fbbf24; --cat-status: #f87171; --cat-community: #fbbf24; --cat-posts: #38bdf8; --cat-reddit: #fb923c; --cat-systems: #34d399; --cat-backend: #60a5fa; --cat-ai-eng: #a78bfa; --cat-ml: #f472b6; --cat-postmortems: #f87171; --cat-math: #22d3ee; }
+        --cat-news: #60a5fa; --cat-ai: #a78bfa; --cat-engineering: #34d399; --cat-security: #fbbf24; --cat-status: #f87171; --cat-community: #fbbf24; --cat-posts: #38bdf8; --cat-reddit: #fb923c; --cat-systems: #34d399; --cat-backend: #60a5fa; --cat-ai-eng: #a78bfa; --cat-ml: #f472b6; --cat-postmortems: #f87171; --cat-math: #22d3ee; --cat-quant: #a3e635; }
 [data-sig="outage"] { --sc: var(--s-outage); }
 [data-sig="model"] { --sc: var(--s-model); }
 [data-sig="migration"] { --sc: var(--s-migration); }
@@ -245,6 +245,7 @@ a.tile:hover, .tile.hoverable:hover { border-color: color-mix(in srgb, var(--acc
 [data-cat="ai"] { --cc: var(--cat-ai); }
 [data-cat="engineering"] { --cc: var(--cat-engineering); }
 [data-cat="security"] { --cc: var(--cat-security); }
+[data-cat="quant"] { --cc: var(--cat-quant); }
 [data-cat="status"] { --cc: var(--cat-status); }
 [data-cat="community"] { --cc: var(--cat-community); }
 [data-cat="posts"] { --cc: var(--cat-posts); }
@@ -1502,15 +1503,30 @@ a.fp-ear:hover { border-color: var(--fg); }
 }
 @media (max-width: 900px) { .aura-grid { grid-template-columns: 1fr; } }
 
-/* ---------- AI features: toggle, badge, editor's note ---------- */
-.ai-toggle { font: 700 11px var(--sans); letter-spacing: .06em; width: auto; padding: 0 9px; border-radius: 999px; }
-.ai-toggle[aria-pressed="true"] { color: #fff; background: linear-gradient(135deg, #7c3aed, #0891b2); }
-.ai-toggle[aria-pressed="false"] { color: var(--faint); text-decoration: line-through; }
-html[data-ai="off"] [data-ai-content] { display: none !important; }
-.ai-badge { display: inline-block; margin-left: 8px; font: 700 9px var(--sans); text-transform: uppercase; letter-spacing: .1em; color: #fff; background: linear-gradient(135deg, #7c3aed, #0891b2); padding: 2px 7px; border-radius: 4px; vertical-align: 1px; }
-.ed-note { margin: 16px 0 0; padding: 12px 16px 12px 18px; border-left: 4px solid #7c3aed; background: color-mix(in srgb, #7c3aed 6%, var(--tile)); }
-.ed-note.stale { opacity: .82; }
-.ed-k { font: 700 10px var(--sans); text-transform: uppercase; letter-spacing: .14em; color: var(--fg); }
-.ed-h { margin: 4px 0 4px; font-family: var(--serif-d); font-variation-settings: 'opsz' 48; font-weight: 600; font-size: 21px; line-height: 1.2; color: var(--fg); }
-.ed-body { font: 15px/1.5 var(--serif-d); color: var(--fg); max-width: 85ch; }
-.ed-focus { margin-top: 6px; font: italic 14px var(--serif-d); color: var(--muted); }
+
+/* ---------- Puzzles from around the web (links, credited) ---------- */
+.puzzle-main { display: grid; gap: 18px; align-content: start; min-width: 0; }
+.web-today .fp-box-h { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; border-top: 2px solid var(--fg); padding-top: 6px; }
+.web-note { font: 400 11px var(--sans); text-transform: none; letter-spacing: 0; color: var(--faint); }
+.web-pz { list-style: none; padding: 0; margin: 0; display: grid; }
+.web-pz li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; align-items: start; padding: 7px 0; border-top: 1px solid var(--border); }
+.web-pz li:first-child { border-top: 0; }
+.web-tick { position: relative; width: 16px; height: 16px; margin-top: 2px; cursor: pointer; }
+.web-tick input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.web-tick span { display: block; width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-2); }
+.web-pz li.is-done .web-tick span { background: var(--c-library); border-color: var(--c-library); }
+.web-pz li.is-done a { color: var(--faint); text-decoration: line-through; }
+.web-main { display: grid; gap: 1px; min-width: 0; }
+.web-main a { font: 600 14.5px/1.3 var(--serif-d); color: var(--fg); }
+.web-main a:hover { text-decoration: underline; }
+.web-credit { font-size: 11.5px; color: var(--faint); }
+.web-pz.compact { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); column-gap: 24px; }
+.web-pz.compact li, .web-pz.compact li:first-child { border-top: 1px solid var(--border); padding: 5px 0; }
+.web-pz.compact .web-main a { font: 13.5px/1.3 var(--sans); font-weight: 500; }
+.web-sources { display: grid; gap: 4px; margin-top: 14px; }
+.web-source { border-top: 2px solid var(--fg); padding: 6px 0 10px; }
+.web-source > summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.web-src-name { font: 600 17px var(--serif-d); color: var(--fg); }
+.web-src-meta { font-size: 12px; color: var(--faint); }
+.web-src-about { font: 14px/1.45 var(--serif-d); color: var(--muted); margin: 4px 0 6px; }
+.web-src-about a { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }

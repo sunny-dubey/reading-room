@@ -1,6 +1,6 @@
 # The Roadmap: what you want to learn, area by area.
 # Areas 1-25 are your system design roadmap; 26-31 cover AI engineering, ML foundations, payments, mathematics,
-# testing & correctness, and engineering craft & judgment; 32 is the cybersecurity engineer roadmap.
+# testing & correctness, and engineering craft & judgment; 32 is the cybersecurity engineer roadmap; 33 is quantitative finance.
 # Every article is matched to its closest topics by meaning (embeddings, at build time) and cards show
 # "Why read: you'll get better at <topic> (<area>). <why>". Topic ids are used for progress, so keep them
 # stable; a topic that appears in several areas shares one id.
@@ -1748,3 +1748,114 @@
     name: Security Trends & Emerging Threats
     group: Continuous Learning
     about: emerging threats, AI security, prompt injection, supply chain attacks
+- id: quantitative-finance
+  n: 33
+  title: Quantitative Finance
+  track: quant
+  why: Markets are distributed systems with money attached. Quant finance trains you in probability, risk and engineering under pressure.
+  topics:
+  - id: q-instruments
+    name: "Equities, futures and options"
+    group: "Markets & Instruments"
+    about: "how stocks, futures and options work, payoffs, leverage, margin"
+  - id: q-order-book
+    name: "Order types and the limit order book"
+    group: "Markets & Instruments"
+    why: "Every price you see is the result of an order book; knowing how it works explains spreads, slippage and flash crashes."
+    about: "limit order book, market orders, limit orders, bid ask spread, matching"
+  - id: q-random-walks
+    name: "Random walks and Brownian motion"
+    group: "Pricing"
+    about: "random walk, Brownian motion, geometric Brownian motion, stochastic process"
+  - id: q-ito
+    name: "It\u014d's lemma (the intuition)"
+    group: "Pricing"
+    about: "It\u00f4 calculus, stochastic differential equations, Ito's lemma"
+  - id: q-black-scholes
+    name: "Black\u2013Scholes and option pricing"
+    group: "Pricing"
+    why: "Teaches the single most powerful idea in finance: price something by building a portfolio that copies it."
+    about: "Black-Scholes, option pricing, risk-neutral valuation, replication, hedging"
+  - id: q-greeks
+    name: "The Greeks and hedging"
+    group: "Pricing"
+    about: "delta, gamma, vega, theta, delta hedging"
+  - id: q-volatility
+    name: "Implied volatility and the smile"
+    group: "Pricing"
+    about: "implied volatility, volatility smile, volatility surface, VIX, realised volatility"
+  - id: q-monte-carlo
+    name: "Monte Carlo pricing"
+    group: "Pricing"
+    about: "Monte Carlo simulation, variance reduction, path simulation, option pricing"
+  - id: q-binomial
+    name: "Binomial trees"
+    group: "Pricing"
+    about: "binomial tree, lattice models, American options"
+  - id: q-time-series
+    name: "Stationarity and financial time series"
+    group: "Statistics & Signals"
+    about: "stationarity, autocorrelation, ARIMA, GARCH, returns"
+  - id: q-mean-reversion
+    name: "Mean reversion and pairs trading"
+    group: "Statistics & Signals"
+    about: "mean reversion, pairs trading, cointegration, statistical arbitrage"
+  - id: q-momentum
+    name: "Momentum and trend following"
+    group: "Statistics & Signals"
+    about: "momentum, trend following, time-series momentum"
+  - id: q-factor-models
+    name: "Factor models (CAPM, Fama\u2013French)"
+    group: "Statistics & Signals"
+    about: "factor models, CAPM, beta, Fama-French, factor investing, value, quality"
+  - id: q-backtesting
+    name: "Backtesting without fooling yourself"
+    group: "Statistics & Signals"
+    why: "Most strategies that look great are overfit; learning to distrust a backtest saves careers and money."
+    about: "backtesting, overfitting, look-ahead bias, survivorship bias, data snooping, walk-forward"
+  - id: q-portfolio
+    name: "Portfolio optimisation (Markowitz, risk parity)"
+    group: "Portfolio & Risk"
+    about: "portfolio optimisation, mean-variance, Markowitz, risk parity, diversification"
+  - id: q-kelly
+    name: "Position sizing and the Kelly criterion"
+    group: "Portfolio & Risk"
+    why: "Teaches that sizing a bet matters as much as finding the edge, and why over-betting ruins even a winning strategy."
+    about: "Kelly criterion, position sizing, leverage, bankroll"
+  - id: q-risk
+    name: "Risk: VaR, drawdowns and tail risk"
+    group: "Portfolio & Risk"
+    about: "value at risk, expected shortfall, drawdown, tail risk, stress testing"
+  - id: q-sharpe
+    name: "The Sharpe ratio and its pitfalls"
+    group: "Portfolio & Risk"
+    about: "Sharpe ratio, risk-adjusted return, deflated Sharpe ratio"
+  - id: q-microstructure
+    name: "Market microstructure: spreads, liquidity, impact"
+    group: "Microstructure & Execution"
+    about: "market microstructure, liquidity, price impact, adverse selection"
+  - id: q-market-making
+    name: "Market making and inventory risk"
+    group: "Microstructure & Execution"
+    about: "market making, inventory risk, quoting, Avellaneda-Stoikov"
+  - id: q-execution
+    name: "Execution algorithms (TWAP, VWAP) and slippage"
+    group: "Microstructure & Execution"
+    about: "execution algorithms, TWAP, VWAP, implementation shortfall, slippage"
+  - id: q-low-latency
+    name: "Low-latency trading systems"
+    group: "Trading Systems Engineering"
+    why: "Where systems engineering meets money: every microsecond and every tail latency has a price."
+    about: "low latency, kernel bypass, FPGA, tick-to-trade, colocation"
+  - id: q-market-data
+    name: "Market data feeds and order gateways"
+    group: "Trading Systems Engineering"
+    about: "market data, multicast feeds, order entry, gateways, FIX protocol"
+  - id: q-matching-engine
+    name: "How an exchange matching engine works"
+    group: "Trading Systems Engineering"
+    about: "matching engine, price-time priority, exchange architecture, sequencer"
+  - id: q-yield-curve
+    name: "Yield curves, duration and convexity"
+    group: "Rates"
+    about: "yield curve, bonds, duration, convexity, interest rates"

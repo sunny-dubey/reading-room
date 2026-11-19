@@ -5,8 +5,13 @@ import ReadingClient from '../components/ReadingClient.astro';
 import PuzzleCard from '../components/PuzzleCard.astro';
 import PuzzleClient from '../components/PuzzleClient.astro';
 import { getPuzzles, TYPE_LABEL, type PuzzleType } from '../lib/puzzles';
+import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
+import WebPuzzleList from '../components/WebPuzzleList.astro';
 
-const { puzzles, today, numbers } = await getPuzzles();
+
+const { puzzles, today, numbers, now } = await getPuzzles();
+const web = (await getWebPuzzles()).filter(s => s.items.length);
+const picks = todaysPicks(web, now);
 const types = Object.keys(TYPE_LABEL) as PuzzleType[];
 const fmt = (n: number) => (Math.abs(n) >= 1e7 ? n.toExponential(2).replace('e+', ' × 10^') : n.toLocaleString('en-US', { maximumSignificantDigits: 4 }));
 ---
@@ -29,6 +34,24 @@ const fmt = (n: number) => (Math.abs(n) >= 1e7 ? n.toExponential(2).replace('e+'
                 <PuzzleCard p={today} featured />
             </section>
         )}
+
+        <section class="fp-band" id="web">
+            <h2 class="fp-band-h"><span>From around the web</span></h2>
+            <p class="side-note">The best puzzle collections online, as links: each opens on the original site, credited to whoever made it. Nothing is copied here. Tick what you've solved; it's saved in this browser only.</p>
+            {picks.length > 0 && <div class="web-today"><h3 class="fp-box-h">Today's picks</h3><WebPuzzleList rows={picks} /></div>}
+            <div class="web-sources">
+                {web.map(s => (
+                    <details class="web-source" open={s.items.length <= 12}>
+                        <summary>
+                            <span class="web-src-name">{s.name}</span>
+                            <span class="web-src-meta">by {s.credit} · {s.items.length} {s.items.length === 1 ? 'puzzle' : 'puzzles'} · {s.cadence} · <span data-web-count={s.items.map(i => i.id).join(' ')}></span></span>
+                        </summary>
+                        <p class="web-src-about">{s.about} <a href={s.home} target="_blank" rel="noopener noreferrer">Open {s.name} ↗</a></p>
+                        <WebPuzzleList rows={s.items.map(item => ({ source: s, item }))} compact />
+                    </details>
+                ))}
+            </div>
+        </section>
 
         <section class="fp-band">
             <h2 class="fp-band-h"><span>Every puzzle</span></h2>

@@ -1,0 +1,18 @@
+---
+// Links to puzzles on other sites: title, where it's from, who made it, and a "solved" tick kept in this browser.
+import type { WebPuzzle, WebSource } from '../lib/web-puzzles';
+interface Props { rows: { source: WebSource; item: WebPuzzle }[]; compact?: boolean }
+const { rows, compact = false } = Astro.props;
+---
+<ul class:list={['web-pz', { compact }]} role="list">
+    {rows.map(({ source, item }) => (
+        <li data-web-id={item.id}>
+            <label class="web-tick" title="Mark solved (saved in this browser)"><input type="checkbox" data-web-solve={item.id} aria-label={`Solved: ${item.title}`} /><span></span></label>
+            <span class="web-main">
+                {!compact && <span class="fp-kicker sm">{source.kind}</span>}
+                <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
+                {!compact && <span class="web-credit">{source.name} · by {source.credit} ↗</span>}
+            </span>
+        </li>
+    ))}
+</ul>

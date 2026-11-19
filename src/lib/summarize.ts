@@ -88,6 +88,12 @@ const VOCAB: [RegExp, string][] = ([
     ['forensics', 'forensics?|dfir'], ['reverse engineering', 'reverse engineer\\w*|disassembl\\w+|decompil\\w+'], ['zero trust', 'zero trust|beyondcorp'],
     ['supply chain security', 'supply[- ]chain (attacks?|security)|sbom|dependency confusion'], ['iam', '\\biam\\b|identity and access management'], ['prompt injection', 'prompt injection|jailbreaks?'],
     ['threat actors', 'threat actors?|apts?\\b|lateral movement|initial access'],
+    // quantitative finance
+    ['options', 'options? pricing|call options?|put options?|black[- ]scholes'], ['volatility', 'volatility|vix|implied vol\\w*'], ['greeks', '\\bgreeks\\b|\\bdelta hedg\\w+|\\bgamma\\b|\\bvega\\b'],
+    ['backtesting', 'backtest\\w*|overfitting|look-?ahead bias|survivorship bias'], ['sharpe ratio', 'sharpe( ratio)?'], ['factor models', 'factor (models?|investing|exposures?)|fama[- ]french'],
+    ['market making', 'market[- ]mak\\w+|inventory risk'], ['order book', 'order ?books?|limit orders?|bid[- ]ask|spreads?\\b'], ['execution', 'slippage|twap|vwap|market impact|price impact'],
+    ['portfolio', 'portfolio (optimi[sz]ation|construction)|risk parity|markowitz|mean[- ]variance'], ['risk', 'value at risk|\\bvar\\b|drawdowns?|tail risk'], ['momentum', 'momentum|trend[- ]following'],
+    ['mean reversion', 'mean[- ]revers\\w+|pairs trading|stat(istical)? arb\\w*'], ['stochastic calculus', 'stochastic (calculus|process\\w*)|brownian motion|it[oô]\\b'],
     // ai engineering
     ['agents', 'agents?|agentic'], ['tool use', 'tool (use|calling|calls)|function calling'], ['mcp', 'model context protocol|\\bmcp\\b'], ['evals', 'evals?|evaluation(s)?'],
     ['rag', 'rag|retrieval[- ]augmented'], ['embeddings', 'embeddings?'], ['vector search', 'vector (search|database|store)s?'], ['prompting', 'prompt(s|ing)?|prompt engineering'],

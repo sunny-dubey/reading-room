@@ -1,6 +1,6 @@
 # The Canon: foundational reads per track, in suggested order.
 # Progress is tracked in your browser. Edit freely: add, remove, reorder.
-# track: systems | backend | ai-eng | ml | security | math | postmortems
+# track: systems | backend | ai-eng | ml | security | quant | math | postmortems
 # kind: paper | article | book | video | course | docs
 # minutes: rough reading/watching time
 # parts: chapters (or sittings) of a long work, in reading order. Today's plan and the Canon
@@ -921,3 +921,60 @@
     - { title: "Set 2 \u00b7 Block crypto", minutes: 180, url: "https://cryptopals.com/sets/2" }
     - { title: "Set 3 \u00b7 Block and stream crypto", minutes: 180, url: "https://cryptopals.com/sets/3" }
     - { title: "Set 4 \u00b7 Stream crypto and randomness", minutes: 180, url: "https://cryptopals.com/sets/4" }
+
+# ---------- Quantitative Finance ----------
+- id: mit-18s096
+  track: quant
+  title: "Topics in Mathematics with Applications in Finance (MIT 18.S096)"
+  author: "MIT OpenCourseWare"
+  url: https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/
+  kind: course
+  minutes: 1500
+  why: "The maths quants actually use (probability, time series, stochastic calculus, portfolio theory, risk), taught with practitioners from industry."
+  parts:
+    - { title: "Lectures 1\u20133: financial terms, linear algebra, probability theory", minutes: 240, url: "https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/video_galleries/video-lectures/" }
+    - { title: "Lectures 5\u20138: stochastic processes, regression, value at risk, time series", minutes: 300, url: "https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/video_galleries/video-lectures/" }
+    - { title: "Lectures 9\u201313: volatility, regularised pricing and risk, time series II and III, commodities", minutes: 360, url: "https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/video_galleries/video-lectures/" }
+    - { title: "Lectures 14\u201316: portfolio theory, factor models, portfolio management", minutes: 240, url: "https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/video_galleries/video-lectures/" }
+    - { title: "Lectures 17\u201321: stochastic processes II, It\u014d calculus, option pricing, SDEs", minutes: 300, url: "https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/video_galleries/video-lectures/" }
+    - { title: "Lectures 23\u201326: credit hedging, interest-rate models, Ross recovery, counterparty risk", minutes: 240, url: "https://ocw.mit.edu/courses/18-s096-topics-in-mathematics-with-applications-in-finance-fall-2013/video_galleries/video-lectures/" }
+- id: black-scholes-73
+  track: quant
+  title: "The Pricing of Options and Corporate Liabilities"
+  author: "Fischer Black & Myron Scholes (1973)"
+  url: https://www.cs.princeton.edu/courses/archive/fall09/cos323/papers/black_scholes73.pdf
+  kind: paper
+  minutes: 60
+  why: "The paper that turned option pricing into a hedging argument. Read it for the idea, not the algebra: a riskless portfolio must earn the risk-free rate."
+- id: kelly-1956
+  track: quant
+  title: "A New Interpretation of Information Rate"
+  author: "John L. Kelly Jr. (1956)"
+  url: https://www.princeton.edu/~wbialek/rome/refs/kelly_56.pdf
+  kind: paper
+  minutes: 30
+  why: "Where the Kelly criterion comes from: how much to bet when you have an edge. The foundation of position sizing, and a lesson in why over-betting ruins you."
+- id: avellaneda-lee
+  track: quant
+  title: "Statistical Arbitrage in the US Equities Market"
+  author: "Marco Avellaneda & Jeong-Hyun Lee (2008)"
+  url: https://math.nyu.edu/~avellane/AvellanedaLeeStatArb20090616.pdf
+  kind: paper
+  minutes: 90
+  why: "A clear, end-to-end stat-arb strategy: factor models, mean-reverting residuals, signals and honest backtests."
+- id: avellaneda-stoikov
+  track: quant
+  title: "High-frequency trading in a limit order book"
+  author: "Marco Avellaneda & Sasha Stoikov (2008)"
+  url: https://people.orie.cornell.edu/sfs33/LimitOrderBook.pdf
+  kind: paper
+  minutes: 60
+  why: "The classic market-making model: where to quote around the mid price, and how inventory risk should skew your quotes."
+- id: jane-street-talks
+  track: quant
+  title: "Jane Street Tech Talks"
+  author: "Jane Street"
+  url: https://www.janestreet.com/tech-talks/
+  kind: video
+  minutes: 60
+  why: "How a top trading firm builds its systems: low latency, correctness, OCaml, FPGAs. Pick one talk per sitting."

@@ -49,8 +49,10 @@ function check(q: HTMLElement, today: string): number {
             return links.length && links.every(l => read.has(l)) && links.some(readToday) ? pts : 0;
         }
         case 'puzzle': {
-            const r = load<Record<string, { ok: boolean; at: number }>>('puzzles:results', {})[q.dataset.pzid!];
-            if (!r || ymd(new Date(r.at)) !== today) return 0;
+            // Today's puzzle may be the AI one or the hand-written one: either counts.
+            const all = load<Record<string, { ok: boolean; at: number }>>('puzzles:results', {});
+            const r = (q.dataset.pzid ?? '').split(' ').map(id => all[id]).filter(x => x && ymd(new Date(x.at)) === today).sort((a, b) => Number(b!.ok) - Number(a!.ok))[0];
+            if (!r) return 0;
             return r.ok ? pts : Math.round(pts / 5); // trying counts for something
         }
         case 'numbers': {
@@ -61,6 +63,11 @@ function check(q: HTMLElement, today: string): number {
             const st = load<{ note: string; step: number } | null>(`drill:${q.dataset.drillid}`, null);
             const total = document.querySelectorAll('[data-drill-step]').length;
             return st && st.note.trim() && st.step >= total ? pts : 0;
+        }
+        case 'web': {
+            // Any linked puzzle ticked as solved today.
+            const done = load<Record<string, number>>('web:solved', {});
+            return Object.values(done).some(t => ymd(new Date(t)) === today) ? pts : 0;
         }
         case 'canon':
             return load<string[]>(`plan:${today}`, []).includes('canon') ? pts : 0;

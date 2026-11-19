@@ -10,13 +10,14 @@ import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
 import { getToday } from '../lib/today';
 import { getOutages, fmtDuration, internetWeather } from '../lib/outages';
 import { getBriefing } from '../lib/briefing';
-import { getLatestAi } from '../lib/ai';
 import OutageMap from '../components/OutageMap.astro';
 import PuzzleCard from '../components/PuzzleCard.astro';
 import NumbersCard from '../components/NumbersCard.astro';
 import IncidentDrill from '../components/IncidentDrill.astro';
 import PuzzleClient from '../components/PuzzleClient.astro';
 import { getPuzzles } from '../lib/puzzles';
+import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
+import WebPuzzleList from '../components/WebPuzzleList.astro';
 
 const { learning, fetchedAt, now, deepRead, deepCands, fresh, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
@@ -25,11 +26,7 @@ const STEP_NAMES = ['Start here', 'Go deeper', 'Master it'];
 const ROMAN = ['I', 'II', 'III'];
 const pz = await getPuzzles();
 const bf = await getBriefing();
-// AI content is generated locally and committed; the public build only shows it, labelled with its date.
-const ai = await getLatestAi();
-const editionDate = new Date(+fetchedAt + 5.5 * 3600e3).toISOString().slice(0, 10);
-const aiStale = ai ? ai.date !== editionDate : false;
-const aiDay = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const webPicks = todaysPicks(await getWebPuzzles(), now);
 const bfDay = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const bfJobs = bf.jobs.filter(j => j.score >= 3 && (j.remoteAnywhere || j.india)).slice(0, 5);
 // Outage map panel: the last 72 hours (a week if it's been quiet).
@@ -88,14 +85,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
 
         <section class="week-card" data-your-week hidden aria-label="Your week"></section>
 
-        {ai?.editorsNote && (
-            <section class:list={['ed-note', { stale: aiStale }]} data-ai-content aria-label="Editor's note">
-                <p class="ed-k">Editor's note <span class="ai-badge" title={`Written by ${ai.model} from that day's front page, generated locally and published with the edition.`}>AI · {aiStale ? `from the ${aiDay(ai.date)} edition` : `written ${aiDay(ai.date)}`}</span></p>
-                <h2 class="ed-h">{ai.editorsNote.headline}</h2>
-                <p class="ed-body">{ai.editorsNote.body}</p>
-                <p class="ed-focus">{ai.editorsNote.focus}</p>
-            </section>
-        )}
+
 
         <!-- ===== Front: the lead story and the day's plan ===== -->
         <section class="fp-front">
@@ -240,9 +230,10 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     <ol role="list">
                         {deepRead && <li data-quest="lead" data-check="lead" data-aura="100"><span class="aura-tick"></span><span class="aura-q">Read the lead story<small>{deepRead.title}</small></span><b data-aura-pts>+100</b></li>}
                         {rabbitHoles[0] && <li data-quest="rabbit" data-check="rabbit" data-aura="250"><span class="aura-tick"></span><span class="aura-q">Go all the way down the rabbit hole<small>all three steps, from first read to the Canon</small></span><b data-aura-pts>+250</b></li>}
-                        {pz.today && <li data-quest="puzzle" data-check="puzzle" data-pzid={pz.today.id} data-aura="150"><span class="aura-tick"></span><span class="aura-q"><a href={`#pz-${pz.today.id}`}>Solve today's puzzle</a><small>{pz.today.title} · a wrong answer still earns 30</small></span><b data-aura-pts>+150</b></li>}
+                        {pz.today && <li data-quest="puzzle" data-check="puzzle" data-pzid={pz.today.id} data-aura="150"><span class="aura-tick"></span><span class="aura-q"><a href={`#pz-${pz.today.id}`}>Solve today's puzzle</a><small>a wrong answer still earns 30</small></span><b data-aura-pts>+150</b></li>}
                         <li data-quest="numbers" data-check="numbers" data-aura="50"><span class="aura-tick"></span><span class="aura-q">Nail today's number<small>within 2× on the flash card</small></span><b data-aura-pts>+50</b></li>
                         {pz.drill && <li data-quest="drill" data-check="drill" data-drillid={pz.drill.id} data-aura="120"><span class="aura-tick"></span><span class="aura-q">Survive the incident drill<small>write a hypothesis, then replay {pz.drill.provider}'s whole timeline</small></span><b data-aura-pts>+120</b></li>}
+                        {webPicks.length > 0 && <li data-quest="web" data-check="web" data-aura="100"><span class="aura-tick"></span><span class="aura-q">Solve one from around the web<small>{webPicks.map(p => p.source.name).slice(0, 3).join(' · ')}</small></span><b data-aura-pts>+100</b></li>}
                         <li data-quest="canon" data-check="canon" data-aura="200"><span class="aura-tick"></span><span class="aura-q">Read a Canon chapter<small>tick step 2 of today's plan</small></span><b data-aura-pts>+200</b></li>
                         {question && <li data-quest="explain" data-check="claim" data-aura="80"><span class="aura-tick"></span><span class="aura-q">Answer the question of the day out loud, in under two minutes<small>{question.q}</small></span><button type="button" data-claim>I did it</button><b data-aura-pts>+80</b></li>}
                         {bf.cves[0] && <li data-quest="exploit" data-check="claim" data-aura="60"><span class="aura-tick"></span><span class="aura-q"><a href={u('/briefing/#cves')}>Understand today's exploit</a><small>{bf.cves[0].vendor} {bf.cves[0].product}: what breaks, and how you'd defend</small></span><button type="button" data-claim>I did it</button><b data-aura-pts>+60</b></li>}
@@ -257,7 +248,15 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             <section class="fp-band reveal puzzle-band">
                 <h2 class="fp-band-h"><span>The puzzle page</span></h2>
                 <div class="puzzle-grid">
-                    <PuzzleCard p={pz.today} featured />
+                    <div class="puzzle-main">
+                        <PuzzleCard p={pz.today} featured />
+                        {webPicks.length > 0 && (
+                            <div class="web-today">
+                                <h3 class="fp-box-h">From around the web <span class="web-note">links to the originals, credited</span></h3>
+                                <WebPuzzleList rows={webPicks} />
+                            </div>
+                        )}
+                    </div>
                     <div class="puzzle-side">
                         <NumbersCard cards={pz.numbers} />
                         {pz.drill && <IncidentDrill i={pz.drill} />}

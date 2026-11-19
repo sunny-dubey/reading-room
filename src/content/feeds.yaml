@@ -8,6 +8,7 @@
 #   ai-eng       AI Engineering & Agents
 #   ml           ML & LLM Foundations
 #   security     Security: web, crypto, cloud, detection, exploitation
+#   quant        Quantitative finance: pricing, risk, microstructure, trading systems
 #   math         Mathematics
 #   postmortems  Postmortems: learning from failure
 #   pulse        Pulse: a small page of the week's headlines (not on the front page)
@@ -570,6 +571,78 @@
   limit: 4
   maxAgeDays: 45
   weight: -0.5
+
+# ---------- quantitative finance ----------
+- id: quantocracy
+  title: "Quantocracy"
+  url: 'https://quantocracy.com/feed/'
+  site: https://quantocracy.com/
+  category: quant
+  limit: 6
+  maxAgeDays: 45
+  weight: 0.3
+- id: alpha-architect
+  title: "Alpha Architect"
+  url: 'https://alphaarchitect.com/feed/'
+  site: https://alphaarchitect.com/
+  category: quant
+  limit: 4
+  maxAgeDays: 90
+  weight: 0.3
+- id: quantpedia
+  title: "Quantpedia"
+  url: 'https://quantpedia.com/feed/'
+  site: https://quantpedia.com/
+  category: quant
+  limit: 5
+  maxAgeDays: 60
+- id: moontower
+  title: "Moontower (Kris Abdelmessih)"
+  url: 'https://moontowermeta.com/feed/'
+  site: https://moontowermeta.com/
+  category: quant
+  limit: 4
+  maxAgeDays: 90
+  weight: 0.5
+- id: jane-street-tech
+  title: "Jane Street Tech Blog"
+  url: 'https://blog.janestreet.com/feed.xml'
+  site: https://blog.janestreet.com/
+  category: quant
+  limit: 4
+  maxAgeDays: 180
+  weight: 0.5
+- id: robot-wealth
+  title: "Robot Wealth"
+  url: 'https://robotwealth.com/feed/'
+  site: https://robotwealth.com/
+  category: quant
+  limit: 3
+  maxAgeDays: 180
+  weight: 0.5
+- id: quantitativo
+  title: "Quantitativo"
+  url: 'https://www.quantitativo.com/feed'
+  site: https://www.quantitativo.com/
+  category: quant
+  limit: 3
+  maxAgeDays: 120
+  weight: 0.3
+- id: ernie-chan
+  title: "Ernie Chan"
+  url: 'https://epchan.blogspot.com/feeds/posts/default'
+  site: https://epchan.blogspot.com/
+  category: quant
+  limit: 3
+  maxAgeDays: 365
+  weight: 0.5
+- id: arxiv-qfin
+  title: "arXiv: Quantitative Finance"
+  url: 'https://rss.arxiv.org/rss/q-fin'
+  site: https://arxiv.org/list/q-fin/new
+  category: quant
+  limit: 6
+  maxAgeDays: 14
 
 # ---------- math ----------
 - id: jeremy-kun
