@@ -20,9 +20,9 @@ It covers the areas a strong engineer needs:
 
 | Page | What it's for |
 |---|---|
-| **Today** (`/`) | A ~1-hour daily plan (one deep read, one foundational Canon read, then revisit something you read a week or a month ago, or reflect), this week's system design practice, and more worth your time |
+| **Today** (`/`) | A newspaper-style front page whose paper colour follows the time of day (morning, midday, evening, late edition). A question of the day; a daily plan you can size to 15 minutes, an hour or a weekend (deep read, Canon chapter, design practice, revisit); your reading streak; a rabbit hole that takes one topic from a first read to real depth; fresh reads; two takes on one topic; an explainer of the day; and a Sunday recap of your week |
 | **Track pages** (`/systems/`, `/architecture/`, …) | The best recent deep reads for that track, plus its Canon |
-| **Roadmap** (`/roadmap/`) | 32 areas and ~530 topics to master (a full system design roadmap plus AI, ML, payments, maths, testing, engineering judgment and cybersecurity), with progress ticks and the reads that teach each topic |
+| **Roadmap** (`/roadmap/`) | 32 areas and ~530 topics to master (a full system design roadmap plus AI, ML, payments, maths, testing, engineering judgment and cybersecurity), with a topic map (every topic placed by meaning; learned ones glow), progress ticks and the reads that teach each topic |
 | **Canon** (`/canon/`) | 93 hand-picked foundational reads in order: papers, books, courses and classic articles |
 | **Notebook** (`/notebook/`) | Notes on what I've understood, in my own words |
 | **Saved** (`/library/`) | Links worth keeping, each with a line on why |
@@ -68,6 +68,7 @@ The site is **read-only**: there's no editing in the browser. Add content as fil
 | A foundational read | Add it to `src/content/canon.yaml` (for a book or course, list its chapters under `parts`) |
 | A topic to learn | Add it to `src/content/roadmap.yaml` |
 | Progress on every device | List Canon ids or topic ids in `src/content/progress.yaml` (ticks on the site are kept per browser) |
+| Change the daily questions or explainers | Edit `src/content/questions.yaml` or `src/content/explainers.yaml` |
 | Change the weekly design prompts | Edit `src/content/practice.yaml` (topics, reads, the hard question) |
 | Fix a bad "Why read" match | Pin a topic (or `none`) for a URL in `src/content/overrides.yaml` |
 

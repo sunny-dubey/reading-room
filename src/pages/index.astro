@@ -1,13 +1,21 @@
 ---
 import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
-import LearnCard from '../components/LearnCard.astro';
-import ReadingMast from '../components/ReadingMast.astro';
+import Story from '../components/Story.astro';
+import Cover from '../components/Cover.astro';
+import { categoryShort } from '../lib/feeds';
+import { editionName, istTime, istDate } from '../lib/edition';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
+import { getToday } from '../lib/today';
 
 const { learning, fetchedAt, now, deepRead, deepCands, fresh, picks, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
+const { question, rabbitHoles, twoTakes, quickCands, explainer, readMap } = await getToday();
+const STEP_NAMES = ['Start here', 'Go deeper', 'Master it'];
+const ROMAN = ['I', 'II', 'III'];
+const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
+const mins = (m?: number) => (m ? `${m} min` : '');
 const revisit = await getRevisit(now);
 const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 const deepCount = tracks.reduce((a, t) => a + t.deep.length, 0);
@@ -31,82 +39,211 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
     .filter(i => isDeep(i) && (i.skill?.sim ?? 0) >= 0.5)
     .sort((a, b) => rank(b, now) - rank(a, now))[0];
 ---
-<Base description="Learn something real every day: distributed systems, backend, AI engineering and ML foundations." accent="reading">
-    <div class="rd">
-        <ReadingMast title="The Reading Room" sub="Become a sharper engineer: read deeply, reflect, revisit." edition={{ at: fetchedAt, newReads }} />
+<Base description="Learn something real every day: distributed systems, architecture, AI engineering, ML, security and maths." accent="reading">
+    <div class="rd fp">
+        <!-- ===== Masthead ===== -->
+        <header class="fp-mast">
+            <div class="fp-ears">
+                <div class="fp-ear">
+                    <span class="fp-ear-k">Your streak</span>
+                    <span class="fp-ear-v"><span data-ear-streak>Open a read to start one</span></span>
+                </div>
+                <div class="fp-ear right">
+                    <span class="fp-ear-k">This edition</span>
+                    <span class="fp-ear-v">{newReads === 0 ? 'No new reads since the last edition' : `${newReads} new ${newReads === 1 ? 'read' : 'reads'} since the last edition`} · <span data-next-edition>next in 3 hours</span></span>
+                </div>
+            </div>
+            <h1 class="fp-title">The Reading Room</h1>
+            <div class="fp-dateline">
+                <span>No. {issue}</span>
+                <span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span>
+                <span>{editionName(fetchedAt)} edition · <time data-edition-time datetime={fetchedAt.toISOString()}>{istTime(fetchedAt)}</time></span>
+            </div>
+        </header>
 
-        <section class="plan" data-plan>
-            <header class="plan-head">
-                <h2>Today's plan</h2>
-                <span class="plan-time">about {planMinutes} min</span>
-            </header>
-            <ol class="plan-steps" role="list">
-                {deepRead && (
-                    <li class="plan-step" data-step="read" data-link={deepRead.link}>
-                        <label class="plan-check"><input type="checkbox" data-plan-step="read" aria-label="Done: read" /><span></span></label>
-                        {deepCands.map((d, n) => (
-                            <div data-deep-cand={d.link} hidden={n > 0}>
-                                <span class="plan-kind">1 · Read deeply</span>
-                                <a class="plan-title" href={d.link} target="_blank" rel="noopener noreferrer" data-read>{d.title}</a>
-                                <span class="plan-meta">{d.feedTitle}{d.brief?.minutes ? ` · ${d.brief.minutes} min` : ''}{d.brief?.depth === 'deep' ? ' · deep dive' : ''}</span>
-                                {d.skill && (
-                                    <p class="plan-why">
-                                        You'll get better at <a href={u(`/roadmap/#${d.skill.topic.id}`)}>{d.skill.topic.name}</a>. {d.skill.topic.why}
-                                    </p>
+        <section class="week-card" data-your-week hidden aria-label="Your week"></section>
+
+        <!-- ===== Front: the lead story and the day's plan ===== -->
+        <section class="fp-front">
+            {deepRead && (
+                <div class="fp-lead-wrap">
+                    {deepCands.map((d, n) => (
+                        <article class="fp-lead" data-deep-lead={d.link} data-link={d.link} data-cat={d.category} hidden={n > 0}>
+                            <p class="fp-kicker">The deep read · {categoryShort(d.category)} · {mins(d.brief?.minutes)}</p>
+                            <h2 class:list={["fp-lead-h", { long: d.title.length > 60 }]}><a href={d.link} target="_blank" rel="noopener noreferrer" data-read>{d.title}</a></h2>
+                            {d.skill && <p class="fp-deck">You'll get better at <a href={u(`/roadmap/#${d.skill.topic.id}`)}>{d.skill.topic.name}</a>. {d.skill.topic.why}</p>}
+                            <p class="fp-byline">By {d.feedTitle}</p>
+                            <a href={d.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={d.title} track={d.category} w={640} h={280} class="fp-lead-art" /></a>
+                            {d.classic && <p class="fp-footnote"><span>Builds on a classic</span><a href={d.classic.url} target="_blank" rel="noopener noreferrer">{d.classic.title}</a>, {d.classic.author}</p>}
+                        </article>
+                    ))}
+                </div>
+            )}
+
+            <aside class="fp-side">
+                <section class="plan" data-plan>
+                    <header class="plan-head">
+                        <h2>Today's plan</h2>
+                        <span class="plan-time" data-plan-time>about {planMinutes} min</span>
+                        <div class="plan-modes" role="group" aria-label="How much time do you have today?">
+                            <button type="button" data-mode="quick">15 min</button>
+                            <button type="button" data-mode="hour" aria-pressed="true">1 hour</button>
+                            <button type="button" data-mode="weekend">Weekend</button>
+                        </div>
+                    </header>
+                    <ol class="plan-steps" role="list">
+                        {deepRead && (
+                            <li class="plan-step" data-step="read" data-link={deepRead.link} data-modes="hour weekend" data-min={deepRead.brief?.minutes ?? 15}>
+                                <label class="plan-check"><input type="checkbox" data-plan-step="read" aria-label="Done: read" /><span></span></label>
+                                {deepCands.map((d, n) => (
+                                    <div data-deep-cand={d.link} data-min={d.brief?.minutes ?? 15} hidden={n > 0}>
+                                        <span class="plan-kind">Read the lead story</span>
+                                        <a class="plan-title" href={d.link} target="_blank" rel="noopener noreferrer" data-read>{d.title}</a>
+                                        <span class="plan-meta">{d.feedTitle}{d.brief?.minutes ? ` · ${d.brief.minutes} min` : ''}</span>
+                                    </div>
+                                ))}
+                            </li>
+                        )}
+                        {quickCands.length > 0 && (
+                            <li class="plan-step" data-step="quick" data-modes="quick" data-min={quickCands[0].brief?.minutes ?? 8} hidden>
+                                <label class="plan-check"><input type="checkbox" data-plan-step="quick" aria-label="Done: quick read" /><span></span></label>
+                                {quickCands.map((d, n) => (
+                                    <div data-quick-cand={d.link} data-min={d.brief?.minutes ?? 8} hidden={n > 0}>
+                                        <span class="plan-kind">A quick, good read</span>
+                                        <a class="plan-title" href={d.link} target="_blank" rel="noopener noreferrer" data-read>{d.title}</a>
+                                        <span class="plan-meta">{d.feedTitle}{d.brief?.minutes ? ` · ${d.brief.minutes} min` : ''}</span>
+                                    </div>
+                                ))}
+                            </li>
+                        )}
+                        <li class="plan-step" data-step="canon" data-modes="hour weekend" data-min="25">
+                            <label class="plan-check"><input type="checkbox" data-plan-step="canon" aria-label="Done: canon" /><span></span></label>
+                            <div>
+                                <span class="plan-kind">A foundation (the Canon)</span>
+                                <a class="plan-title" data-plan-canon href={u('/canon/')} target="_blank" rel="noopener noreferrer">Next foundational read</a>
+                                <span class="plan-meta" data-plan-canon-meta>Read 25 minutes of it; it doesn't have to be finished today</span>
+                            </div>
+                        </li>
+                        {practice && (
+                            <li class="plan-step" data-step="practice" data-modes="weekend" data-min="40" hidden>
+                                <label class="plan-check"><input type="checkbox" data-plan-step="practice" aria-label="Done: design practice" /><span></span></label>
+                                <div>
+                                    <span class="plan-kind">Design practice</span>
+                                    <a class="plan-title" href="#practice">{practice.name}</a>
+                                    <span class="plan-meta">30–45 min on paper</span>
+                                </div>
+                            </li>
+                        )}
+                        <li class="plan-step" data-step="explain" data-modes="quick hour weekend" data-min="10">
+                            <label class="plan-check"><input type="checkbox" data-plan-step="explain" aria-label="Done: reflect or revisit" /><span></span></label>
+                            <div>
+                                {revisitItem ? (
+                                    <>
+                                        <span class="plan-kind">Revisit what you wrote</span>
+                                        <a class="plan-title" href={u(revisitItem.href)}>{revisitItem.title}</a>
+                                        <span class="plan-meta">Re-read it, then fix or extend it.</span>
+                                    </>
+                                ) : (
+                                    <div data-reflect>
+                                        <span class="plan-kind">Reflect</span>
+                                        <span class="plan-title">Explain the lead story to a teammate</span>
+                                        <span class="plan-meta">Ten minutes, in your own words. If you can say it simply, you understand it.</span>
+                                    </div>
                                 )}
                             </div>
-                        ))}
-                    </li>
-                )}
-                <li class="plan-step" data-step="canon">
-                    <label class="plan-check"><input type="checkbox" data-plan-step="canon" aria-label="Done: canon" /><span></span></label>
-                    <div>
-                        <span class="plan-kind">2 · A foundation (the Canon)</span>
-                        <a class="plan-title" data-plan-canon href={u('/canon/')} target="_blank" rel="noopener noreferrer">Next foundational read</a>
-                        <span class="plan-meta" data-plan-canon-meta>Read 25 minutes of it; it doesn't have to be finished today</span>
-                    </div>
-                </li>
-                <li class="plan-step" data-step="explain">
-                    <label class="plan-check"><input type="checkbox" data-plan-step="explain" aria-label="Done: reflect or revisit" /><span></span></label>
-                    <div>
-                        {revisitItem ? (
-                            <>
-                                <span class="plan-kind">3 · Revisit what you wrote</span>
-                                <a class="plan-title" href={u(revisitItem.href)}>{revisitItem.title}</a>
-                                <span class="plan-meta">Re-read it, then fix or extend it. Revisiting is what makes knowledge stick.</span>
-                            </>
-                        ) : (
-                            <div data-reflect>
-                                <span class="plan-kind">3 · Reflect</span>
-                                <span class="plan-title">Could you explain today's read to a teammate?</span>
-                                <span class="plan-meta">Take 10 minutes to say the core idea in your own words, out loud or on paper. If you can explain it simply, you understand it.</span>
-                            </div>
+                        </li>
+                    </ol>
+                    <p class="stamp" data-plan-done hidden>Done for today</p>
+                    <script type="application/json" id="plan-canon" set:html={JSON.stringify(canonPlan)} />
+                </section>
+
+                {question && (
+                    <section class="fp-box qotd">
+                        <h3 class="fp-box-h">Question of the day</h3>
+                        <p class="qotd-q">{question.q}</p>
+                        {question.hint && <details class="qotd-hint"><summary>Need a hint?</summary><p>{question.hint}</p></details>}
+                        {(question.canon || question.read || question.topic) && (
+                            <p class="qotd-reads"><span>Find the answer in</span>
+                                {question.canon && <a href={question.canon.data.url} target="_blank" rel="noopener noreferrer">{question.canon.data.title}</a>}
+                                {question.read && <a href={question.read.link} target="_blank" rel="noopener noreferrer">{question.read.title}</a>}
+                                {question.topic && <a href={u(`/roadmap/#${question.topic.id}`)}>{question.topic.name} on the Roadmap</a>}
+                            </p>
                         )}
+                    </section>
+                )}
+
+                <section class="fp-box reading-pulse" data-reading-pulse aria-label="Your reading">
+                    <h3 class="fp-box-h">Your reading</h3>
+                    <div class="rp-stats">
+                        <div><strong data-rp-streak>0</strong><span>day streak</span></div>
+                        <div><strong data-rp-month>0</strong><span>reads, 30 days</span></div>
+                        <div><strong data-rp-topics>0</strong><span>topics</span></div>
+                        <div><strong data-rp-tracks>0</strong><span>tracks</span></div>
                     </div>
-                </li>
-            </ol>
-            <p class="plan-done" data-plan-done hidden>Done for today ✓ That's a real step forward. Come back tomorrow.</p>
-            <script type="application/json" id="plan-canon" set:html={JSON.stringify(canonPlan)} />
+                    <div class="rp-grid" data-rp-grid aria-hidden="true"></div>
+                    <p class="rp-note" data-rp-note>From this browser only. Open a read to start your streak.</p>
+                    <script type="application/json" id="read-map" set:html={JSON.stringify(readMap)} />
+                </section>
+            </aside>
         </section>
 
+        <!-- ===== Fresh this week ===== -->
         {fresh.length > 0 && (
-            <section class="home-block fresh-block">
-                <header class="block-head">
-                    <h2>Fresh this week</h2>
-                    <span class="dim">new posts worth reading, picked for what they teach</span>
-                </header>
-                <div class="pick-grid">{fresh.map(i => <LearnCard i={i} />)}</div>
+            <section class="fp-band reveal">
+                <h2 class="fp-band-h"><span>Fresh this week</span></h2>
+                <div class="fp-cols">{fresh.map(i => <Story i={i} cover />)}</div>
             </section>
         )}
 
+        <!-- ===== The rabbit hole ===== -->
+        {rabbitHoles.length > 0 && (
+            <section class="fp-band reveal" data-rabbit>
+                <h2 class="fp-band-h"><span>The rabbit hole</span></h2>
+                {rabbitHoles.map((h, n) => (
+                    <div class="fp-feature" data-hole={h.topic.id} data-cat={h.topic.track} hidden={n > 0}>
+                        <div class="fp-feature-intro">
+                            <p class="fp-kicker">{h.topic.areaTitle}</p>
+                            <h3 class="fp-feature-h"><a href={u(`/roadmap/#${h.topic.id}`)}>{h.topic.name}</a></h3>
+                            <p class="fp-deck">{h.topic.why}</p>
+                        </div>
+                        <ol class="fp-steps" role="list">
+                            {h.steps.map((st, k) => (
+                                <li data-link={st.url}>
+                                    <span class="fp-roman">{ROMAN[k]}</span>
+                                    <span class="fp-kicker sm">{STEP_NAMES[k]}</span>
+                                    <a href={st.url} target="_blank" rel="noopener noreferrer" data-read>{st.title}</a>
+                                    <span class="story-by">{st.kind === 'canon' ? 'From the Canon · ' : ''}{st.meta}</span>
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                ))}
+            </section>
+        )}
+
+        <!-- ===== Point · Counterpoint ===== -->
+        {twoTakes && (
+            <section class="fp-band reveal">
+                <h2 class="fp-band-h"><span>Point · Counterpoint</span></h2>
+                <p class="fp-pc-topic">Two takes on <a href={u(`/roadmap/#${twoTakes.topic.id}`)}>{twoTakes.topic.name}</a></p>
+                <div class="fp-pc">
+                    <Story i={twoTakes.a} size="take" kicker={twoTakes.a.feedTitle} />
+                    <span class="fp-vs" aria-hidden="true">vs</span>
+                    <Story i={twoTakes.b} size="take" kicker={twoTakes.b.feedTitle} />
+                </div>
+                <p class="fp-pc-ask">Read both. Where do they agree, where do they differ, and why?</p>
+            </section>
+        )}
+
+        <!-- ===== The weekly problem ===== -->
         {practice && (
-            <section class="practice" data-practice={`${practice.id}-w${week}`}>
+            <section class="practice reveal" id="practice" data-practice={`${practice.id}-w${week}`}>
                 <div class="practice-head">
-                    <span class="practice-label">This week's design practice</span>
+                    <span class="practice-label">The weekly problem</span>
                     <label class="practice-done"><input type="checkbox" data-practice-check /> Done</label>
                 </div>
                 <h2 class="practice-title">{practice.name}</h2>
-                {practice.twist && <p class="practice-twist"><span>The hard part</span>{practice.twist}</p>}
+                {practice.twist && <p class="practice-twist dropcap">{practice.twist}</p>}
                 <p class="practice-how">30–45 minutes, on paper or a whiteboard. Work through it in order:</p>
                 <ol class="practice-steps">
                     <li><strong>Requirements:</strong> who uses it, what must it do, what must it never do</li>
@@ -127,11 +264,9 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             </section>
         )}
 
-        <section class="home-block">
-            <header class="block-head">
-                <h2>Continue the Canon</h2>
-                <a href={u('/canon/')}>All tracks →</a>
-            </header>
+        <!-- ===== From the Canon ===== -->
+        <section class="fp-band reveal">
+            <h2 class="fp-band-h"><span>From the Canon</span></h2>
             <div class="next-grid">
                 {canon.filter(t => t.items.length).map(t => (
                     <div class="next-card" data-next-track={t.id} data-cat={t.id}>
@@ -154,75 +289,72 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     </div>
                 ))}
             </div>
+            <p class="fp-more-link"><a href={u('/canon/')}>The whole Canon →</a></p>
         </section>
 
+        <!-- ===== More worth your time ===== -->
         {picks.length > 0 && (
-            <section class="home-block">
-                <header class="block-head">
-                    <h2>More worth your time</h2>
-                    <span class="dim">the best of the last three weeks</span>
-                </header>
-                <div class="pick-grid">{picks.map(i => <LearnCard i={i} />)}</div>
+            <section class="fp-band reveal">
+                <h2 class="fp-band-h"><span>More worth your time</span></h2>
+                <div class="fp-briefs-grid">{picks.map(i => <Story i={i} size="brief" deck={false} />)}</div>
             </section>
         )}
 
-        <div class="home-split">
+        <!-- ===== Bottom row ===== -->
+        <section class="fp-band fp-bottom reveal">
             {postmortem && (
-                <section class="home-block">
-                    <header class="block-head">
-                        <h2>Learn from failure</h2>
-                        <a href={u('/postmortems/')}>More postmortems →</a>
-                    </header>
-                    <LearnCard i={postmortem} size="card" showTrack={false} />
-                </section>
+                <div class="fp-cell" data-link={postmortem.link} data-cat="postmortems">
+                    <h3 class="fp-box-h">Learn from failure</h3>
+                    <a href={postmortem.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={postmortem.title} track="postmortems" w={320} h={120} /></a>
+                    <a class="fp-cell-h" href={postmortem.link} target="_blank" rel="noopener noreferrer" data-read>{postmortem.title}</a>
+                    <p class="story-by">{postmortem.feedTitle}{postmortem.brief?.minutes ? ` · ${postmortem.brief.minutes} min` : ''}</p>
+                    <a class="fp-more" href={u('/postmortems/')}>More postmortems →</a>
+                </div>
             )}
-            <section class="home-block" data-revisit hidden={revisit.week.length + revisit.month.length === 0 && !revisit.archive}>
-                <header class="block-head">
-                    <h2>Revisit</h2>
-                    <span class="dim">a week and a month later</span>
-                </header>
+            {explainer && (
+                <div class="fp-cell" data-cat={explainer.track} data-link={explainer.url}>
+                    <h3 class="fp-box-h">See it, don't just read it</h3>
+                    <a href={explainer.url} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={explainer.title} track={explainer.track} w={320} h={120} /></a>
+                    <a class="fp-cell-h" href={explainer.url} target="_blank" rel="noopener noreferrer" data-read>{explainer.title}</a>
+                    <p class="fp-cell-p">{explainer.why}</p>
+                    <p class="story-by">{explainer.author} · {explainer.minutes} min · interactive</p>
+                </div>
+            )}
+            <div class="fp-cell" data-revisit hidden={revisit.week.length + revisit.month.length === 0 && !revisit.archive}>
+                <h3 class="fp-box-h">Revisit</h3>
                 <ul class="mini revisit" role="list" data-revisit-list>
                     {revisit.week.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">your note · 1 week ago</span></a></li>)}
                     {revisit.month.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">your note · 1 month ago</span></a></li>)}
                     {revisit.archive && <li><a href={u(revisit.archive.href)}><span class="mini-title">{revisit.archive.title}</span><span class="mini-meta">your note · from the archive</span></a></li>}
                 </ul>
-                <p class="revisit-hint">Open it and ask yourself: can I still explain the core idea? If not, skim it again.</p>
-            </section>
-        </div>
-
-        <section class="home-block">
-            <header class="block-head"><h2>Tracks</h2></header>
-            <div class="track-grid">
-                {tracks.map(t => (
-                    <a class="track-card" href={u(`/${t.slug}/`)} data-cat={t.id}>
-                        <span class="track-name"><span class="cat-dot" data-cat={t.id}></span>{t.label}</span>
-                        <span class="track-blurb">{t.blurb}</span>
-                        <span class="track-stats">{t.deep.length} deep reads · {canon.find(c => c.id === t.id)?.items.length ?? 0} canon</span>
-                    </a>
-                ))}
+                <p class="revisit-hint">Can you still explain the core idea? If not, skim it again.</p>
             </div>
         </section>
 
-        {startups.launches.length > 0 && (
-            <a class="pulse-strip" href={u('/startups/')}>
-                <span class="pulse-label">Startups</span>
-                <span class="pulse-text">{startups.launches.length} recent YC launches, plus Show HN and Product Hunt. See what's being built.</span>
-                <span aria-hidden="true">→</span>
-            </a>
-        )}
-        {pulse.length > 0 && (
-            <a class="pulse-strip" href={u('/pulse/')}>
-                <span class="pulse-label">Pulse</span>
-                <span class="pulse-text">The week in tech, in ten headlines. Glance, then get back to learning.</span>
-                <span aria-hidden="true">→</span>
-            </a>
-        )}
+        <!-- ===== Sections ===== -->
+        <section class="fp-band reveal">
+            <h2 class="fp-band-h"><span>Sections</span></h2>
+            <div class="fp-sections">
+                {tracks.map(t => (
+                    <a class="fp-section" href={u(`/${t.slug}/`)} data-cat={t.id}>
+                        <span class="fp-section-name"><span class="cat-dot" data-cat={t.id}></span>{t.label}</span>
+                        <span class="fp-section-blurb">{t.blurb}</span>
+                        <span class="story-by">{t.deep.length} deep reads · {canon.find(c => c.id === t.id)?.items.length ?? 0} in the Canon</span>
+                    </a>
+                ))}
+            </div>
+            <div class="fp-strips">
+                {startups.launches.length > 0 && <a class="pulse-strip" href={u('/startups/')}><span class="pulse-label">Startups</span><span class="pulse-text">{startups.launches.length} recent YC launches, plus Show HN and Product Hunt.</span><span aria-hidden="true">→</span></a>}
+                {pulse.length > 0 && <a class="pulse-strip" href={u('/pulse/')}><span class="pulse-label">Pulse</span><span class="pulse-text">The week in tech, in ten headlines.</span><span aria-hidden="true">→</span></a>}
+            </div>
+        </section>
     </div>
     <ReadingClient />
 </Base>
 
 <script>
     import { getSet } from '../lib/progress-client';
+    import { mountReadingStats } from '../lib/reading-stats-client';
     import { dueForRevisit, getHistory } from '../lib/history-client';
     import { nextPart, partId } from '../lib/canon-parts-client';
 
@@ -241,7 +373,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
     const first = due.week[0] ?? due.month[0];
     if (reflect && first) {
         const ago = due.week[0] ? 'a week' : 'a month';
-        reflect.innerHTML = `<span class="plan-kind">3 · Revisit</span>
+        reflect.innerHTML = `<span class="plan-kind">Revisit</span>
             <a class="plan-title" href="${esc(first.u)}" target="_blank" rel="noopener noreferrer">${esc(first.t)}</a>
             <span class="plan-meta">You read this ${ago} ago. Can you still explain the core idea? Skim it again if not.</span>`;
     }
@@ -274,6 +406,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             ?? cands[0];
         if (pick) {
             cands.forEach(c => (c.hidden = c !== pick));
+            document.querySelectorAll<HTMLElement>('[data-deep-lead]').forEach(l => (l.hidden = l.dataset.deepLead !== link(pick)));
             const li = pick.closest<HTMLElement>('[data-step="read"]');
             if (li) { li.dataset.link = link(pick); li.classList.toggle('is-read', read.has(link(pick))); }
             shown[link(pick)] ??= today;
@@ -281,7 +414,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             for (const [k, d] of Object.entries(shown)) if (d < cutoff) delete shown[k];
             try { localStorage.setItem(SHOWN, JSON.stringify(shown)); } catch {}
             // Don't show the same piece twice on the page.
-            if (pick !== cands[0]) document.querySelectorAll<HTMLElement>('.learn[data-link]').forEach(el => { if (el.dataset.link === link(pick)) el.hidden = true; });
+            if (pick !== cands[0]) document.querySelectorAll<HTMLElement>('[data-story]').forEach(el => { if (el.dataset.link === link(pick)) el.hidden = true; });
         }
     }
 
@@ -316,11 +449,70 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
     renderCanonStep();
     document.addEventListener('canon:changed', renderCanonStep);
 
+    // ---------- Quick read (15-minute plan): the best short piece you haven't opened ----------
+    {
+        const read = new Set(getHistory().map(r => r.u));
+        const cands = [...document.querySelectorAll<HTMLElement>('[data-quick-cand]')];
+        const pick = cands.find(c => !read.has(c.dataset.quickCand!)) ?? cands[0];
+        if (pick) {
+            cands.forEach(c => (c.hidden = c !== pick));
+            const li = pick.closest<HTMLElement>('li');
+            if (li) { li.dataset.link = pick.dataset.quickCand!; li.dataset.min = pick.dataset.min!; }
+        }
+        const deep = [...document.querySelectorAll<HTMLElement>('[data-deep-cand]')].find(c => !c.hidden);
+        const dli = deep?.closest<HTMLElement>('li');
+        if (deep && dli) dli.dataset.min = deep.dataset.min!;
+    }
+
+    // ---------- Time modes: 15 min · 1 hour · weekend (remembered for the day) ----------
+    const MODE_KEY = `plan:mode:${new Date().toLocaleDateString('en-CA')}`;
+    const weekendDay = [0, 6].includes(new Date().getDay());
+    let mode = (() => { try { return localStorage.getItem(MODE_KEY); } catch { return null; } })() ?? (weekendDay ? 'weekend' : 'hour');
+    function applyMode() {
+        document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+        let mins = 0;
+        document.querySelectorAll<HTMLElement>('.plan-step[data-modes]').forEach(li => {
+            const on = li.dataset.modes!.split(' ').includes(mode);
+            li.hidden = !on;
+            if (on) mins += Number(li.dataset.min ?? 0);
+        });
+        const t = document.querySelector('[data-plan-time]');
+        if (t) t.textContent = `about ${mins} min`;
+        paintPlan();
+    }
+    document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(b => b.addEventListener('click', () => {
+        mode = b.dataset.mode!;
+        try { localStorage.setItem(MODE_KEY, mode); } catch {}
+        applyMode();
+    }));
+
+    // ---------- Rabbit hole: keep today's, else the best topic you haven't learned or seen ----------
+    {
+        const today = new Date().toLocaleDateString('en-CA');
+        const KEY = 'rabbit:shown';
+        let shown: Record<string, string> = {};
+        try { shown = JSON.parse(localStorage.getItem(KEY) ?? '{}'); } catch {}
+        const learned = getSet('learned');
+        const holes = [...document.querySelectorAll<HTMLElement>('[data-hole]')];
+        const id = (h: HTMLElement) => h.dataset.hole!;
+        const pick = holes.find(h => shown[id(h)] === today)
+            ?? holes.find(h => !learned.has(id(h)) && !shown[id(h)])
+            ?? holes.find(h => !learned.has(id(h)))
+            ?? holes[0];
+        if (pick) {
+            holes.forEach(h => (h.hidden = h !== pick));
+            shown[id(pick)] ??= today;
+            try { localStorage.setItem(KEY, JSON.stringify(shown)); } catch {}
+        }
+    }
+
     let done = readSet(key);
     const boxes = document.querySelectorAll<HTMLInputElement>('[data-plan-step]');
+    const visibleBoxes = () => [...boxes].filter(b => !b.closest('li')?.hidden);
     function paintPlan() {
         boxes.forEach(b => { b.checked = done.has(b.dataset.planStep!); b.closest('li')?.classList.toggle('is-done', b.checked); });
-        const all = boxes.length > 0 && [...boxes].every(b => b.checked);
+        const vis = visibleBoxes();
+        const all = vis.length > 0 && vis.every(b => b.checked);
         document.querySelector<HTMLElement>('[data-plan-done]')!.hidden = !all;
         document.querySelector('[data-plan]')?.classList.toggle('is-complete', all);
     }
@@ -328,6 +520,8 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         b.checked ? done.add(b.dataset.planStep!) : done.delete(b.dataset.planStep!);
         try { localStorage.setItem(key, JSON.stringify([...done])); } catch {}
         paintPlan();
+        mountReadingStats();
     }));
-    paintPlan();
+    applyMode();
+    mountReadingStats();
 </script>

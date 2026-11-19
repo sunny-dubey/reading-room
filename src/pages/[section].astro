@@ -1,11 +1,13 @@
 ---
+import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
-import ReadingMast from '../components/ReadingMast.astro';
 import ReadingClient from '../components/ReadingClient.astro';
-import LearnCard from '../components/LearnCard.astro';
+import Story from '../components/Story.astro';
+import Cover from '../components/Cover.astro';
 import CanonList from '../components/CanonList.astro';
 import { CATEGORIES } from '../lib/feeds';
 import { getReading, getCanon } from '../lib/reading';
+import { editionName, istTime } from '../lib/edition';
 
 export function getStaticPaths() {
     return CATEGORIES.map(c => ({ params: { section: c.slug }, props: { id: c.id } }));
@@ -14,39 +16,68 @@ const { id } = Astro.props;
 const { tracks, fetchedAt } = await getReading();
 const t = tracks.find(x => x.id === id)!;
 const canon = (await getCanon()).find(c => c.id === id)!;
-const SHOW = 12;
+// Front of the section: the best deep read as the lead, the next two beside it.
+const [lead, ...restDeep] = t.deep;
+const seconds = restDeep.slice(0, 2);
+const columns = restDeep.slice(2);
+const SHOW = 9;
+const mins = (m?: number) => (m ? `${m} min` : '');
 ---
 <Base title={t.label} description={t.blurb} accent="reading">
-    <div class="rd">
-        <ReadingMast compact cat={t.id} title={t.label} sub={t.blurb} updated={fetchedAt} />
-        <div class="track-layout">
-            <div class="track-main">
-                <section class="home-block">
-                    <header class="block-head">
-                        <h2>Deep reads</h2>
-                        <span class="dim">{t.deep.length} pieces worth studying, best first</span>
-                    </header>
-                    {t.deep.length === 0 ? <p class="notice">No deep reads right now. The Canon has plenty.</p> : (
-                        <div class="learn-list collapsed" id="deep-list">
-                            {t.deep.map((i, n) => <div class:list={{ more: n >= SHOW }}><LearnCard i={i} size="row" showTrack={false} /></div>)}
+    <div class="rd fp" data-cat={t.id}>
+        <header class="fp-mast sec-mast">
+            <p class="sec-kicker"><a href={u('/')}>The Reading Room</a> · Section</p>
+            <h1 class="sec-title"><span class="cat-dot big" data-cat={t.id}></span>{t.label}</h1>
+            <p class="sec-blurb">{t.blurb}</p>
+            <div class="fp-dateline">
+                <span>{t.deep.length} deep reads · {canon.items.length} in the Canon</span>
+                <span>{editionName(fetchedAt)} edition · <time data-edition-time datetime={fetchedAt.toISOString()}>{istTime(fetchedAt)}</time></span>
+            </div>
+        </header>
+
+        {lead ? (
+            <section class="fp-front sec-front">
+                <article class="fp-lead-wrap fp-lead" data-link={lead.link} data-ts={+lead.date} data-cat={lead.category} data-story>
+                    <p class="fp-kicker"><span class="new-badge" data-new hidden>New</span>The lead · {mins(lead.brief?.minutes)}{lead.brief?.depth === 'deep' ? ' · Deep dive' : ''}</p>
+                    <h2 class:list={["fp-lead-h", { long: lead.title.length > 60 }]}><a href={lead.link} target="_blank" rel="noopener noreferrer" data-read>{lead.title}</a></h2>
+                    {lead.skill && <p class="fp-deck">You'll get better at <a href={u(`/roadmap/#${lead.skill.topic.id}`)}>{lead.skill.topic.name}</a>. {lead.skill.topic.why}</p>}
+                    <p class="fp-byline">By {lead.feedTitle} · <time data-rel datetime={lead.date.toISOString()}></time></p>
+                    <a href={lead.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={lead.title} track={lead.category} w={640} h={260} class="fp-lead-art" /></a>
+                    {lead.classic && <p class="fp-footnote"><span>Builds on a classic</span><a href={lead.classic.url} target="_blank" rel="noopener noreferrer">{lead.classic.title}</a>, {lead.classic.author}</p>}
+                </article>
+                <div class="sec-seconds">
+                    {seconds.map(i => <Story i={i} cover />)}
+                </div>
+            </section>
+        ) : <p class="notice">No deep reads right now. The Canon below has plenty.</p>}
+
+        <div class="sec-body">
+            <div class="sec-main">
+                {columns.length > 0 && (
+                    <section class="fp-band reveal">
+                        <h2 class="fp-band-h"><span>More deep reads</span></h2>
+                        <div class="fp-cols sec-cols" id="deep-list">
+                            {columns.map((i, n) => <Story i={i} cover={n < SHOW} deck={n < SHOW} size={n < SHOW ? 'col' : 'brief'} />)}
                         </div>
-                    )}
-                    {t.deep.length > SHOW && <button class="show-more" data-expand="deep-list">Show {t.deep.length - SHOW} more</button>}
-                </section>
+                    </section>
+                )}
                 {t.light.length > 0 && (
-                    <details class="light-reads">
-                        <summary>Lighter reads and updates · {t.light.length}</summary>
-                        <div class="learn-list">{t.light.map(i => <LearnCard i={i} size="row" showTrack={false} />)}</div>
-                    </details>
+                    <section class="fp-band reveal">
+                        <details class="light-reads">
+                            <summary class="fp-band-h"><span>Lighter reads and updates · {t.light.length}</span></summary>
+                            <div class="fp-briefs-grid sec-briefs">{t.light.map(i => <Story i={i} size="brief" deck={false} />)}</div>
+                        </details>
+                    </section>
                 )}
             </div>
-            <aside class="track-side" id="canon">
+            <aside class="sec-side" id="canon">
                 {canon.items.length > 0 && <CanonList items={canon.items} track={t.id} />}
-                <div class="side-sources-box">
-                    <h3>Sources</h3>
+                <div class="fp-box sec-sources">
+                    <h3 class="fp-box-h">Where this section comes from</h3>
                     <ul role="list">
-                        {t.sources.map(s => <li><span class={s.ok ? 'ok' : 'bad'}></span><a href={s.site ?? s.url} target="_blank" rel="noopener noreferrer">{s.title}</a><span class="n">{s.ok ? s.count : 'err'}</span></li>)}
+                        {t.sources.map(s => <li><span class={s.ok ? (s.count ? 'ok' : 'idle') : 'bad'}></span><a href={s.site ?? s.url} target="_blank" rel="noopener noreferrer">{s.title}</a><span class="n">{s.ok ? s.count : 'err'}</span></li>)}
                     </ul>
+                    <a class="fp-more" href={u('/sources/')}>All sources →</a>
                 </div>
             </aside>
         </div>

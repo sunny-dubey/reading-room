@@ -1,0 +1,124 @@
+# Question of the day: one hard question at the top of Today, rotating daily.
+# q:     the question (should make you stop and think)
+# topic: the roadmap topic id whose reads answer it (Canon + fresh articles are linked automatically)
+# hint:  a nudge, hidden until you ask for it. Not the full answer.
+- q: "Why can't a message queue give you exactly-once delivery, and how do real systems get exactly-once *effects* anyway?"
+  topic: exactly-once-semantics
+  hint: "Delivery is at-least-once because acks can be lost. The trick is making the consumer idempotent (dedupe keys, transactional outbox)."
+- q: "Your Postgres primary dies mid-write. What can the new primary have lost, and what decides how much?"
+  topic: failover-strategies
+  hint: "Synchronous vs asynchronous replication, and the WAL position the replica had reached."
+- q: "Why does adding a cache sometimes make an outage worse?"
+  topic: cache-stampede
+  hint: "Think about what happens to the database when the cache is cold or a hot key expires."
+- q: "A retry fixes a flaky call. Why can retries also take a whole system down?"
+  topic: exponential-backoff
+  hint: "Retries multiply load exactly when the system is already overloaded. Backoff, jitter and retry budgets exist for this."
+- q: "What does \"linearizable\" promise that \"serializable\" doesn't, and the other way round?"
+  topic: strong-consistency
+  hint: "One is about single objects and real time; the other is about transactions over many objects, in some order."
+- q: "Why do Raft and Paxos need a majority, not just \"more than one\" node, to agree?"
+  topic: quorum
+  hint: "Any two majorities overlap in at least one node, so no two leaders can decide differently."
+- q: "Why is p99 latency often more important than the average?"
+  topic: latency-and-throughput
+  hint: "A single page load fans out to many calls; the slowest one sets the user's experience."
+- q: "Why does a B-tree index make reads fast but writes slower, and when would an LSM tree win?"
+  topic: b-tree-and-bplus-tree
+  hint: "In-place updates vs append-only writes with background compaction."
+- q: "What exactly goes wrong if two services share one database?"
+  topic: database-per-service
+  hint: "Schema changes, coupling of deploys, and who owns the data's invariants."
+- q: "Why do idempotency keys need to be stored *before* doing the work, not after?"
+  topic: idempotency
+  hint: "Consider a crash between charging the card and recording that you did."
+- q: "How can a system be \"up\" by every dashboard and still be failing its users?"
+  topic: sli-slo-sla
+  hint: "Measure what users experience (successful requests, latency), not whether the process is alive."
+- q: "Why does consistent hashing move only a small fraction of keys when a node is added?"
+  topic: consistent-hashing
+  hint: "Each node owns arcs of a ring; a new node only takes over the arcs next to its positions."
+- q: "When is eventual consistency good enough, and how would you explain the risk to a product manager?"
+  topic: eventual-consistency
+  hint: "Think about the cost of a stale read in that feature, and how long \"eventually\" really is."
+- q: "What happens to a clock-based lock (a lease) when a process pauses for 30 seconds of garbage collection?"
+  topic: distributed-locking
+  hint: "The lease expires, someone else takes the lock, and the paused process wakes up still believing it holds it. Fencing tokens fix this."
+- q: "Why is fan-out on write great for most users and terrible for celebrities?"
+  topic: fan-out-strategies
+  hint: "Cost per post is proportional to follower count."
+- q: "Why might the outbox pattern be safer than publishing an event right after a database commit?"
+  topic: outbox-pattern
+  hint: "The process can crash between the commit and the publish."
+- q: "What makes a migration \"zero-downtime\", and why does it usually take several deploys?"
+  topic: microservices-deployment-strategies
+  hint: "Expand, migrate, contract. Old and new code must both work during the change."
+- q: "Why does a load balancer need health checks, and how can a bad health check cause an outage?"
+  topic: health-checks
+  hint: "A check that's too strict (or depends on a shared dependency) can mark every node unhealthy at once."
+- q: "In a double-entry ledger, why do you never update a balance directly?"
+  topic: ledgers-double-entry
+  hint: "Balances are derived from immutable entries that always sum to zero; that's what makes the books auditable."
+- q: "Why is backpressure better than an unbounded queue?"
+  topic: backpressure
+  hint: "An unbounded queue turns overload into ever-growing latency and memory, then a crash."
+- q: "What does a transformer's attention actually compute, in one sentence?"
+  topic: transformers-attention
+  hint: "For each token, a weighted average of other tokens' values, weighted by how well queries match keys."
+- q: "Why do LLMs get worse at a task when you stuff more (relevant!) documents into the context?"
+  topic: context-engineering
+  hint: "Attention is a finite budget; distractors and position effects (\"lost in the middle\") dilute the signal."
+- q: "How would you know whether a prompt change made your LLM feature better or just different?"
+  topic: evals
+  hint: "A fixed eval set with graded examples, run before and after, and a look at the failures."
+- q: "Why does RAG fail when retrieval looks fine on paper?"
+  topic: rag-retrieval
+  hint: "Chunking, missing context in chunks, and ranking: the right passage exists but isn't in the top k."
+- q: "Why does quantising a model to 4 bits barely hurt quality, and when does it hurt a lot?"
+  topic: inference-efficiency
+  hint: "Most weights are tolerant; outliers and small models are not."
+- q: "What makes an agent loop unreliable, and what's the simplest design that avoids it?"
+  topic: agent-design
+  hint: "Errors compound over steps. Fewer steps, clear tools, and workflows before autonomy."
+- q: "Why does Little's Law (L = λW) let you size a thread pool without a load test?"
+  topic: queueing-theory
+  hint: "Concurrency in the system equals arrival rate times time in the system."
+- q: "Why does utilisation above about 80% make latency explode?"
+  topic: queueing-theory
+  hint: "Queueing delay grows like 1 / (1 − utilisation)."
+- q: "How likely is a collision among 1 million random 64-bit IDs? Among random 32-bit ones?"
+  topic: hashing-probability
+  hint: "The birthday bound: collisions become likely around the square root of the space."
+- q: "Why does 0.1 + 0.2 ≠ 0.3, and why does it matter for money?"
+  topic: floating-point
+  hint: "Binary floating point can't represent 0.1 exactly. Store money as integers of the smallest unit."
+- q: "What does Bayes' theorem say about an alert with a 99% accurate detector for a 1-in-10,000 event?"
+  topic: bayes-theorem
+  hint: "Most alerts will be false positives, because the base rate is tiny."
+- q: "Why is deterministic simulation testing able to find bugs that years of production traffic don't?"
+  topic: deterministic-simulation-testing
+  hint: "It controls time, network and disk, so it can explore rare interleavings and replay any failure exactly."
+- q: "Why are parameterised queries immune to SQL injection while escaping input is not?"
+  topic: sec-sql-injection
+  hint: "Code and data travel separately, so data can never be parsed as SQL."
+- q: "Why can't a Content Security Policy alone save you from XSS?"
+  topic: sec-xss
+  hint: "Unsafe inline allowances, script gadgets and injection into allowed sources."
+- q: "Why is SSRF so dangerous in the cloud specifically?"
+  topic: sec-ssrf
+  hint: "The instance metadata endpoint hands out credentials to anything that can make the server request it."
+- q: "What does TLS protect, and what does it leave visible to someone watching the network?"
+  topic: tls
+  hint: "Content is protected; IPs, timing, sizes and (without ECH) the server name are not."
+- q: "Why should passwords be hashed with something slow, like Argon2, rather than SHA-256?"
+  topic: password-hashing
+  hint: "Attackers guess offline at billions of hashes per second; a slow, memory-hard hash makes each guess expensive."
+- q: "What does \"zero trust\" actually change about how a request gets authorised?"
+  topic: sec-zero-trust
+  hint: "Being on the internal network grants nothing; every request is checked for user, device and context."
+- q: "Why are memory-safe languages such a big deal for security?"
+  topic: sec-binary-exploitation
+  hint: "Roughly two-thirds of serious vulnerabilities in large C/C++ codebases are memory-safety bugs."
+- q: "Why is a design doc worth writing even if nobody reads it?"
+  topic: design-docs
+  hint: "Writing forces you to find the holes in your own thinking before the code does."

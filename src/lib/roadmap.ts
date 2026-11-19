@@ -4,7 +4,8 @@ import type { FeedItem } from './feeds';
 import { embed, cosine } from './embed';
 import { getNotes, getLibrary } from './content';
 import { getProgress } from './progress';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { UMAP } from 'umap-js';
 import { parse } from 'yaml';
 
 export interface Topic {
@@ -35,6 +36,7 @@ export interface SkillMatch {
 // Similarity thresholds for all-MiniLM-L6-v2 (normalised vectors).
 const MATCH = 0.42;     // article ↔ topic: strong enough to claim "you'll get better at X"
 const COVER = 0.40;     // note/saved ↔ topic: counts as coverage of the topic
+const CLASSIC = 0.5;    // article ↔ Canon read: close enough to say "builds on"
 
 // Which roadmap areas an article may match, by the track of its source. Keeps "voting" in a maths
 // essay from matching Leader Election, while letting a queueing post match Queueing Theory.
@@ -75,7 +77,7 @@ async function build(articles: FeedItem[]) {
     ]);
 
     const practiceTopics = areas.filter(a => a.data.n === 24).flatMap(a => a.data.topics.filter(t => /^Design a /i.test(t.name)));
-    const empty = { areas, topics, enabled: false, practice: practiceTopics.map(t => ({ id: t.id, name: t.name, topics: [] as Topic[], canon: [] as CollectionEntry<'canon'>[] })), itemsByTopic: new Map<string, FeedItem[]>(), canonByTopic: new Map<string, CollectionEntry<'canon'>[]>(), notesByTopic: new Map<string, number>(), savedByTopic: new Map<string, number>() };
+    const empty = { areas, topics, enabled: false, practice: practiceTopics.map(t => ({ id: t.id, name: t.name, topics: [] as Topic[], canon: [] as CollectionEntry<'canon'>[] })), itemsByTopic: new Map<string, FeedItem[]>(), canonByTopic: new Map<string, CollectionEntry<'canon'>[]>(), notesByTopic: new Map<string, number>(), savedByTopic: new Map<string, number>(), topicMap: [] as MapPoint[] };
     if (!all) return empty;
 
     let k = 0;
@@ -89,6 +91,9 @@ async function build(articles: FeedItem[]) {
         topicList.map((t, idx) => ({ t, sim: cosine(v, tv[idx]) }))
             .filter(m => !tracks || tracks.includes(m.t.track))
             .sort((a, b) => b.sim - a.sim).slice(0, n);
+
+    // Topic map: every topic placed in 2D by meaning (UMAP, seeded so the layout is stable between builds).
+    const topicMap = await layoutTopics(topicList.map(t => t.id), tv);
 
     // Coverage: what you've written about or saved.
     const notesByTopic = new Map<string, number>();
@@ -142,6 +147,16 @@ async function build(articles: FeedItem[]) {
         itemsByTopic.get(top.t.id)!.push(i);
     });
 
+    // Old meets new: the Canon read closest in meaning to each article (the classic it builds on).
+    articles.forEach((i, idx) => {
+        let bestJ = -1, bestSim = 0;
+        cv.forEach((v, j) => { const sim = cosine(av[idx], v); if (sim > bestSim) { bestSim = sim; bestJ = j; } });
+        if (bestJ >= 0 && bestSim >= CLASSIC) {
+            const c = canon[bestJ];
+            i.classic = { id: c.id, title: c.data.title, url: c.data.url, author: c.data.author, sim: bestSim };
+        }
+    });
+
     // Weekly design practice: pair each "Design a …" prompt with the closest topics and Canon reads.
     // Match on the subject ("rate limiter", "news feed"), not the generic "design a", so the
     // pairings are specific: fan-out and caching for a feed, token buckets for a rate limiter.
@@ -172,5 +187,29 @@ async function build(articles: FeedItem[]) {
         return { id: t.id, name: t.name, topics: near, canon: reads };
     });
 
-    return { areas, topics, enabled: true, itemsByTopic, canonByTopic, notesByTopic, savedByTopic, practice };
+    return { areas, topics, enabled: true, itemsByTopic, canonByTopic, notesByTopic, savedByTopic, practice, topicMap };
+}
+
+export interface MapPoint { id: string; x: number; y: number }
+
+/** 2D layout of topic vectors, normalised to 0..1. Cached in .cache/topic-map.json by topic list. */
+async function layoutTopics(ids: string[], vecs: number[][]): Promise<MapPoint[]> {
+    const key = 'v2|' + ids.join('|');
+    const file = '.cache/topic-map.json';
+    try {
+        const c = JSON.parse(await readFile(file, 'utf8'));
+        if (c.key === key) return c.points;
+    } catch {}
+    let seed = 42;
+    const random = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+    const umap = new UMAP({ nComponents: 2, nNeighbors: 25, minDist: 0.6, spread: 1.5, random });
+    const xy = umap.fit(vecs);
+    // Normalise by the 2nd–98th percentile so one far-off cluster doesn't squash the rest; clamp outliers to the edge.
+    const pct = (a: number[], q: number) => [...a].sort((m, n) => m - n)[Math.floor(q * (a.length - 1))];
+    const xs = xy.map(p => p[0]), ys = xy.map(p => p[1]);
+    const [x0, x1, y0, y1] = [pct(xs, .02), pct(xs, .98), pct(ys, .02), pct(ys, .98)];
+    const clamp = (v: number) => Math.max(0, Math.min(1, v));
+    const points = ids.map((id, i) => ({ id, x: clamp((xy[i][0] - x0) / (x1 - x0 || 1)), y: clamp((xy[i][1] - y0) / (y1 - y0 || 1)) }));
+    try { await mkdir('.cache', { recursive: true }); await writeFile(file, JSON.stringify({ key, points })); } catch {}
+    return points;
 }

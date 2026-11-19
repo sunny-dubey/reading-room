@@ -59,7 +59,7 @@ const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.da
         const nextSlot = slots.find(s => s > mins) ?? slots[0] + 1440;
         const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) + nextSlot * 60000);
         const sameDay = next.toDateString() === now.toDateString();
-        el.textContent = `Next edition around ${clock(next)}${sameDay ? '' : ' tomorrow'}`;
+        el.textContent = `next around ${clock(next)}${sameDay ? '' : ' tomorrow'}`;
         el.title = `Scheduled for ${next.toISOString().slice(11, 16)} UTC; GitHub sometimes runs 5–30 minutes late`;
     });
 
@@ -145,6 +145,9 @@ const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.da
     document.addEventListener('click', e => {
         const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-mark-done]');
         if (!btn) return;
+        btn.closest('.next-card')?.classList.remove('flash');
+        void (btn.closest('.next-card') as HTMLElement | null)?.offsetWidth;
+        btn.closest('.next-card')?.classList.add('flash');
         if (btn.dataset.partDone) { markPart(btn.dataset.partDone, true); return; }
         done.add(btn.dataset.markDone!);
         setProgress('canon', btn.dataset.markDone!, true);

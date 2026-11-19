@@ -28,6 +28,10 @@ const fullTitle = title ? `${title} · The Reading Room` : 'The Reading Room';
                 var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (dark) document.documentElement.setAttribute('data-theme', 'dark');
             } catch (e) {}
+            // The edition follows the reader's clock: morning, midday, evening, late. Sets the paper colour.
+            var h = new Date().getHours();
+            document.documentElement.setAttribute('data-ed', h >= 5 && h < 11 ? 'morning' : h >= 11 && h < 17 ? 'midday' : h >= 17 && h < 23 ? 'evening' : 'late');
+            document.documentElement.classList.add('js');
         })();
     </script>
 </head>
@@ -42,6 +46,15 @@ const fullTitle = title ? `${title} · The Reading Room` : 'The Reading Room';
             if (dark) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', 'dark');
             try { localStorage.setItem('theme', dark ? 'light' : 'dark'); } catch {}
         }));
+        // Reveal sections gently as they scroll into view (skipped when the reader prefers less motion).
+        if (matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
+            const io = new IntersectionObserver(entries => entries.forEach(e => {
+                if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+            }), { rootMargin: '0px 0px -8% 0px' });
+            document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+        } else {
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+        }
         const timeEl = document.getElementById('local-time');
         if (timeEl) {
             const fmt = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });

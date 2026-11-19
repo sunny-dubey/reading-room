@@ -1,0 +1,87 @@
+---
+// Generative cover art: a small abstract SVG made from the article's title (seed) and its track.
+// Same title → same picture; each track has its own visual language.
+interface Props { seed: string; track: string; w?: number; h?: number; class?: string }
+const { seed, track, w = 320, h = 180, class: cls } = Astro.props;
+
+// Deterministic PRNG (mulberry32) seeded by a string hash.
+let x = 2166136261;
+for (let i = 0; i < seed.length; i++) x = Math.imul(x ^ seed.charCodeAt(i), 16777619);
+const rnd = () => { x |= 0; x = (x + 0x6d2b79f5) | 0; let t = Math.imul(x ^ (x >>> 15), 1 | x); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+const r = (a: number, b: number) => a + rnd() * (b - a);
+const f = (n: number) => Math.round(n * 10) / 10;
+
+let body = '';
+if (track === 'systems') {
+    // Nodes and the links between them: a small cluster.
+    const pts = Array.from({ length: 9 + Math.floor(r(0, 5)) }, () => [r(20, w - 20), r(18, h - 18)]);
+    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+        const d = Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]);
+        if (d < w * 0.32) body += `<line x1="${f(pts[i][0])}" y1="${f(pts[i][1])}" x2="${f(pts[j][0])}" y2="${f(pts[j][1])}" stroke="currentColor" stroke-opacity=".35" stroke-width="1.2"/>`;
+    }
+    pts.forEach((p, i) => body += `<circle cx="${f(p[0])}" cy="${f(p[1])}" r="${i === 0 ? 9 : f(r(3, 6.5))}" fill="${i === 0 ? 'currentColor' : 'var(--paper)'}" stroke="currentColor" stroke-width="1.6"/>`);
+} else if (track === 'backend') {
+    // A skyline of services: towers of stacked blocks, a few linked across the top.
+    const cols = 5 + Math.floor(r(0, 4));
+    const cw = (w - 24) / cols, rowH = Math.max(14, h / 9);
+    const rows = Math.floor((h - 24) / rowH);
+    const tops: [number, number][] = [];
+    for (let c = 0; c < cols; c++) {
+        const n = Math.max(1, Math.floor(r(1, rows + 0.99)));
+        for (let k = 0; k < n; k++) {
+            const y = h - 12 - (k + 1) * rowH;
+            body += `<rect x="${f(12 + c * cw + 3)}" y="${f(y + 2)}" width="${f(cw - 6)}" height="${f(rowH - 4)}" rx="2" fill="currentColor" fill-opacity="${f(k === n - 1 ? 0.9 : r(.18, .55))}"/>`;
+        }
+        tops.push([12 + c * cw + cw / 2, h - 12 - n * rowH]);
+    }
+    for (let c = 0; c + 1 < tops.length; c++) if (rnd() < 0.55) {
+        const [x1, y1] = tops[c], [x2, y2] = tops[c + 1], ym = Math.min(y1, y2) - rowH * 0.8;
+        body += `<path d="M ${f(x1)} ${f(y1)} C ${f(x1)} ${f(ym)}, ${f(x2)} ${f(ym)}, ${f(x2)} ${f(y2)}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+    }
+    body += `<line x1="8" y1="${h - 10}" x2="${w - 8}" y2="${h - 10}" stroke="currentColor" stroke-width="2"/>`;
+} else if (track === 'ai-eng') {
+    // Flow lines bending around a point: a loop of steps.
+    const cx = r(w * 0.3, w * 0.7), cy = r(h * 0.35, h * 0.65);
+    for (let i = 0; i < 9; i++) {
+        const rr = 14 + i * r(9, 13);
+        const a0 = r(0, 6.28), a1 = a0 + r(1.6, 4.2);
+        const p = (a: number) => `${f(cx + rr * Math.cos(a))} ${f(cy + rr * Math.sin(a) * 0.72)}`;
+        body += `<path d="M ${p(a0)} A ${f(rr)} ${f(rr * 0.72)} 0 ${a1 - a0 > 3.14 ? 1 : 0} 1 ${p(a1)}" fill="none" stroke="currentColor" stroke-width="${f(r(1.2, 3.5))}" stroke-opacity="${f(r(.35, 1))}" stroke-linecap="round"/>`;
+    }
+    body += `<circle cx="${f(cx)}" cy="${f(cy)}" r="5" fill="currentColor"/>`;
+} else if (track === 'ml') {
+    // A lattice of weights: dots of varying size.
+    const nx = 14, ny = 8;
+    for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) {
+        const v = Math.abs(Math.sin(i * r(.3, .5) + j * .7 + r(0, 1.5)));
+        body += `<circle cx="${f(18 + i * (w - 36) / (nx - 1))}" cy="${f(16 + j * (h - 32) / (ny - 1))}" r="${f(1 + v * 5)}" fill="currentColor" fill-opacity="${f(.2 + v * .8)}"/>`;
+    }
+} else if (track === 'security') {
+    // Interlocking hatching around a keyhole-like shape.
+    const s = r(9, 14);
+    for (let i = -h; i < w; i += s) body += `<line x1="${f(i)}" y1="0" x2="${f(i + h)}" y2="${h}" stroke="currentColor" stroke-opacity=".28" stroke-width="1.2"/>`;
+    const cx = r(w * 0.3, w * 0.7), cy = h / 2;
+    body += `<rect x="${f(cx - 40)}" y="${f(cy - 46)}" width="80" height="92" rx="40" fill="var(--paper)" stroke="currentColor" stroke-width="2.5"/>`;
+    body += `<circle cx="${f(cx)}" cy="${f(cy - 8)}" r="10" fill="currentColor"/><rect x="${f(cx - 4)}" y="${f(cy - 2)}" width="8" height="24" rx="2" fill="currentColor"/>`;
+} else if (track === 'math') {
+    // Overlapping waves.
+    for (let k = 0; k < 6; k++) {
+        const amp = r(10, 40), freq = r(1, 3.5), ph = r(0, 6.28), y0 = h / 2 + r(-20, 20);
+        let d = '';
+        for (let px = 0; px <= w; px += 6) d += `${px ? 'L' : 'M'} ${px} ${f(y0 + amp * Math.sin((px / w) * freq * 6.28 + ph))} `;
+        body += `<path d="${d}" fill="none" stroke="currentColor" stroke-width="${f(r(1, 2.6))}" stroke-opacity="${f(r(.3, 1))}"/>`;
+    }
+} else {
+    // Postmortems: a calm line that spikes, then recovers.
+    const spike = r(0.35, 0.7) * w;
+    let d = '';
+    for (let px = 0; px <= w; px += 5) {
+        const dist = Math.abs(px - spike);
+        const y = h * 0.72 - r(0, 6) - (dist < 30 ? (30 - dist) * r(2.2, 3.4) : 0);
+        d += `${px ? 'L' : 'M'} ${px} ${f(Math.max(8, y))} `;
+    }
+    body += `<line x1="0" y1="${f(h * 0.35)}" x2="${w}" y2="${f(h * 0.35)}" stroke="currentColor" stroke-dasharray="4 5" stroke-opacity=".5"/>`;
+    body += `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>`;
+}
+---
+<svg class:list={['cover', cls]} data-cat={track} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true" set:html={body} />
