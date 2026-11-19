@@ -20,7 +20,6 @@ export function mountWebPuzzles() {
         if (cb.checked) done[cb.dataset.webSolve!] = Date.now(); else delete done[cb.dataset.webSolve!];
         try { localStorage.setItem(KEY, JSON.stringify(done)); } catch {}
         paint();
-        document.dispatchEvent(new CustomEvent('aura:update'));
     });
     paint();
 }

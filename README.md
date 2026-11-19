@@ -12,16 +12,18 @@ It covers the areas a strong engineer needs:
 - **Scalability & Architecture**: architectural design, trade-offs, reliability patterns, APIs
 - **AI Engineering & Agents**: agents, evals, retrieval, LLMs in production
 - **ML & LLM Foundations**: how transformers, training, fine-tuning and inference work
-- **Mathematics**: discrete maths, probability, linear algebra, and the maths behind systems and ML
+- **Applied Mathematics**: probability, optimisation, numerical methods and the maths behind systems, ML and markets
 - **Security**: web vulnerabilities, cryptography, cloud security, detection and exploitation (a full cybersecurity engineer roadmap)
+- **CS Research**: algorithms, theory and performance, from researchers and new arXiv papers
 - **Quantitative Finance**: probability, pricing, risk, market microstructure and the engineering behind trading
+- **Macro & Markets**: central banks, inflation, growth and jobs, from data-led sources (the Fed, the New York Fed, the Bank of England, FRED)
 - **Postmortems**: real failures, explained
 
 ## What's on the site
 
 | Page | What it's for |
 |---|---|
-| **Today** (`/`) | A newspaper-style front page whose paper colour follows the time of day (morning, midday, evening, late edition). A question of the day; a daily plan you can size to 15 minutes, an hour or a weekend (deep read, Canon chapter, design practice, revisit); your reading streak; a rabbit hole that takes one topic from a first read to real depth; fresh reads; two takes on one topic; an explainer of the day; and a Sunday recap of your week |
+| **Today** (`/`) | A newspaper front page built for scanning: the lead story, **The wire** (the newest headlines from every desk), **Latest from every desk** (the freshest worth-reading pieces in each discipline), the puzzle page, the briefing, the outage map and more. Newest first, informative over opinion |
 | **Track pages** (`/systems/`, `/architecture/`, …) | The best recent deep reads for that track, plus its Canon |
 | **Roadmap** (`/roadmap/`) | 32 areas and ~530 topics to master (a full system design roadmap plus AI, ML, payments, maths, testing, engineering judgment and cybersecurity), with a topic map (every topic placed by meaning; learned ones glow), progress ticks and the reads that teach each topic |
 | **Canon** (`/canon/`) | 93 hand-picked foundational reads in order: papers, books, courses and classic articles |
@@ -91,6 +93,10 @@ npm run edition -- --serve      # builds today's edition and opens it at http://
 
 Make it yours by editing the files in `src/content/`: your sources (`feeds.yaml`), what you're learning (`roadmap.yaml`), your foundational reads (`canon.yaml`), your stack (`stack.yaml`), puzzles and status pages. To publish on GitHub Pages, change `site` and `base` in `astro.config.mjs` and enable Pages (GitHub Actions) in your repo settings.
 
+
+## Market data (credits)
+
+The markets strip is a snapshot taken when the edition is built, not a live feed. Data: [FRED](https://fred.stlouisfed.org), Federal Reserve Bank of St. Louis (S&P 500 from S&P Dow Jones Indices, Nasdaq-100 from Nasdaq, VIX from Cboe, US Treasury yields, the Fed's H.10 exchange rates, EIA Brent, IMF copper, OECD India yields) and [CoinGecko](https://www.coingecko.com) (Bitcoin; gold via PAX Gold, one token per ounce).
 
 ## Puzzles from around the web (credits)
 

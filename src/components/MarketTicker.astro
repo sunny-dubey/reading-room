@@ -1,0 +1,36 @@
+---
+// The markets band under the masthead: a slow scrolling tape (static when the reader prefers less motion).
+// A build-time snapshot, labelled as such; each item links to /markets/.
+import { getMarkets, fmtValue, fmtChange, sparkPath } from '../lib/markets';
+import { u } from '../lib/url';
+const markets = await getMarkets();
+const now = Date.now();
+const day = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const items = markets.map(m => ({
+    m, dir: (m.change ?? 0) > 0 ? 'up' : (m.change ?? 0) < 0 ? 'down' : 'flat',
+    span: m.freq === 'monthly' ? '1 mo' : '1 wk',
+    stale: now - m.last!.t > 4 * 864e5 ? day(m.last!.t) : '',
+}));
+---
+{items.length > 0 && (
+    <a class="ticker" href={u('/markets/')} aria-label="Markets: prices and change over the last week">
+        <span class="ticker-label">Markets</span>
+        <span class="ticker-window">
+            <span class="ticker-track">
+                {[0, 1].map(copy => (
+                    <span class="ticker-set" aria-hidden={copy === 1 ? 'true' : undefined}>
+                        {items.map(({ m, dir, span, stale }) => (
+                            <span class={`tick ${dir}`}>
+                                <span class="tick-name">{m.name}</span>
+                                <span class="tick-val">{fmtValue(m)}</span>
+                                <span class="tick-chg">{dir === 'up' ? '▲' : dir === 'down' ? '▼' : '■'} {fmtChange(m)} <small>{span}</small></span>
+                                <svg class="tick-spark" viewBox="0 0 40 14" aria-hidden="true"><path d={sparkPath(m.points, 40, 14, m.freq === 'monthly' ? 8 : 10)} /></svg>
+                                {stale && <small class="tick-asof">as of {stale}</small>}
+                            </span>
+                        ))}
+                    </span>
+                ))}
+            </span>
+        </span>
+    </a>
+)}

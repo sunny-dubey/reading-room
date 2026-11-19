@@ -47,6 +47,8 @@ const ALLOWED: Record<string, string[]> = {
     'ai-eng': ['ai-eng', 'ml', 'backend', 'security'],
     security: ['security', 'backend', 'systems'],
     quant: ['quant', 'math', 'ml', 'backend'],
+    macro: ['macro', 'quant', 'math'],
+    research: ['math', 'systems', 'ml', 'backend', 'security'],
     ml: ['ml', 'ai-eng', 'math'],
     math: ['math', 'ml'],
 };
@@ -137,7 +139,7 @@ async function build(articles: FeedItem[]) {
             ? [{ t: topics.get(pinned)!, sim: 1 }]
             : best(av[idx], 1, ALLOWED[i.category]);
         // Maths and security posts use different vocabulary from topic names, so they get a slightly lower bar.
-        const bar = i.category === 'math' || i.category === 'security' || i.category === 'quant' ? MATCH - 0.03 : MATCH;
+        const bar = ['math', 'security', 'quant', 'macro', 'research'].includes(i.category) ? MATCH - 0.03 : MATCH;
         if (!top || top.sim < bar) return;
         const covered = learned.has(top.t.id) ? 3
             : (notesByTopic.get(top.t.id) ?? 0) + (savedByTopic.get(top.t.id) ?? 0) * 0.5 + (canonDoneTopics.get(top.t.id) ?? 0);

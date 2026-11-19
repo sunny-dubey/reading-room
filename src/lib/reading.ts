@@ -5,9 +5,9 @@ import { getRoadmap } from './roadmap';
 
 const DAY = 864e5;
 
-/** How much an item deserves attention right now: depth first, then freshness (halves every 4 days:
- *  +2.5 today, +1.25 at 4 days, +0.3 at two weeks), so a fresh good post beats an older slightly better one. */
-export const freshness = (i: FeedItem, now: number) => 2.5 * 0.5 ** (Math.max(0, now - +i.date) / DAY / 4);
+/** How much an item deserves attention right now. The reader wants the latest, so freshness is strong:
+ *  +4 today, +2 at 2.5 days, +1 at 5 days, +0.25 at 10. Worth (×2, so 2–10) still keeps weak posts down. */
+export const freshness = (i: FeedItem, now: number) => 4 * 0.5 ** (Math.max(0, now - +i.date) / DAY / 2.5);
 export const rank = (i: FeedItem, now: number) => {
     const fresh = freshness(i, now);
     return (i.brief?.worth ?? 2) * 2 + fresh + (i.skill?.boost ?? 0) + (i.weight ?? 0);
@@ -45,7 +45,7 @@ async function buildReading() {
     };
 
     // Today's deep read: the most worthwhile thing from the last two weeks (postmortems have their own slot).
-    const recent = byRank.filter(i => now - +i.date < 14 * DAY && i.category !== 'postmortems' && i.brief?.fetched);
+    const recent = byRank.filter(i => now - +i.date < 7 * DAY && i.category !== 'postmortems' && i.brief?.fetched);
     // Up to 5 candidates in rank order; the page shows the first one you haven't read or been shown on an
     // earlier day, so the plan's deep read changes daily even when the same post keeps ranking first.
     const deepCands = recent.filter(i => (i.brief?.worth ?? 0) >= 4 && !used.has(i.link)).slice(0, 5);
@@ -58,8 +58,8 @@ async function buildReading() {
     const fresh = take(pool, 4, true);
     fresh.push(...take(pool, 8 - fresh.length));
     // More worth your time: one per track first, then fill.
-    const picks = take(byRank.filter(i => now - +i.date < 21 * DAY && isDeep(i) && i.category !== 'postmortems'), 4, true);
-    picks.push(...take(byRank.filter(i => now - +i.date < 21 * DAY && isDeep(i) && i.category !== 'postmortems'), 6 - picks.length));
+    const picks = take(byRank.filter(i => now - +i.date < 10 * DAY && isDeep(i) && i.category !== 'postmortems'), 4, true);
+    picks.push(...take(byRank.filter(i => now - +i.date < 10 * DAY && isDeep(i) && i.category !== 'postmortems'), 6 - picks.length));
     // Learn from failure: the best recent postmortem.
     const [postmortem] = take(byRank.filter(i => i.category === 'postmortems' && (i.brief?.worth ?? 0) >= 3), 1);
 
@@ -83,7 +83,23 @@ async function buildReading() {
         funding: startup('tc-startups'),
     };
 
-    return { items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, postmortem, tracks, pulse, startups, roadmap };
+    // Latest from every desk: each discipline's freshest worth-reading pieces (quality floor).
+    const newest = (a: FeedItem, b: FeedItem) => +b.date - +a.date;
+    const desks = CATEGORIES.map(c => {
+        const mine = learning.filter(i => i.category === c.id && +i.date <= now);
+        // Recency-heavy rank (freshness dominates) so the latest leads, but a practical piece beats a same-day essay.
+        let list = mine.filter(i => now - +i.date < 10 * DAY && (i.brief?.worth ?? 0) >= 3).sort((a, b) => rank(b, now) - rank(a, now));
+        if (list.length < 2) list = [...list, ...mine.filter(i => !list.includes(i) && (i.brief?.worth ?? 0) >= 2.5).sort(newest)];
+        // Different sources first, so one prolific feed doesn't fill a desk.
+        const seen = new Set<string>(), varied = list.filter(i => !seen.has(i.feedTitle) && seen.add(i.feedTitle));
+        return { ...c, items: [...varied, ...list.filter(i => !varied.includes(i))].slice(0, 3) };
+    }).filter(d => d.items.length);
+    // The wire: the newest headlines from every desk, for scanning.
+    // At most two per source, so a batch publisher (arXiv posts its whole day at once) can't flood it.
+    const perFeed = new Map<string, number>();
+    const wire = learning.filter(i => +i.date <= now && (i.brief?.worth ?? 0) >= 2.5 && i.link !== deepRead?.link).sort(newest)
+        .filter(i => { const n = perFeed.get(i.feedId) ?? 0; perFeed.set(i.feedId, n + 1); return n < 2; }).slice(0, 14);
+    return { items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */

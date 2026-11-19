@@ -1,6 +1,6 @@
 # The Canon: foundational reads per track, in suggested order.
 # Progress is tracked in your browser. Edit freely: add, remove, reorder.
-# track: systems | backend | ai-eng | ml | security | quant | math | postmortems
+# track: research | systems | backend | ai-eng | ml | security | quant | macro | math | postmortems
 # kind: paper | article | book | video | course | docs
 # minutes: rough reading/watching time
 # parts: chapters (or sittings) of a long work, in reading order. Today's plan and the Canon
@@ -978,3 +978,87 @@
   kind: video
   minutes: 60
   why: "How a top trading firm builds its systems: low latency, correctness, OCaml, FPGAs. Pick one talk per sitting."
+
+# ---------- CS Research ----------
+- id: keshav-read-paper
+  track: research
+  title: "How to Read a Paper"
+  author: "S. Keshav"
+  url: http://ccr.sigcomm.org/online/files/p83-keshavA.pdf
+  kind: paper
+  minutes: 15
+  why: "The three-pass method for reading research papers quickly and well. Read this before any other paper."
+- id: hamming-research
+  track: research
+  title: "You and Your Research"
+  author: "Richard Hamming"
+  url: https://www.cs.virginia.edu/~robins/YouAndYourResearch.html
+  kind: article
+  minutes: 45
+  why: "Hamming on why some researchers do important work and most don't. The best talk on doing work that matters."
+- id: turing-1950
+  track: research
+  title: "Computing Machinery and Intelligence"
+  author: "Alan Turing (1950)"
+  url: https://redirect.cs.umbc.edu/courses/471/papers/turing.pdf
+  kind: paper
+  minutes: 60
+  why: "The paper that asked whether machines can think, and answered the objections people still raise today."
+- id: dijkstra-goto
+  track: research
+  title: "Go To Statement Considered Harmful"
+  author: "Edsger W. Dijkstra (1968)"
+  url: https://www.cs.utexas.edu/~EWD/transcriptions/EWD02xx/EWD215.html
+  kind: article
+  minutes: 10
+  why: "A two-page letter about structure and reasoning about programs that changed how all code is written."
+- id: aaronson-philosophers
+  track: research
+  title: "Why Philosophers Should Care About Computational Complexity"
+  author: "Scott Aaronson"
+  url: https://arxiv.org/abs/1108.1791
+  kind: paper
+  minutes: 120
+  why: "Complexity theory explained through the big questions it answers: knowledge, proof, learning and computation."
+
+# ---------- Macro & Markets ----------
+- id: fed-explained
+  track: macro
+  title: "The Fed Explained: What the Central Bank Does"
+  author: "Federal Reserve"
+  url: https://www.federalreserve.gov/aboutthefed/files/the-fed-explained.pdf
+  kind: docs
+  minutes: 90
+  why: "How monetary policy, bank supervision and the payment system actually work, from the source. Read the monetary policy chapter first."
+- id: dalio-machine
+  track: macro
+  title: "How the Economic Machine Works"
+  author: "Ray Dalio"
+  url: https://www.youtube.com/watch?v=PHe0bXAIuk0
+  kind: video
+  minutes: 31
+  why: "Credit, debt cycles and productivity in half an hour. A simple, practical model of how economies move."
+- id: taylor-1993
+  track: macro
+  title: "Discretion versus Policy Rules in Practice"
+  author: "John B. Taylor (1993)"
+  url: https://web.stanford.edu/~johntayl/Papers/Discretion.PDF
+  kind: paper
+  minutes: 60
+  why: "Where the Taylor rule comes from: the simple formula people still use to judge whether interest rates are too high or too low."
+- id: minsky-instability
+  track: macro
+  title: "The Financial Instability Hypothesis"
+  author: "Hyman Minsky (1992)"
+  url: https://www.levyinstitute.org/pubs/wp74.pdf
+  kind: paper
+  minutes: 30
+  why: "Why stability breeds instability: how periods of calm lead to the borrowing that causes crises."
+- id: bernanke-nobel
+  track: macro
+  title: "Banking, Credit, and Economic Fluctuations (Nobel lecture)"
+  author: "Ben Bernanke (2022)"
+  url: https://www.nobelprize.org/prizes/economic-sciences/2022/bernanke/lecture/
+  kind: video
+  minutes: 45
+  why: "Why bank failures make recessions deeper and longer, from the economist who then ran the Fed through 2008."

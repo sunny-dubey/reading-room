@@ -21,13 +21,15 @@ export interface FeedItem {
 }
 
 export const CATEGORIES = [
+    { id: 'research', slug: 'research', label: 'CS Research', short: 'Research', blurb: 'Algorithms, theory, performance and the papers behind tomorrow\'s systems' },
     { id: 'systems', slug: 'systems', label: 'Distributed Systems & Databases', short: 'Systems & DBs', blurb: 'Consensus, replication, consistency, storage engines, Postgres internals' },
-    { id: 'backend', slug: 'architecture', label: 'Scalability & Architecture', short: 'Architecture', blurb: 'Scaling systems, architectural design and trade-offs, reliability patterns, APIs' },
-    { id: 'ai-eng', slug: 'ai-engineering', label: 'AI Engineering & Agents', short: 'AI Engineering', blurb: 'Agents, evals, RAG, tool use, LLMs in production' },
+    { id: 'backend', slug: 'architecture', label: 'System Design & Architecture', short: 'System Design', blurb: 'Designing systems at scale: architecture, trade-offs, reliability patterns, APIs' },
+    { id: 'ai-eng', slug: 'ai-engineering', label: 'Agentic AI & AI Engineering', short: 'Agentic AI', blurb: 'Agents, evals, retrieval, tool use and LLMs in production' },
     { id: 'ml', slug: 'foundations', label: 'ML & LLM Foundations', short: 'ML Foundations', blurb: 'How transformers, training, fine-tuning and inference actually work' },
     { id: 'security', slug: 'security', label: 'Security', short: 'Security', blurb: 'How attacks work and how to build systems that survive them: web, crypto, cloud, detection' },
     { id: 'quant', slug: 'quant', label: 'Quantitative Finance', short: 'Quant', blurb: 'Markets as systems: probability, pricing, risk, microstructure and the engineering behind trading' },
-    { id: 'math', slug: 'math', label: 'Mathematics', short: 'Math', blurb: 'Discrete math, probability, linear algebra and the maths behind systems and ML' },
+    { id: 'macro', slug: 'macro', label: 'Macro & Markets', short: 'Macro', blurb: 'Central banks, inflation, growth, jobs and trade, from the data and the people who produce it' },
+    { id: 'math', slug: 'math', label: 'Applied Mathematics', short: 'Applied Maths', blurb: 'Probability, optimisation, numerical methods and the maths behind systems, ML and markets' },
     { id: 'postmortems', slug: 'postmortems', label: 'Postmortems', short: 'Postmortems', blurb: 'Real failures, explained. The fastest way to learn how systems break' },
 ] as const;
 export const PULSE = { id: 'pulse', slug: 'pulse', label: 'Pulse', short: 'Pulse', blurb: "The week's headlines, in one short page" };

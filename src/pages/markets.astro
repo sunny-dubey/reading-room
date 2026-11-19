@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import { getMarkets, fmtValue, fmtChange, sparkPath } from '../lib/markets';
+const markets = await getMarkets();
+const day = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const groups = [...new Set(markets.map(m => m.group))];
+---
+<Base title="Markets" description="The numbers that matter to an engineer who follows tech, macro and quant: last value, change over a week, and the last month." accent="reading">
+    <div class="rd markets-page">
+        <ReadingMast compact title="Markets" sub="A snapshot taken when this edition was built, not a live feed: the latest value, the change over a week (a month for monthly series) and the trend." />
+        {groups.map(g => (
+            <section class="fp-band">
+                <h2 class="fp-band-h"><span>{g}</span></h2>
+                <div class="mk-grid">
+                    {markets.filter(m => m.group === g).map(m => {
+                        const dir = (m.change ?? 0) > 0 ? 'up' : (m.change ?? 0) < 0 ? 'down' : 'flat';
+                        const lo = Math.min(...m.points.map(p => p.v)), hi = Math.max(...m.points.map(p => p.v));
+                        return (
+                            <article class={`mk ${dir}`}>
+                                <p class="mk-name">{m.name}<span>{m.why}</span></p>
+                                <p class="mk-val">{fmtValue(m)} <span class="mk-chg">{dir === 'up' ? '▲' : dir === 'down' ? '▼' : '■'} {fmtChange(m)} <small>{m.freq === 'monthly' ? 'vs last month' : 'vs a week ago'}</small></span></p>
+                                <svg class="mk-chart" viewBox="0 0 300 70" preserveAspectRatio="none" aria-label={`${m.name} over the last ${m.freq === 'monthly' ? '2 years' : 'month and a half'}`}><path d={sparkPath(m.points, 300, 70, m.points.length)} /></svg>
+                                <p class="mk-meta">{m.freq === 'monthly' ? 'Monthly' : 'Daily'} · last {day(m.last!.t)} · range {fmtValue(m, lo)}–{fmtValue(m, hi)}{!m.ok ? ' · source unreachable, showing the last good values' : ''}</p>
+                                <p class="mk-src">Source: <a href={m.sourceUrl} target="_blank" rel="noopener noreferrer">{m.source}</a></p>
+                            </article>
+                        );
+                    })}
+                </div>
+            </section>
+        ))}
+        <p class="side-note">Data: FRED, Federal Reserve Bank of St. Louis (with the original publishers named on each card), and CoinGecko. Some series are published with a lag (USD/INR about a week, Brent a few days); copper and India's 10-year yield are monthly. Nifty 50 and the Philadelphia Semiconductor Index are left out because no free source allows automated access.</p>
+    </div>
+</Base>

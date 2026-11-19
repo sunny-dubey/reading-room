@@ -9,11 +9,61 @@
 #   ml           ML & LLM Foundations
 #   security     Security: web, crypto, cloud, detection, exploitation
 #   quant        Quantitative finance: pricing, risk, microstructure, trading systems
+#   macro        Macro & markets: central banks, inflation, growth (informative, data-led sources only)
+#   research     CS research: algorithms, theory, performance
 #   math         Mathematics
 #   postmortems  Postmortems: learning from failure
 #   pulse        Pulse: a small page of the week's headlines (not on the front page)
 # limit: max items kept from this feed · maxAgeDays: ignore older items
 # weight: ranking nudge, -2..2 (default 0). Raise authors known for depth, lower newsletters and roundups.
+
+# ---------- CS research ----------
+- id: lemire
+  title: "Daniel Lemire"
+  url: 'https://lemire.me/blog/feed/'
+  site: https://lemire.me/blog/
+  category: research
+  limit: 5
+  maxAgeDays: 60
+  weight: 0.8
+- id: quanta-cs
+  title: "Quanta Magazine (Computer Science)"
+  url: 'https://www.quantamagazine.org/computer-science/feed/'
+  site: https://www.quantamagazine.org/computer-science/
+  category: research
+  limit: 4
+  maxAgeDays: 90
+  weight: 0.3
+- id: windows-on-theory
+  title: "Windows on Theory (Boaz Barak)"
+  url: 'https://www.windowsontheory.org/feed/'
+  site: https://windowsontheory.org/
+  category: research
+  limit: 3
+  maxAgeDays: 120
+  weight: 0.3
+- id: argmin
+  title: "arg min (Ben Recht)"
+  url: 'https://www.argmin.net/feed'
+  site: https://www.argmin.net/
+  category: research
+  limit: 3
+  maxAgeDays: 60
+- id: complexity-blog
+  title: "Computational Complexity (Fortnow & Gasarch)"
+  url: 'https://blog.computationalcomplexity.org/feeds/posts/default'
+  site: https://blog.computationalcomplexity.org/
+  category: research
+  limit: 3
+  maxAgeDays: 45
+  weight: -0.3
+- id: arxiv-cs-ds
+  title: "arXiv: Data Structures and Algorithms"
+  url: 'https://rss.arxiv.org/rss/cs.DS'
+  site: https://arxiv.org/list/cs.DS/new
+  category: research
+  limit: 5
+  maxAgeDays: 10
 
 # ---------- systems ----------
 - id: marc-brooker
@@ -178,7 +228,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
-  weight: -0.2
+  weight: -0.5
 - id: julia-evans
   title: Julia Evans
   url: https://jvns.ca/atom.xml
@@ -247,7 +297,7 @@
   category: backend
   limit: 4
   maxAgeDays: 180
-  weight: 0.5
+  weight: -0.5
 - id: eli-bendersky
   title: Eli Bendersky
   url: 'https://eli.thegreenplace.net/feeds/all.atom.xml'
@@ -311,7 +361,7 @@
   category: ai-eng
   limit: 6
   maxAgeDays: 60
-  weight: -0.6
+  weight: -0.5
 
 - id: vicki-boykis
   title: Vicki Boykis
@@ -354,7 +404,7 @@
   category: ml
   limit: 5
   maxAgeDays: 180
-  weight: 0.4
+  weight: -0.3
 - id: karpathy
   title: Andrej Karpathy
   url: https://karpathy.github.io/feed.xml
@@ -644,6 +694,77 @@
   limit: 6
   maxAgeDays: 14
 
+# ---------- macro & markets (informative, data-led sources) ----------
+- id: fred-blog
+  title: "FRED Blog (St. Louis Fed)"
+  url: 'https://fredblog.stlouisfed.org/feed/'
+  site: https://fredblog.stlouisfed.org/
+  category: macro
+  limit: 5
+  maxAgeDays: 45
+  weight: 0.5
+- id: liberty-street
+  title: "Liberty Street Economics (New York Fed)"
+  url: 'https://libertystreeteconomics.newyorkfed.org/feed/'
+  site: https://libertystreeteconomics.newyorkfed.org/
+  category: macro
+  limit: 5
+  maxAgeDays: 45
+  weight: 0.5
+- id: bank-underground
+  title: "Bank Underground (Bank of England staff)"
+  url: 'https://bankunderground.co.uk/feed/'
+  site: https://bankunderground.co.uk/
+  category: macro
+  limit: 4
+  maxAgeDays: 60
+  weight: 0.3
+- id: econbrowser
+  title: "Econbrowser (Menzie Chinn & James Hamilton)"
+  url: 'https://www.econbrowser.com/feed'
+  site: https://econbrowser.com/
+  category: macro
+  limit: 5
+  maxAgeDays: 30
+- id: apricitas
+  title: "Apricitas Economics"
+  url: 'https://www.apricitas.io/feed'
+  site: https://www.apricitas.io/
+  category: macro
+  limit: 3
+  maxAgeDays: 60
+  weight: 0.3
+- id: owid
+  title: "Our World in Data"
+  url: 'https://ourworldindata.org/atom.xml'
+  site: https://ourworldindata.org/
+  category: macro
+  limit: 3
+  maxAgeDays: 45
+- id: fed-speeches
+  title: "Federal Reserve: speeches"
+  url: 'https://www.federalreserve.gov/feeds/speeches.xml'
+  site: https://www.federalreserve.gov/newsevents/speeches.htm
+  category: macro
+  limit: 4
+  maxAgeDays: 21
+- id: ecb-press
+  title: "European Central Bank: press"
+  url: 'https://www.ecb.europa.eu/rss/press.html'
+  site: https://www.ecb.europa.eu/press/html/index.en.html
+  category: macro
+  limit: 3
+  maxAgeDays: 21
+  weight: -0.3
+- id: bis-speeches
+  title: "BIS: central bankers' speeches"
+  url: 'https://www.bis.org/doclist/cbspeeches.rss'
+  site: https://www.bis.org/cbspeeches/
+  category: macro
+  limit: 4
+  maxAgeDays: 14
+  weight: -0.3
+
 # ---------- math ----------
 - id: jeremy-kun
   title: Math ∩ Programming (Jeremy Kun)
@@ -683,3 +804,27 @@
   limit: 6
   maxAgeDays: 30
   weight: -0.3
+- id: francis-bach
+  title: "Francis Bach (Machine Learning Research Blog)"
+  url: 'https://francisbach.com/feed/'
+  site: https://francisbach.com/
+  category: math
+  limit: 3
+  maxAgeDays: 365
+  weight: 0.8
+- id: pedregosa
+  title: "Fabian Pedregosa (optimisation)"
+  url: 'https://fa.bianp.net/blog/feed/'
+  site: https://fa.bianp.net/
+  category: math
+  limit: 3
+  maxAgeDays: 365
+  weight: 0.5
+- id: cleve-moler
+  title: "Cleve's Corner (Cleve Moler)"
+  url: 'https://blogs.mathworks.com/cleve/feed/'
+  site: https://blogs.mathworks.com/cleve/
+  category: math
+  limit: 3
+  maxAgeDays: 365
+  weight: 0.5

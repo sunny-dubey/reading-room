@@ -125,6 +125,10 @@ function concepts(text: string, title: string, max = 5): string[] {
 const ANNOUNCE = /\b(announc\w*|launch(es|ed|ing)?|introduc(ing|es)|now available|generally available|release notes|what'?s new|we'?re hiring|webinar|event|conference|meetup|join us|recap|roundup|weekly|newsletter|funding|raises|acquires?|pricing|partner(s|ship)|award|podcast|episode|livestream|keynote)\b/i;
 
 // Roundups and newsletters: long, but a list of links rather than an explanation.
+// The reader wants informative, practical pieces over opinion: titles that signal a take lose worth,
+// titles that signal how-it-works or how-to gain a little.
+const OPINION = /\b(why (i|we|you)\b|my (take|thoughts|view)|thoughts on|in defen[cs]e of|the case (for|against)|unpopular opinion|hot take|rant\b|i think|i believe|reflections on|is (dead|overrated|over|broken)\b|stop (using|doing)|conversation with|in conversation|ask me anything|\bama\b|interview with|op-?ed|opinion)\b/i;
+const PRACTICAL = /\b(how (to|we|it works|does)|guide|tutorial|walkthrough|deep dive|explained|internals|under the hood|benchmark(s|ing)?|case study|lessons (from|learned)|post-?mortem|step[- ]by[- ]step|implement(ing|ation)|from scratch|primer|introduction to|measur(ing|ed|ement)|nowcast|data on|what the data)\b/i;
 const ROUNDUP = /^\[ainews\]|^ep\d+[:\s]|\bthis week in\b|\bweekly\b|\broundup\b|\bdigest\b|\blinks? (for|of the)\b|\bissue #?\d+|\bnewsletter\b|\bthe pulse\b|\b(day \d+|days? \d+ and \d+)\)?$/i;
 
 // ---------------------------------------------------------------- public API
@@ -152,7 +156,16 @@ export async function makeBrief(i: { title: string; link: string; summary: strin
     if (ANNOUNCE.test(i.title)) worth -= 2;
     else if (ROUNDUP.test(i.title)) worth -= 1.5;
     if (i.category === 'postmortems') worth += 0.5;
+    if (OPINION.test(i.title)) worth -= 1;
+    else if (PRACTICAL.test(i.title)) worth += 0.5;
+    // Heavy first-person writing is usually a personal take rather than an explainer.
+    if (fetched && words > 300) {
+        const firstPerson = (text.match(/\b(I|I'm|I've|I'd|my)\b/g) ?? []).length / words * 1000;
+        if (firstPerson > 14) worth -= 0.5;
+    }
     if (!fetched) worth -= 0.5;
+    // A new research paper is informative by nature even though only its abstract is visible here.
+    if (/arxiv\.org\/abs\//.test(i.link)) worth = Math.max(worth, 3.5);
     worth = Math.max(1, Math.min(5, Math.round(worth * 2) / 2));
 
     return { concepts: found, minutes: fetched ? minutes : 0, depth, worth, fetched, text: text.slice(0, 1200) };
