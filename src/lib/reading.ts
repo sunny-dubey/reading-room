@@ -2,6 +2,8 @@ import { getCollection } from 'astro:content';
 import { getFeeds, CATEGORIES, SIDE, type FeedItem } from './feeds';
 import { getNotes } from './content';
 import { getRoadmap } from './roadmap';
+import { getMeta, makeThumb, cleanDescription } from './meta';
+import { mapLimit } from './summarize';
 
 const DAY = 864e5;
 
@@ -102,6 +104,19 @@ async function buildReading() {
     // Top stories under the lead: the best recent pieces not already in the wire or the desks.
     const shownElsewhere = new Set([...wire, ...desks.flatMap(d => d.items)].map(i => i.link));
     const topStories = byRank.filter(i => now - +i.date < 7 * DAY && isDeep(i) && !shownElsewhere.has(i.link) && !deepCands.some(d => d.link === i.link) && i.category !== 'postmortems').slice(0, 6);
+    // The article's own description and preview image for everything shown with a picture or a dek.
+    const showcase = [...new Set([...deepCands, ...topStories, ...desks.flatMap(d => d.items), ...wire])];
+    await mapLimit(showcase, 8, async i => {
+        const m = await getMeta(i.link);
+        i.meta = { description: cleanDescription(m.description, i.title), image: m.image };
+    });
+    // An image reused across a feed's posts is a site logo, not the article's picture.
+    const uses = new Map<string, number>();
+    for (const i of showcase) if (i.meta?.image) uses.set(`${i.feedId} ${i.meta.image}`, (uses.get(`${i.feedId} ${i.meta.image}`) ?? 0) + 1);
+    for (const i of showcase) if (i.meta?.image && (uses.get(`${i.feedId} ${i.meta.image}`) ?? 0) > 1) delete i.meta.image;
+    const thumbFor = async (i: FeedItem, w: number) => { if (i.meta?.image) i.meta.thumb = await makeThumb(i.meta.image, w); };
+    await mapLimit(deepCands, 4, i => thumbFor(i, 760));
+    await mapLimit([...topStories, ...desks.map(d => d.items[0])].filter(Boolean), 6, i => thumbFor(i, 360));
     return { items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
 }
 

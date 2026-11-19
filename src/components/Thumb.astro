@@ -1,0 +1,12 @@
+---
+// The article's own preview image (a small self-hosted thumbnail), or the generative cover when it has none.
+import type { FeedItem } from '../lib/feeds';
+import { u } from '../lib/url';
+import Cover from './Cover.astro';
+interface Props { i: FeedItem; w?: number; h?: number; class?: string; eager?: boolean }
+const { i, w = 320, h = 150, class: cls, eager = false } = Astro.props;
+const thumb = i.meta?.thumb;
+---
+{thumb
+    ? <img class:list={['thumb', cls]} src={u(`/thumbs/${thumb}`)} alt="" width={w} height={Math.round(w / 2)} loading={eager ? 'eager' : 'lazy'} decoding="async" />
+    : <Cover seed={i.title} track={i.category} w={w} h={h} class={cls} />}

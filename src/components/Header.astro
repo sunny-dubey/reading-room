@@ -6,7 +6,6 @@ const path = Astro.url.pathname.replace(/\/?$/, '/');
 const sections = [
     { href: u('/'), label: 'Today', cat: '' },
     ...CATEGORIES.map(c => ({ href: u(`/${c.slug}/`), label: c.short, cat: c.id })),
-    { href: u('/roadmap/'), label: 'Roadmap', cat: '' },
     { href: u('/canon/'), label: 'Canon', cat: '' },
     { href: u('/sources/'), label: 'Sources', cat: '' },
 ];
@@ -21,13 +20,11 @@ const isSaved = path.startsWith(u('/library/'));
             <span class="brand-name">The Reading Room</span>
         </a>
         <div class="nav-links">
-            <a href={u('/startups/')} aria-current={path.startsWith(u('/startups/')) ? 'page' : undefined}>Startups</a>
-            <a href={u('/pulse/')} aria-current={path.startsWith(u('/pulse/')) ? 'page' : undefined}>Pulse</a>
             <a href={u('/briefing/')} aria-current={path.startsWith(u('/briefing/')) ? 'page' : undefined}>Briefing</a>
+            <a href={u('/markets/')} aria-current={path.startsWith(u('/markets/')) ? 'page' : undefined}>Markets</a>
             <a href={u('/outages/')} aria-current={path.startsWith(u('/outages/')) ? 'page' : undefined}>Outages</a>
             <a href={u('/puzzles/')} aria-current={path.startsWith(u('/puzzles/')) ? 'page' : undefined}>Puzzles</a>
-            <a href={u('/notebook/')} aria-current={isNotebook ? 'page' : undefined}>Notebook</a>
-            <a href={u('/library/')} aria-current={isSaved ? 'page' : undefined}>Saved</a>
+            <a href={u('/roadmap/')} aria-current={path.startsWith(u('/roadmap/')) ? 'page' : undefined}>Roadmap</a>
         </div>
         <div class="nav-tools">
             <a href={u('/search/')} class="icon-btn" aria-label="Search" title="Search">
@@ -43,12 +40,10 @@ const isSaved = path.startsWith(u('/library/'));
         })}
         {/* On phones the top-bar links live here, so the header is two rows instead of three. */}
         <span class="m-only m-sep" aria-hidden="true"></span>
-        <a class="m-only" href={u('/notebook/')} aria-current={isNotebook ? 'page' : undefined}>Notebook</a>
-        <a class="m-only" href={u('/library/')} aria-current={isSaved ? 'page' : undefined}>Saved</a>
-        <a class="m-only" href={u('/startups/')} aria-current={path.startsWith(u('/startups/')) ? 'page' : undefined}>Startups</a>
-        <a class="m-only" href={u('/pulse/')} aria-current={path.startsWith(u('/pulse/')) ? 'page' : undefined}>Pulse</a>
         <a class="m-only" href={u('/briefing/')} aria-current={path.startsWith(u('/briefing/')) ? 'page' : undefined}>Briefing</a>
+        <a class="m-only" href={u('/markets/')} aria-current={path.startsWith(u('/markets/')) ? 'page' : undefined}>Markets</a>
         <a class="m-only" href={u('/outages/')} aria-current={path.startsWith(u('/outages/')) ? 'page' : undefined}>Outages</a>
         <a class="m-only" href={u('/puzzles/')} aria-current={path.startsWith(u('/puzzles/')) ? 'page' : undefined}>Puzzles</a>
+        <a class="m-only" href={u('/roadmap/')} aria-current={path.startsWith(u('/roadmap/')) ? 'page' : undefined}>Roadmap</a>
     </nav>
 </div>

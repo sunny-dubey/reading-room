@@ -3,6 +3,7 @@ import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
 import Story from '../components/Story.astro';
 import Cover from '../components/Cover.astro';
+import Thumb from '../components/Thumb.astro';
 import { categoryShort } from '../lib/feeds';
 import { editionName, istTime, istDate } from '../lib/edition';
 import ReadingClient from '../components/ReadingClient.astro';
@@ -67,10 +68,11 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 <span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span>
                 <span>{editionName(fetchedAt)} edition · <time data-edition-time datetime={fetchedAt.toISOString()}>{istTime(fetchedAt)}</time></span>
             </div>
+            <p class="fp-stale" data-stale={fetchedAt.toISOString()} hidden></p>
+            <p class="fp-since" data-since hidden></p>
         </header>
         <MarketTicker />
 
-        <section class="week-card" data-your-week hidden aria-label="Your week"></section>
 
 
 
@@ -82,9 +84,10 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                         <article class="fp-lead" data-deep-lead={d.link} data-link={d.link} data-cat={d.category} hidden={n > 0}>
                             <p class="fp-kicker">The deep read · {categoryShort(d.category)} · {mins(d.brief?.minutes)}</p>
                             <h2 class:list={["fp-lead-h", { long: d.title.length > 60 }]}><a href={d.link} target="_blank" rel="noopener noreferrer" data-read>{d.title}</a></h2>
+                            {d.meta?.description && <p class="fp-dek" title="The author's own description">{d.meta.description}</p>}
                             {d.skill && <p class="fp-deck">You'll get better at <a href={u(`/roadmap/#${d.skill.topic.id}`)}>{d.skill.topic.name}</a>. {d.skill.topic.why}</p>}
                             <p class="fp-byline">By {d.feedTitle}</p>
-                            <a href={d.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={d.title} track={d.category} w={640} h={280} class="fp-lead-art" /></a>
+                            <a href={d.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Thumb i={d} w={760} h={280} class="fp-lead-art" eager={n === 0} /></a>
                             {d.classic && <p class="fp-footnote"><span>Builds on a classic</span><a href={d.classic.url} target="_blank" rel="noopener noreferrer">{d.classic.title}</a>, {d.classic.author}</p>}
                         </article>
                     ))}
@@ -102,8 +105,8 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     <h3 class="fp-box-h">The wire <span class="web-note">newest first, every desk</span></h3>
                     <ol class="wire-list" role="list">
                         {wire.map(i => (
-                            <li data-link={i.link} data-cat={i.category}>
-                                <span class="wire-meta"><span class="cat-dot" data-cat={i.category}></span><time data-rel datetime={i.date.toISOString()}></time> · {categoryShort(i.category)}</span>
+                            <li data-link={i.link} data-cat={i.category} data-ts={+i.date}>
+                                <span class="wire-meta"><span class="new-badge" data-new hidden>New</span><span class="cat-dot" data-cat={i.category}></span><time data-rel datetime={i.date.toISOString()}></time> · {categoryShort(i.category)}</span>
                                 <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
                                 <span class="wire-src">{i.feedTitle}{i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}</span>
                             </li>
@@ -126,56 +129,32 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     </section>
                 )}
 
-                <section class="fp-box reading-pulse" data-reading-pulse aria-label="Your reading">
-                    <h3 class="fp-box-h">Your reading</h3>
-                    <div class="rp-stats">
-                        <div><strong data-rp-streak>0</strong><span>day streak</span></div>
-                        <div><strong data-rp-month>0</strong><span>reads, 30 days</span></div>
-                        <div><strong data-rp-topics>0</strong><span>topics</span></div>
-                        <div><strong data-rp-tracks>0</strong><span>tracks</span></div>
-                    </div>
-                    <div class="rp-grid" data-rp-grid aria-hidden="true"></div>
-                    <p class="rp-note" data-rp-note>From this browser only. Open a read to start your streak.</p>
-                    <script type="application/json" id="read-map" set:html={JSON.stringify(readMap)} />
-                </section>
             </aside>
         </section>
-
-        <!-- ===== The puzzle page ===== -->
-        {pz.today && (
-            <section class="fp-band reveal puzzle-band">
-                <h2 class="fp-band-h"><span>The puzzle page</span></h2>
-                <div class="puzzle-grid">
-                    <div class="puzzle-main">
-                        <PuzzleCard p={pz.today} featured />
-                        {webPicks.length > 0 && (
-                            <div class="web-today">
-                                <h3 class="fp-box-h">From around the web <span class="web-note">links to the originals, credited</span></h3>
-                                <WebPuzzleList rows={webPicks} />
-                            </div>
-                        )}
-                    </div>
-                    <div class="puzzle-side">
-                        <NumbersCard cards={pz.numbers} />
-                        {pz.drill && <IncidentDrill i={pz.drill} />}
-                        <a class="fp-more" href={u('/puzzles/')}>All {pz.puzzles.length} puzzles and the full numbers deck →</a>
-                    </div>
-                </div>
-            </section>
-        )}
 
         <!-- ===== Latest from every desk ===== -->
         <section class="fp-band reveal">
             <h2 class="fp-band-h"><span>Latest from every desk</span></h2>
+            <details class="desk-pick">
+                <summary>Choose desks <span data-desk-count></span></summary>
+                <div class="desk-pick-row" role="group" aria-label="Desks to show">
+                    {desks.map(d => (
+                        <button type="button" class="desk-chip" data-desk-toggle={d.id} aria-pressed="true"><span class="cat-dot" data-cat={d.id}></span>{d.short}</button>
+                    ))}
+                    <button type="button" class="desk-chip all" data-desk-all>Show all</button>
+                </div>
+                <p class="desk-pick-note">Hidden desks also leave the wire and top stories. Saved in this browser only.</p>
+            </details>
             <div class="desks">
                 {desks.map(d => (
                     <section class="desk" data-cat={d.id}>
                         <h3 class="desk-h"><a href={u(`/${d.slug}/`)}><span class="cat-dot" data-cat={d.id}></span>{d.short}</a></h3>
                         {d.items.map((i, n) => (
                             <article class:list={['desk-item', { first: n === 0 }]} data-link={i.link} data-ts={+i.date} data-story>
-                                {n === 0 && <a href={i.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={i.title} track={i.category} w={320} h={110} /></a>}
+                                {n === 0 && <a href={i.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Thumb i={i} w={360} h={110} /></a>}
                                 <p class="desk-meta"><span class="new-badge" data-new hidden>New</span><time data-rel datetime={i.date.toISOString()}></time>{i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}{i.brief?.depth === 'deep' ? ' · deep dive' : ''}</p>
                                 <a class="desk-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                                {n === 0 && i.meta?.description && <p class="desk-dek">{i.meta.description}</p>}
                                 <span class="desk-src">{i.feedTitle}</span>
                             </article>
                         ))}
@@ -239,108 +218,26 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             </section>
         )}
 
-        <!-- ===== The rabbit hole ===== -->
-        {rabbitHoles.length > 0 && (
-            <section class="fp-band reveal" data-rabbit>
-                <h2 class="fp-band-h"><span>The rabbit hole</span></h2>
-                {rabbitHoles.map((h, n) => (
-                    <div class="fp-feature" data-hole={h.topic.id} data-cat={h.topic.track} hidden={n > 0}>
-                        <div class="fp-feature-intro">
-                            <p class="fp-kicker">{h.topic.areaTitle}</p>
-                            <h3 class="fp-feature-h"><a href={u(`/roadmap/#${h.topic.id}`)}>{h.topic.name}</a></h3>
-                            <p class="fp-deck">{h.topic.why}</p>
-                        </div>
-                        <ol class="fp-steps" role="list">
-                            {h.steps.map((st, k) => (
-                                <li data-link={st.url}>
-                                    <span class="fp-roman">{ROMAN[k]}</span>
-                                    <span class="fp-kicker sm">{STEP_NAMES[k]}</span>
-                                    <a href={st.url} target="_blank" rel="noopener noreferrer" data-read>{st.title}</a>
-                                    <span class="story-by">{st.kind === 'canon' ? 'From the Canon · ' : ''}{st.meta}</span>
-                                </li>
-                            ))}
-                        </ol>
-                    </div>
-                ))}
-            </section>
-        )}
-
-        <!-- ===== Point · Counterpoint ===== -->
-        {twoTakes && (
-            <section class="fp-band reveal">
-                <h2 class="fp-band-h"><span>Point · Counterpoint</span></h2>
-                <p class="fp-pc-topic">Two takes on <a href={u(`/roadmap/#${twoTakes.topic.id}`)}>{twoTakes.topic.name}</a></p>
-                <div class="fp-pc">
-                    <Story i={twoTakes.a} size="take" kicker={twoTakes.a.feedTitle} />
-                    <span class="fp-vs" aria-hidden="true">vs</span>
-                    <Story i={twoTakes.b} size="take" kicker={twoTakes.b.feedTitle} />
-                </div>
-                <p class="fp-pc-ask">Read both. Where do they agree, where do they differ, and why?</p>
-            </section>
-        )}
-
-        <!-- ===== The weekly problem ===== -->
-        {practice && (
-            <section class="practice reveal" id="practice" data-practice={`${practice.id}-w${week}`}>
-                <div class="practice-head">
-                    <span class="practice-label">The weekly problem</span>
-                    <label class="practice-done"><input type="checkbox" data-practice-check /> Done</label>
-                </div>
-                <h2 class="practice-title">{practice.name}</h2>
-                {practice.twist && <p class="practice-twist dropcap">{practice.twist}</p>}
-                <p class="practice-how">30–45 minutes, on paper or a whiteboard. Work through it in order:</p>
-                <ol class="practice-steps">
-                    <li><strong>Requirements:</strong> who uses it, what must it do, what must it never do</li>
-                    <li><strong>Estimates:</strong> requests per second, data size, read/write ratio</li>
-                    <li><strong>API and data model</strong></li>
-                    <li><strong>High-level design:</strong> boxes and arrows, the request path end to end</li>
-                    <li><strong>Bottlenecks and trade-offs:</strong> what breaks at 10×, what you'd change</li>
-                </ol>
-                {practice.topics.length > 0 && (
-                    <p class="practice-links"><span>Exercises</span>{practice.topics.map(t => <a href={u(`/roadmap/#${t.id}`)}>{t.name}</a>)}</p>
-                )}
-                {(practice.canon.length > 0 || practiceFresh) && (
-                    <p class="practice-links"><span>Read first</span>
-                        {practice.canon.map(c => <a href={c.data.url} target="_blank" rel="noopener noreferrer" title={`${c.data.author} · ${c.data.minutes} min`}>{c.data.title}</a>)}
-                        {practiceFresh && <a href={practiceFresh.link} target="_blank" rel="noopener noreferrer" title={`New · ${practiceFresh.feedTitle}${practiceFresh.brief?.minutes ? ` · ${practiceFresh.brief.minutes} min` : ''}`}>{practiceFresh.title}</a>}
-                    </p>
-                )}
-            </section>
-        )}
-
-        <!-- ===== From the Canon ===== -->
-        <section class="fp-band reveal">
-            <h2 class="fp-band-h"><span>From the Canon</span></h2>
-            <div class="next-grid">
-                {canon.filter(t => t.items.length).map(t => (
-                    <div class="next-card" data-next-track={t.id} data-cat={t.id}>
-                        <div class="next-top">
-                            <a class="story-cat" data-cat={t.id} href={u(`/${t.slug}/#canon`)}>{t.short}</a>
-                            <span class="next-progress" data-next-progress></span>
-                        </div>
-                        {t.items.map(c => (
-                            <div class="next-item" data-next-id={c.id} data-link={c.data.url} hidden>
-                                <a class="next-title" href={c.data.url} target="_blank" rel="noopener noreferrer" data-read>{c.data.title}</a>
-                                <p class="next-why">{c.data.why}</p>
-                                {c.data.parts && <p class="next-part" data-next-part={c.id} hidden></p>}
-                                <div class="next-foot">
-                                    <span>{c.data.author} · {c.data.kind} · {hours(c.data.minutes)}</span>
-                                    <button type="button" class="mark-done" data-mark-done={c.id}>Mark done ✓</button>
-                                </div>
+        <!-- ===== The puzzle page ===== -->
+        {pz.today && (
+            <section class="fp-band reveal puzzle-band">
+                <h2 class="fp-band-h"><span>The puzzle page</span></h2>
+                <div class="puzzle-grid">
+                    <div class="puzzle-main">
+                        <PuzzleCard p={pz.today} featured />
+                        {webPicks.length > 0 && (
+                            <div class="web-today">
+                                <h3 class="fp-box-h">From around the web <span class="web-note">links to the originals, credited</span></h3>
+                                <WebPuzzleList rows={webPicks} />
                             </div>
-                        ))}
-                        <p class="next-item" data-next-done hidden>Track complete. Go deeper with the fresh reads in <a class="u" href={u(`/${t.slug}/`)}>{t.short}</a>.</p>
+                        )}
                     </div>
-                ))}
-            </div>
-            <p class="fp-more-link"><a href={u('/canon/')}>The whole Canon →</a></p>
-        </section>
-
-        <!-- ===== More worth your time ===== -->
-        {picks.length > 0 && (
-            <section class="fp-band reveal">
-                <h2 class="fp-band-h"><span>More worth your time</span></h2>
-                <div class="fp-briefs-grid">{picks.map(i => <Story i={i} size="brief" deck={false} />)}</div>
+                    <div class="puzzle-side">
+                        <NumbersCard cards={pz.numbers} />
+                        {pz.drill && <IncidentDrill i={pz.drill} />}
+                        <a class="fp-more" href={u('/puzzles/')}>All {pz.puzzles.length} puzzles and the full numbers deck →</a>
+                    </div>
+                </div>
             </section>
         )}
 
@@ -364,34 +261,8 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     <p class="story-by">{explainer.author} · {explainer.minutes} min · interactive</p>
                 </div>
             )}
-            <div class="fp-cell" data-revisit hidden={revisit.week.length + revisit.month.length === 0 && !revisit.archive}>
-                <h3 class="fp-box-h">Revisit</h3>
-                <ul class="mini revisit" role="list" data-revisit-list>
-                    {revisit.week.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">your note · 1 week ago</span></a></li>)}
-                    {revisit.month.map(e => <li><a href={u(e.href)}><span class="mini-title">{e.title}</span><span class="mini-meta">your note · 1 month ago</span></a></li>)}
-                    {revisit.archive && <li><a href={u(revisit.archive.href)}><span class="mini-title">{revisit.archive.title}</span><span class="mini-meta">your note · from the archive</span></a></li>}
-                </ul>
-                <p class="revisit-hint">Can you still explain the core idea? If not, skim it again.</p>
-            </div>
         </section>
 
-        <!-- ===== Sections ===== -->
-        <section class="fp-band reveal">
-            <h2 class="fp-band-h"><span>Sections</span></h2>
-            <div class="fp-sections">
-                {tracks.map(t => (
-                    <a class="fp-section" href={u(`/${t.slug}/`)} data-cat={t.id}>
-                        <span class="fp-section-name"><span class="cat-dot" data-cat={t.id}></span>{t.label}</span>
-                        <span class="fp-section-blurb">{t.blurb}</span>
-                        <span class="story-by">{t.deep.length} deep reads · {canon.find(c => c.id === t.id)?.items.length ?? 0} in the Canon</span>
-                    </a>
-                ))}
-            </div>
-            <div class="fp-strips">
-                {startups.launches.length > 0 && <a class="pulse-strip" href={u('/startups/')}><span class="pulse-label">Startups</span><span class="pulse-text">{startups.launches.length} recent YC launches, plus Show HN and Product Hunt.</span><span aria-hidden="true">→</span></a>}
-                {pulse.length > 0 && <a class="pulse-strip" href={u('/pulse/')}><span class="pulse-label">Pulse</span><span class="pulse-text">The week in tech, in ten headlines.</span><span aria-hidden="true">→</span></a>}
-            </div>
-        </section>
     </div>
     <ReadingClient />
     <PuzzleClient />
@@ -399,30 +270,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
 
 
 <script>
-    import { getSet } from '../lib/progress-client';
-    import { mountReadingStats } from '../lib/reading-stats-client';
-    import { dueForRevisit, getHistory } from '../lib/history-client';
-
-    // ---------- Revisit from your reading history (spaced repetition, no writing needed) ----------
-    const due = dueForRevisit();
-    const esc = (t: string) => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
-    const list = document.querySelector<HTMLElement>('[data-revisit-list]');
-    const items = [...due.week.slice(0, 2).map(r => ({ r, when: 'you read it a week ago' })), ...due.month.slice(0, 2).map(r => ({ r, when: 'you read it a month ago' }))];
-    if (list && items.length) {
-        list.insertAdjacentHTML('afterbegin', items.map(({ r, when }) =>
-            `<li><a href="${esc(r.u)}" target="_blank" rel="noopener noreferrer"><span class="mini-title">${esc(r.t)}</span><span class="mini-meta">${when}</span></a></li>`).join(''));
-        document.querySelector<HTMLElement>('[data-revisit]')!.hidden = false;
-    }
-    // ---------- This week's practice: a tick per week ----------
-    const practice = document.querySelector<HTMLElement>('[data-practice]');
-    const pcheck = document.querySelector<HTMLInputElement>('[data-practice-check]');
-    if (practice && pcheck) {
-        const pkey = `practice:${practice.dataset.practice}`;
-        const paint = () => practice.classList.toggle('is-done', pcheck.checked);
-        try { pcheck.checked = localStorage.getItem(pkey) === '1'; } catch {}
-        paint();
-        pcheck.addEventListener('change', () => { try { localStorage.setItem(pkey, pcheck.checked ? '1' : '0'); } catch {} paint(); });
-    }
+    import { getHistory } from '../lib/history-client';
 
     // ---------- Lead story: keep today's pick all day, else the best one you haven't opened or been shown ----------
     {
@@ -448,25 +296,28 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         }
     }
 
-    // ---------- Rabbit hole: keep today's, else the best topic you haven't learned or seen ----------
+    // ---------- choose desks: hidden desks are remembered in this browser (localStorage `desks:hidden`) ----------
     {
-        const today = new Date().toLocaleDateString('en-CA');
-        const KEY = 'rabbit:shown';
-        let shown: Record<string, string> = {};
-        try { shown = JSON.parse(localStorage.getItem(KEY) ?? '{}'); } catch {}
-        const learned = getSet('learned');
-        const holes = [...document.querySelectorAll<HTMLElement>('[data-hole]')];
-        const id = (h: HTMLElement) => h.dataset.hole!;
-        const pick = holes.find(h => shown[id(h)] === today)
-            ?? holes.find(h => !learned.has(id(h)) && !shown[id(h)])
-            ?? holes.find(h => !learned.has(id(h)))
-            ?? holes[0];
-        if (pick) {
-            holes.forEach(h => (h.hidden = h !== pick));
-            shown[id(pick)] ??= today;
-            try { localStorage.setItem(KEY, JSON.stringify(shown)); } catch {}
-        }
+        const KEY = 'desks:hidden';
+        let off = new Set<string>();
+        try { off = new Set(JSON.parse(localStorage.getItem(KEY) ?? '[]')); } catch {}
+        const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-desk-toggle]')];
+        const count = document.querySelector<HTMLElement>('[data-desk-count]');
+        const paint = () => {
+            chips.forEach(b => b.setAttribute('aria-pressed', String(!off.has(b.dataset.deskToggle!))));
+            // Only desk sections, wire items and top stories; the lead stays.
+            document.querySelectorAll<HTMLElement>('.desk[data-cat], .wire-list li[data-cat], .top-stories [data-story][data-cat]')
+                .forEach(el => el.classList.toggle('desk-off', off.has(el.dataset.cat!)));
+            if (count) count.textContent = off.size ? `(${chips.length - off.size} of ${chips.length} shown)` : '';
+        };
+        const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...off])); } catch {} paint(); };
+        chips.forEach(b => b.addEventListener('click', () => {
+            const id = b.dataset.deskToggle!;
+            if (off.has(id)) off.delete(id);
+            else if (off.size < chips.length - 1) off.add(id); // keep at least one desk
+            save();
+        }));
+        document.querySelector('[data-desk-all]')?.addEventListener('click', () => { off.clear(); save(); });
+        paint();
     }
-
-    mountReadingStats();
 </script>

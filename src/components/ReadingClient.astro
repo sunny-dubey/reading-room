@@ -27,11 +27,29 @@ const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.da
             : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: days > 300 ? 'numeric' : undefined });
         t.title = d.toLocaleString();
     });
-    // ---------- "New" badge: posts published in the last 48 hours (from when you're reading) ----------
+    // ---------- "New since your last visit" (kept in this browser) ----------
+    // A visit ends after 30 minutes without a page view; anything published after your previous visit is new.
+    let since = 0;
+    try {
+        const now = Date.now(), seen = Number(localStorage.getItem('visit:seen') ?? 0);
+        if (seen && now - seen > 30 * 60e3) localStorage.setItem('visit:prev', String(seen));
+        localStorage.setItem('visit:seen', String(now));
+        since = Number(localStorage.getItem('visit:prev') ?? 0);
+    } catch {}
+    const cutoff = since || Date.now() - 48 * 3600e3;   // first visit: the last 48 hours
+    const fresh = new Set<string>();
     document.querySelectorAll<HTMLElement>('[data-ts]').forEach(el => {
-        const badge = el.querySelector<HTMLElement>('[data-new]');
-        if (badge) badge.hidden = Date.now() - Number(el.dataset.ts) > 48 * 3600e3;
+        const isNew = Number(el.dataset.ts) > cutoff;
+        el.querySelector<HTMLElement>('[data-new]')?.toggleAttribute('hidden', !isNew);
+        el.classList.toggle('is-new', isNew);
+        if (isNew && el.dataset.link) fresh.add(el.dataset.link);
     });
+    const sinceEl = document.querySelector<HTMLElement>('[data-since]');
+    if (sinceEl && since) {
+        const ago = rtf.format(-Math.max(1, Math.round((Date.now() - since) / 3600e3)), 'hour').replace('in ', '');
+        sinceEl.textContent = fresh.size ? `${fresh.size} new on this page since your last visit (${ago})` : `Nothing new since your last visit (${ago})`;
+        sinceEl.hidden = false;
+    }
     // ---------- editions: show build time in the reader's timezone ----------
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const tzName = (d: Date) => {
@@ -50,6 +68,14 @@ const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.da
     });
     document.querySelectorAll<HTMLElement>('[data-edition-date]').forEach(el => {
         el.textContent = new Date(el.dataset.editionDate!).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    });
+    // Stale edition: editions are published on demand, so say so when this one is over a day old.
+    document.querySelectorAll<HTMLElement>('[data-stale]').forEach(el => {
+        const hours = (Date.now() - +new Date(el.dataset.stale!)) / 3600e3;
+        if (!(hours > 24)) return;
+        const days = Math.floor(hours / 24);
+        el.textContent = `This edition is ${days === 1 ? 'a day' : `${days} days`} old. Newer pieces are not in it yet.`;
+        el.hidden = false;
     });
     document.querySelectorAll<HTMLElement>('[data-today]').forEach(el => {
         el.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });

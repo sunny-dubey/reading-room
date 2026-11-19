@@ -3,18 +3,19 @@
 import type { FeedItem } from '../lib/feeds';
 import { categoryShort } from '../lib/feeds';
 import { u } from '../lib/url';
-import Cover from './Cover.astro';
+import Thumb from './Thumb.astro';
 interface Props { i: FeedItem; cover?: boolean; deck?: boolean; size?: 'col' | 'brief' | 'take'; kicker?: string }
 const { i, cover = false, deck = true, size = 'col', kicker } = Astro.props;
 const b = i.brief;
 ---
 <article class={`story story-${size}`} data-link={i.link} data-ts={+i.date} data-cat={i.category} data-story>
-    {cover && <a href={i.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={i.title} track={i.category} w={320} h={150} /></a>}
+    {cover && <a href={i.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Thumb i={i} w={360} h={150} /></a>}
     <p class="fp-kicker">
         <span class="new-badge" data-new hidden>New</span>
         {kicker ?? categoryShort(i.category)}{b?.minutes ? ` · ${b.minutes} min` : ''}{b?.depth === 'deep' ? ' · Deep dive' : ''}
     </p>
     <h3 class="story-h"><a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a></h3>
+    {i.meta?.description && <p class="story-dek" title="The author's own description">{i.meta.description}</p>}
     {deck && i.skill && (
         <p class="story-deck">On <a href={u(`/roadmap/#${i.skill.topic.id}`)}>{i.skill.topic.name}</a>. {i.skill.topic.why}</p>
     )}

@@ -7,11 +7,19 @@ import PuzzleClient from '../components/PuzzleClient.astro';
 import { getPuzzles, TYPE_LABEL, type PuzzleType } from '../lib/puzzles';
 import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
 import WebPuzzleList from '../components/WebPuzzleList.astro';
+import { getReading, rank, isDeep } from '../lib/reading';
+import { u } from '../lib/url';
 
 
 const { puzzles, today, numbers, now } = await getPuzzles();
 const web = (await getWebPuzzles()).filter(s => s.items.length);
 const picks = todaysPicks(web, now);
+// The weekly design problem (rotates every Monday, IST).
+const { roadmap } = await getReading();
+const week = Math.floor((now + 5.5 * 3600e3 + 3 * 864e5) / (7 * 864e5));
+const practice = roadmap.practice.length ? roadmap.practice[week % roadmap.practice.length] : undefined;
+const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.id) ?? [])
+    .filter(i => isDeep(i) && (i.skill?.sim ?? 0) >= 0.5).sort((a, b) => rank(b, now) - rank(a, now))[0];
 const types = Object.keys(TYPE_LABEL) as PuzzleType[];
 const fmt = (n: number) => (Math.abs(n) >= 1e7 ? n.toExponential(2).replace('e+', ' × 10^') : n.toLocaleString('en-US', { maximumSignificantDigits: 4 }));
 ---
@@ -34,6 +42,35 @@ const fmt = (n: number) => (Math.abs(n) >= 1e7 ? n.toExponential(2).replace('e+'
                 <PuzzleCard p={today} featured />
             </section>
         )}
+
+        {practice && (
+            <section class="practice" id="practice" data-practice={`${practice.id}-w${week}`}>
+                <div class="practice-head">
+                    <span class="practice-label">The weekly problem</span>
+                    <label class="practice-done"><input type="checkbox" data-practice-check /> Done</label>
+                </div>
+                <h2 class="practice-title">{practice.name}</h2>
+                {practice.twist && <p class="practice-twist dropcap">{practice.twist}</p>}
+                <p class="practice-how">30–45 minutes, on paper or a whiteboard. Work through it in order:</p>
+                <ol class="practice-steps">
+                    <li><strong>Requirements:</strong> who uses it, what must it do, what must it never do</li>
+                    <li><strong>Estimates:</strong> requests per second, data size, read/write ratio</li>
+                    <li><strong>API and data model</strong></li>
+                    <li><strong>High-level design:</strong> boxes and arrows, the request path end to end</li>
+                    <li><strong>Bottlenecks and trade-offs:</strong> what breaks at 10×, what you'd change</li>
+                </ol>
+                {practice.topics.length > 0 && (
+                    <p class="practice-links"><span>Exercises</span>{practice.topics.map(t => <a href={u(`/roadmap/#${t.id}`)}>{t.name}</a>)}</p>
+                )}
+                {(practice.canon.length > 0 || practiceFresh) && (
+                    <p class="practice-links"><span>Read first</span>
+                        {practice.canon.map(c => <a href={c.data.url} target="_blank" rel="noopener noreferrer" title={`${c.data.author} · ${c.data.minutes} min`}>{c.data.title}</a>)}
+                        {practiceFresh && <a href={practiceFresh.link} target="_blank" rel="noopener noreferrer" title={`New · ${practiceFresh.feedTitle}${practiceFresh.brief?.minutes ? ` · ${practiceFresh.brief.minutes} min` : ''}`}>{practiceFresh.title}</a>}
+                    </p>
+                )}
+            </section>
+        )}
+
 
         <section class="fp-band" id="web">
             <h2 class="fp-band-h"><span>From around the web</span></h2>
@@ -83,4 +120,17 @@ const fmt = (n: number) => (Math.abs(n) >= 1e7 ? n.toExponential(2).replace('e+'
             c.hidden = f === 'all' ? false : f === 'unsolved' ? !!results[c.dataset.puzzle!] : c.dataset.type !== f;
         });
     }));
+</script>
+
+<script>
+    // The weekly problem: a tick per week, kept in this browser.
+    const practice = document.querySelector<HTMLElement>('[data-practice]');
+    const pcheck = document.querySelector<HTMLInputElement>('[data-practice-check]');
+    if (practice && pcheck) {
+        const pkey = `practice:${practice.dataset.practice}`;
+        const paint = () => practice.classList.toggle('is-done', pcheck.checked);
+        try { pcheck.checked = localStorage.getItem(pkey) === '1'; } catch {}
+        paint();
+        pcheck.addEventListener('change', () => { try { localStorage.setItem(pkey, pcheck.checked ? '1' : '0'); } catch {} paint(); });
+    }
 </script>

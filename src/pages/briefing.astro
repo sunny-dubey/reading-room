@@ -17,7 +17,7 @@ const jobsShown = b.jobs.filter(j => j.score >= 3).slice(0, 60);
     <div class="rd fp briefing">
         <ReadingMast compact title="The briefing" sub="What changed in the world your code runs in: weather, releases, obituaries, exploited vulnerabilities, new papers and who's hiring. Facts, from public sources, refreshed with every edition." updated={new Date(b.now)} />
         <nav class="bf-index" aria-label="Sections">
-            <a href="#weather">Internet weather</a><a href="#releases">Release radar</a><a href="#eol">Obituaries</a><a href="#cves">CVE watch</a><a href="#papers">Paper drop</a><a href="#hiring">Classifieds</a>
+            <a href="#weather">Internet weather</a><a href="#releases">Release radar</a><a href="#eol">Obituaries</a><a href="#cves">CVE watch</a><a href="#papers">Paper drop</a><a href="#hiring">Classifieds</a><a href={u('/startups/')}>Startups →</a><a href={u('/pulse/')}>Pulse: the week's headlines →</a>
         </nav>
 
         <section class="fp-band" id="weather">

@@ -13,6 +13,7 @@ export interface FeedItem {
     embedText?: string;  // title + start of article, for topic matching
     weight?: number;     // source-level ranking nudge from feeds.yaml
     skill?: import('./roadmap').SkillMatch; // closest Roadmap topic (build time)
+    meta?: { description?: string; image?: string; thumb?: string }; // the article's own description and preview thumbnail
     classic?: { id: string; title: string; url: string; author: string; sim: number }; // closest Canon read (Old meets new)
     brief?: Brief;       // build-time summary (learning tracks only)
     content?: string;    // full feed HTML, used for summarising then dropped
