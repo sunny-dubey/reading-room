@@ -98,8 +98,11 @@ async function buildReading() {
     // At most two per source, so a batch publisher (arXiv posts its whole day at once) can't flood it.
     const perFeed = new Map<string, number>();
     const wire = learning.filter(i => +i.date <= now && (i.brief?.worth ?? 0) >= 2.5 && i.link !== deepRead?.link).sort(newest)
-        .filter(i => { const n = perFeed.get(i.feedId) ?? 0; perFeed.set(i.feedId, n + 1); return n < 2; }).slice(0, 14);
-    return { items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, postmortem, tracks, pulse, startups, roadmap };
+        .filter(i => { const n = perFeed.get(i.feedId) ?? 0; perFeed.set(i.feedId, n + 1); return n < 2; }).slice(0, 10);
+    // Top stories under the lead: the best recent pieces not already in the wire or the desks.
+    const shownElsewhere = new Set([...wire, ...desks.flatMap(d => d.items)].map(i => i.link));
+    const topStories = byRank.filter(i => now - +i.date < 7 * DAY && isDeep(i) && !shownElsewhere.has(i.link) && !deepCands.some(d => d.link === i.link) && i.category !== 'postmortems').slice(0, 6);
+    return { items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */

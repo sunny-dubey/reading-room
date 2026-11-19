@@ -11,7 +11,7 @@ export const TYPE_LABEL: Record<PuzzleType, string> = { bug: 'Spot the bug', est
 export interface Puzzle {
     id: string; type: PuzzleType; title: string; prompt: string;
     lang?: string; code?: string; options?: string[]; unit?: string; tolerance?: number;
-    answer: number | number[]; hint?: string; explain: string; proof?: string;
+    answer: number | number[] | number[][]; hint?: string; explain: string; proof?: string; level?: 'advanced' | 'warm-up'; fix?: string;
     read?: string; readLink?: { title: string; href: string; external: boolean };
 }
 export interface NumberCard { id: string; q: string; answer: number; unit: string; tolerance?: number; how: string; source: string }

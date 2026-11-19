@@ -1,11 +1,279 @@
 # The daily puzzle on Today. One per day, rotating through the types.
 # type:   bug (click the line) · estimate (type a number) · scenario / interleave / complexity (pick one)
-# answer: bug → list of correct line numbers (1-based); estimate → number; choice → index of the right option (0-based)
+# answer: bug → list of acceptable line numbers (1-based), or a list of groups [[a], [b, c]] when there are several bugs to find
+#         (one click per group); estimate → number; choice → index of the right option (0-based)
+# level:  advanced (production-shaped) or warm-up (default); fix: the corrected code, shown with the answer
 # tolerance: estimate only, accepted factor either way (default 3, i.e. right order of magnitude)
 # proof:  how the answer was checked (code run, orderings enumerated, arithmetic shown)
 # read:   canon:<id> or topic:<id>, the read that teaches the idea
 
-# ---------- Spot the bug (each one was run to prove the bug) ----------
+# ---------- Spot the bug: ADVANCED (production-shaped; each bug and each fix was run) ----------
+- id: adv-goroutine-leak
+  type: bug
+  level: advanced
+  title: The hedged read that ate the heap
+  prompt: This asks every replica and returns the fastest answer. Under load the service's memory climbs until it's OOM-killed. Click the line at fault.
+  lang: go
+  code: |
+    func fetch(replica int) (string, error) // one network call
+
+    // Ask every replica, return the first answer.
+    func fastest(replicas int) string {
+        results := make(chan string)
+        for i := 0; i < replicas; i++ {
+            go func(r int) {
+                v, _ := fetch(r)
+                results <- v
+            }(i)
+        }
+        return <-results
+    }
+  answer: [5, 9]
+  hint: Only one value is ever received. What happens to the other senders?
+  explain: The channel is unbuffered and only the first result is read, so every slower goroutine blocks forever on its send. Each call leaks replicas − 1 goroutines and everything they hold.
+  fix: |
+    results := make(chan string, replicas) // every sender can finish and exit
+  proof: Ran it 1,000 times with 5 replicas, 4,000 goroutines were still blocked. With the buffered channel, 0.
+  read: topic:concurrency-and-parallelism
+
+- id: adv-slice-alias
+  type: bug
+  level: advanced
+  title: Eight paths, all the same
+  prompt: This should collect all eight 3-step paths of 0s and 1s. It returns [1 1 1] eight times. Click the line at fault.
+  lang: go
+  code: |
+    var paths [][]int
+
+    func walk(path []int, depth int) {
+        if depth == 3 {
+            paths = append(paths, path)
+            return
+        }
+        walk(append(path, 0), depth+1)
+        walk(append(path, 1), depth+1)
+    }
+
+    // walk(make([]int, 0, 8), 0)
+  answer: [5, 8, 9]
+  hint: When does append allocate a new array, and when does it write into the old one?
+  explain: The slice has spare capacity, so every append writes into the same backing array. All stored paths alias that array, and the last write (1, 1, 1) wins. Copy the path before keeping it.
+  fix: |
+    paths = append(paths, append([]int(nil), path...)) // keep a copy, not a view
+  proof: Ran it, eight copies of [1 1 1]. With the copy, all eight paths from [0 0 0] to [1 1 1].
+  read: topic:memory-management
+
+- id: adv-map-race
+  type: bug
+  level: advanced
+  title: Fine in tests, fatal in production
+  prompt: A hit counter shared by every HTTP handler. Unit tests pass; in production the process dies with "fatal error, concurrent map writes". Which line?
+  lang: go
+  code: |
+    var cache = map[string]int{}
+
+    // Called from every HTTP handler (each request runs in its own goroutine).
+    func hit(key string) {
+        cache[key]++
+    }
+  answer: [5, 1]
+  hint: Go maps are not safe for concurrent use.
+  explain: Handlers run concurrently, and a Go map written from several goroutines at once is a data race that the runtime detects and crashes on. Guard it with a mutex (or use sync.Map / sharded counters).
+  fix: |
+    var (
+        mu    sync.Mutex
+        cache = map[string]int{}
+    )
+
+    func hit(key string) { mu.Lock(); cache[key]++; mu.Unlock() }
+  proof: Ran 50 goroutines × 1,000 hits, "fatal error, concurrent map writes". With the mutex, all 50,000 hits counted.
+  read: topic:concurrency-and-parallelism
+
+- id: adv-async-block
+  type: bug
+  level: advanced
+  title: One slow upstream, every request slow
+  prompt: When the rates API slows down, every request on this async server slows down, even health checks that never call it. Click the line.
+  lang: python
+  code: |
+    import asyncio, requests
+
+    async def handle(request):
+        user = await db.fetch_user(request.user_id)
+        rates = requests.get(RATES_URL, timeout=2).json()
+        return render(user, rates)
+  answer: [5]
+  hint: What is the event loop doing while that call waits?
+  explain: requests is synchronous, so it blocks the single event-loop thread; no other coroutine runs until it returns. Use an async client, or push the blocking call to a thread.
+  fix: |
+    rates = await asyncio.to_thread(lambda: requests.get(RATES_URL, timeout=2).json())
+  proof: Simulated with a 0.1 s blocking call, 20 concurrent requests took 2.08 s instead of 0.1 s. With asyncio.to_thread, 0.22 s.
+  read: topic:concurrency-and-parallelism
+
+- id: adv-json-bigint
+  type: bug
+  level: advanced
+  title: The refund that hit the wrong order
+  prompt: Some refunds land on the wrong order. Order IDs are 64-bit integers from the database, e.g. 9007199254740993. Click the line.
+  lang: javascript
+  code: |
+    app.post('/refunds', async (req, res) => {
+      const body = JSON.parse(req.rawBody);
+      const order = await db.orders.findById(body.orderId);
+      await refund(order, body.amount);
+      res.json({ ok: true });
+    });
+  answer: [2]
+  hint: What is the largest integer a JavaScript number can hold exactly?
+  explain: JSON numbers become IEEE-754 doubles, which are exact only up to 2^53. 9007199254740993 silently becomes ...992, a different order. Send 64-bit IDs as strings, or parse them as BigInt.
+  fix: |
+    const body = JSON.parse(req.rawBody, (k, v, ctx) => (k === 'orderId' ? BigInt(ctx.source) : v));
+  proof: Ran it in Node, orderId parsed as 9007199254740992. With the reviver, 9007199254740993.
+  read: topic:api-design
+
+- id: adv-cursor-pagination
+  type: bug
+  level: advanced
+  title: The feed that drops events in bursts
+  prompt: Consumers page through this event feed and occasionally miss events, but only during traffic bursts. Click the line at fault.
+  lang: sql
+  code: |
+    -- Page through events, 100 at a time.
+    -- :cursor is the created_at of the last row on the previous page.
+    SELECT id, created_at, payload
+    FROM events
+    WHERE created_at > :cursor
+    ORDER BY created_at
+    LIMIT 100;
+  answer: [5, 6]
+  hint: What if several events share the same timestamp, and a page ends in the middle of them?
+  explain: created_at isn't unique. If a page ends partway through rows with the same timestamp, the strict > skips the rest of them. Order and page by a unique key, e.g. (created_at, id).
+  fix: |
+    WHERE (created_at, id) > (:cursor_created_at, :cursor_id)
+    ORDER BY created_at, id
+  proof: Ran it in SQLite with three events sharing a timestamp, page 2 skipped two of them. With (created_at, id) keyset paging, none were missed.
+  read: topic:pagination
+
+- id: adv-not-in-null
+  type: bug
+  level: advanced
+  title: Nobody manages nobody
+  prompt: This should list employees who manage no one. It returns zero rows, though half the company manages nobody. Click the line.
+  lang: sql
+  code: |
+    -- Employees who manage nobody
+    SELECT id, name
+    FROM employees
+    WHERE id NOT IN (
+      SELECT manager_id FROM employees
+    );
+  answer: [4, 5]
+  hint: The CEO's manager_id is NULL. What is 3 NOT IN (1, NULL)?
+  explain: x NOT IN (…, NULL) is never true; it's NULL whenever x isn't found, so every row is filtered out. Use NOT EXISTS, which handles NULLs the way you mean.
+  fix: |
+    WHERE NOT EXISTS (
+      SELECT 1 FROM employees m WHERE m.manager_id = employees.id
+    );
+  proof: Ran it in SQLite with one NULL manager_id, NOT IN returned 0 rows; NOT EXISTS returned the correct 2.
+  read: topic:postgresql
+
+- id: adv-path-traversal
+  type: bug
+  level: advanced
+  title: The download endpoint
+  prompt: Users can download their uploaded files. A security review says anyone can read any file on the server. Click the line.
+  lang: python
+  code: |
+    from fastapi.responses import FileResponse
+    UPLOADS = "/srv/uploads"
+
+    @app.get("/files/{name:path}")
+    def download(name: str):
+        path = os.path.join(UPLOADS, name)
+        return FileResponse(path)
+  answer: [6]
+  hint: Try name = "/etc/passwd", or "../../etc/passwd".
+  explain: os.path.join discards everything before an absolute component, and ../ walks out of the folder. Resolve the final path and check it is still inside UPLOADS.
+  fix: |
+    path = (Path(UPLOADS) / name).resolve()
+    if not path.is_relative_to(Path(UPLOADS).resolve()):
+        raise HTTPException(403)
+  proof: Ran it, os.path.join("/srv/uploads", "/etc/passwd") is /etc/passwd and "../../etc/passwd" normalises to /etc/passwd. With resolve + is_relative_to both are rejected.
+  read: topic:sec-owasp-top-10
+
+- id: adv-timezone-expiry
+  type: bug
+  level: advanced
+  title: Tokens die instantly in India
+  prompt: Users in India say login tokens expire immediately. Users in California say tokens last for hours. Click the line at fault.
+  lang: python
+  code: |
+    from datetime import datetime, timedelta
+
+    def is_expired(token):
+        # token.issued_at is a Unix timestamp
+        expires = datetime.utcfromtimestamp(token.issued_at) + timedelta(minutes=15)
+        return datetime.now() > expires
+  answer: [5, 6]
+  hint: One side of the comparison is UTC, the other is the server's local time, and neither knows it.
+  explain: utcfromtimestamp gives naive UTC; datetime.now() gives naive local time. In IST local time is 5h30m ahead, so a fresh token looks expired; west of UTC it looks valid for hours. Use timezone-aware UTC on both sides.
+  fix: |
+    expires = datetime.fromtimestamp(token.issued_at, timezone.utc) + timedelta(minutes=15)
+    return datetime.now(timezone.utc) > expires
+  proof: Ran it with TZ=Asia/Kolkata, a token issued that second was already expired. With aware UTC, valid now and expired after 20 minutes.
+  read: topic:distributed-system-challenges
+
+- id: adv-two-bugs-fileserver
+  type: bug
+  level: advanced
+  title: "Two bugs: the file server"
+  prompt: An async file server. It has two different bugs, one about security and one about performance. Find both.
+  lang: python
+  code: |
+    UPLOADS = "/srv/uploads"
+
+    async def serve(request):
+        name = request.query["file"]
+        path = os.path.join(UPLOADS, name)
+        time.sleep(0.05)  # rate-limit each download
+        with open(path, "rb") as f:
+            return Response(f.read())
+  answer: [[5], [6, 7]]
+  hint: One lets callers escape the folder. The other freezes every other request while it waits.
+  explain: Line 5 allows path traversal ("/etc/passwd" or "../"). Line 6 (and the synchronous file read) blocks the event loop, so one download stalls the whole server.
+  fix: |
+    path = (Path(UPLOADS) / name).resolve()
+    if not path.is_relative_to(Path(UPLOADS).resolve()):
+        raise HTTPForbidden()
+    await asyncio.sleep(0.05)
+    data = await asyncio.to_thread(path.read_bytes)
+  proof: Both bugs were run on their own above, path traversal reached /etc/passwd and a blocking call took 20 requests from 0.1 s to 2.08 s.
+  read: topic:sec-owasp-top-10
+
+- id: adv-two-bugs-importer
+  type: bug
+  level: advanced
+  title: "Two bugs: the order importer"
+  prompt: Imports a batch of orders. It reports success, yet orders go missing and some land under the wrong ID. Find both bugs.
+  lang: javascript
+  code: |
+    async function importOrders(body) {
+      const orders = JSON.parse(body); // [{ id: 9007199254740993, ... }]
+      orders.forEach(async (o) => {
+        await db.orders.upsert(o.id, o);
+      });
+      return { imported: orders.length };
+    }
+  answer: [[2], [3, 4]]
+  hint: One is about numbers. The other is about what forEach does with the promises your callback returns.
+  explain: Line 2 loses 64-bit IDs (doubles are exact only to 2^53). Lines 3–4 never await the writes; forEach ignores the returned promises, so it returns before anything is saved and errors go unhandled.
+  fix: |
+    const orders = JSON.parse(body, (k, v, ctx) => (k === 'id' ? BigInt(ctx.source) : v));
+    await Promise.all(orders.map((o) => db.orders.upsert(o.id, o)));
+  proof: Both bugs were run on their own, the ID became ...992, and the forEach version reported "imported 0 of 5" (Promise.all, 5 of 5).
+  read: topic:api-design
+
+# ---------- Spot the bug: WARM-UPS (each one was run to prove the bug) ----------
 - id: bug-check-then-act
   type: bug
   title: Two withdrawals, one balance

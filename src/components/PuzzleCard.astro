@@ -6,15 +6,18 @@ import { u } from '../lib/url';
 interface Props { p: Puzzle; featured?: boolean }
 const { p, featured = false } = Astro.props;
 const lines = p.code ? p.code.replace(/\n$/, '').split('\n') : [];
-const answerText = p.type === 'bug' ? `Line ${(p.answer as number[]).join(' or ')}`
+// Several bugs to find: answer is a list of groups (one click per group).
+const groups: number[][] = p.type === 'bug' ? (Array.isArray((p.answer as any[])[0]) ? p.answer as number[][] : [p.answer as number[]]) : [];
+const answerText = p.type === 'bug' ? groups.map(g => `line ${g.join(' or ')}`).join('; ').replace(/^l/, 'L')
     : p.type === 'estimate' ? `≈ ${Number(p.answer).toLocaleString('en-US', { maximumSignificantDigits: 3 })} ${p.unit ?? ''}`
     : p.options?.[p.answer as number] ?? '';
 ---
 <article class:list={['pz', `pz-t-${p.type}`, { featured }]} id={`pz-${p.id}`} data-puzzle={p.id} data-type={p.type}
-    data-answer={JSON.stringify(p.answer)} data-tol={p.tolerance ?? 3}>
-    <p class="fp-kicker">{TYPE_LABEL[p.type]}{featured && <span class="pz-streak" data-pz-streak></span>}</p>
+    data-answer={JSON.stringify(p.type === 'bug' ? groups : p.answer)} data-tol={p.tolerance ?? 3}>
+    <p class="fp-kicker">{TYPE_LABEL[p.type]}{p.type === 'bug' && <span class:list={['pz-level', p.level ?? 'warm-up']}>{groups.length > 1 ? `Advanced · ${groups.length} bugs` : p.level === 'advanced' ? 'Advanced' : 'Warm-up'}</span>}{featured && <span class="pz-streak" data-pz-streak></span>}</p>
     <h3 class="pz-title">{p.title}</h3>
     <p class="pz-prompt" set:html={md(p.prompt)} />
+    {p.type === 'estimate' && <p class="pz-think">Work it out on paper{p.unit ? ` (in ${p.unit})` : ''}, then check.</p>}
 
     {p.type === 'bug' && (
         <ol class="pz-code" role="list" data-lang={p.lang}>
@@ -22,13 +25,6 @@ const answerText = p.type === 'bug' ? `Line ${(p.answer as number[]).join(' or '
                 <li><button type="button" data-line={n + 1} aria-label={`Line ${n + 1}`}><span class="ln">{n + 1}</span><code>{l || ' '}</code></button></li>
             ))}
         </ol>
-    )}
-    {p.type === 'estimate' && (
-        <form class="pz-estimate" data-pz-form>
-            <input type="text" inputmode="decimal" autocomplete="off" placeholder="Your estimate" aria-label={`Your estimate in ${p.unit}`} />
-            <span class="pz-unit">{p.unit}</span>
-            <button type="submit">Check</button>
-        </form>
     )}
     {p.options && (
         <div class="pz-options">
@@ -45,6 +41,7 @@ const answerText = p.type === 'bug' ? `Line ${(p.answer as number[]).join(' or '
         <p class="pz-verdict" data-pz-verdict></p>
         <p class="pz-answer"><span>Answer</span>{answerText}</p>
         <p class="pz-explain" set:html={md(p.explain)} />
+        {p.fix && <div class="pz-fix"><span>The fix</span><pre><code>{p.fix.replace(/\n$/, '')}</code></pre></div>}
         {p.proof && <p class="pz-proof"><span>Checked</span>{p.proof}</p>}
         {p.readLink && <p class="pz-read"><span>Learn it properly</span><a href={p.readLink.external ? p.readLink.href : u(p.readLink.href)} target={p.readLink.external ? '_blank' : undefined} rel={p.readLink.external ? 'noopener noreferrer' : undefined}>{p.readLink.title}</a></p>}
     </div>

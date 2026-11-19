@@ -20,7 +20,7 @@ import { getPuzzles } from '../lib/puzzles';
 import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
 import WebPuzzleList from '../components/WebPuzzleList.astro';
 
-const { learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, postmortem, tracks, pulse, startups, roadmap } = await getReading();
+const { learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
 const { question, rabbitHoles, twoTakes, quickCands, explainer, readMap } = await getToday();
 const STEP_NAMES = ['Start here', 'Go deeper', 'Master it'];
@@ -61,6 +61,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         <!-- ===== Masthead ===== -->
         <header class="fp-mast">
             <h1 class="fp-title">The Reading Room</h1>
+            <p class="fp-for">A daily paper for engineers who read like researchers: CS research, distributed systems, system design, agentic AI, security, quant finance, macro, applied maths and puzzles. The latest from the best experts in each, informative over opinion.</p>
             <div class="fp-dateline">
                 <span>No. {issue}</span>
                 <span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span>
@@ -87,6 +88,12 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                             {d.classic && <p class="fp-footnote"><span>Builds on a classic</span><a href={d.classic.url} target="_blank" rel="noopener noreferrer">{d.classic.title}</a>, {d.classic.author}</p>}
                         </article>
                     ))}
+                    {topStories.length > 0 && (
+                        <div class="top-stories">
+                            <h3 class="fp-box-h">Top stories</h3>
+                            <div class="top-grid">{topStories.map(i => <Story i={i} cover deck={false} />)}</div>
+                        </div>
+                    )}
                 </div>
             )}
 

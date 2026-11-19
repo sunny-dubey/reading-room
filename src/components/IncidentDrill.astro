@@ -17,8 +17,7 @@ const anchor = `inc-${i.id.replace(/[^a-z0-9]+/gi, '-')}`;
         <span class="drill-t">{t(first.at)} · {first.status}</span>
         <p>{i.title}. {first.text.length > 280 ? first.text.slice(0, 277) + '…' : first.text}</p>
     </div>
-    <label class="drill-q" for={`drill-note-${i.id}`}>What's your first hypothesis, and what would you check?</label>
-    <textarea id={`drill-note-${i.id}`} rows="3" data-drill-note placeholder="Saved in this browser only"></textarea>
+    <p class="drill-q">What's your first hypothesis, and what would you check? Think it through, then reveal what happened.</p>
     <details class="pz-hint"><summary>Stuck? First things to check</summary>
         <ul>{checklist(`${i.title} ${first.text}`).map(c => <li>{c}</li>)}</ul>
     </details>
@@ -31,7 +30,7 @@ const anchor = `inc-${i.id.replace(/[^a-z0-9]+/gi, '-')}`;
         ))}
     </ol>
     <div class="drill-end" data-drill-end hidden>
-        <p><b>Resolved after {fmtDuration(i.duration)}.</b>{i.identifiedAfter !== undefined ? ` Cause found after ${fmtDuration(i.identifiedAfter)}.` : ''} How close was your first guess?</p>
+        <p><b>Resolved after {fmtDuration(i.duration)}.</b>{i.identifiedAfter !== undefined ? ` Cause found after ${fmtDuration(i.identifiedAfter)}.` : ''} How close was your first hypothesis?</p>
         <p class="inc-links">
             <a href={u(`/outages/#${anchor}`)}>The full investigation report →</a>
             {i.rca && <a class="inc-rca" href={i.rca.url} target="_blank" rel="noopener noreferrer">Postmortem: {i.rca.title} →</a>}

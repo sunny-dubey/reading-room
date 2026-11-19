@@ -19,6 +19,21 @@ It covers the areas a strong engineer needs:
 - **Macro & Markets**: central banks, inflation, growth and jobs, from data-led sources (the Fed, the New York Fed, the Bank of England, FRED)
 - **Postmortems**: real failures, explained
 
+## Who it's for
+
+Engineers who read like researchers and want the newest serious work in one place:
+
+- **CS researchers** and anyone who reads papers: algorithms, theory, performance
+- **Distributed-systems and system-design** engineers
+- **Software engineers** who care about craft, correctness and production
+- **Agentic AI and ML** builders
+- **Security** engineers
+- **Quantitative finance** enthusiasts
+- **Macro** followers who want data, not punditry
+- **Applied maths and puzzle** lovers
+
+It's curated from the best experts in each field, puts the latest first, and prefers informative, practical pieces over opinion.
+
 ## What's on the site
 
 | Page | What it's for |
