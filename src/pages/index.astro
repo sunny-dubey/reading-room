@@ -206,6 +206,37 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             </aside>
         </section>
 
+        <!-- ===== Aura farming ===== -->
+        <section class="fp-band reveal aura" data-aura>
+            <h2 class="fp-band-h"><span>Aura farming</span></h2>
+            <div class="aura-grid">
+                <div class="aura-meter">
+                    <p class="aura-k">Your aura</p>
+                    <p class="aura-total"><strong data-aura-total>0</strong> <span>aura</span></p>
+                    <p class="aura-rank" data-aura-rank>NPC</p>
+                    <div class="aura-bar"><span data-aura-bar style="width:0%"></span></div>
+                    <p class="aura-next" data-aura-next></p>
+                    <p class="aura-today"><b data-aura-today>+0 today</b> · <span data-aura-mult></span></p>
+                    <button type="button" class="pz-reveal" data-aura-copy>Copy my aura card</button>
+                    <p class="aura-fine">Farmed the honest way: learn something, then prove it. Kept in this browser only.</p>
+                </div>
+                <div class="aura-quests">
+                    <p class="aura-left" data-aura-left></p>
+                    <ol role="list">
+                        {deepRead && <li data-quest="lead" data-check="lead" data-aura="100"><span class="aura-tick"></span><span class="aura-q">Read the lead story<small>{deepRead.title}</small></span><b data-aura-pts>+100</b></li>}
+                        {rabbitHoles[0] && <li data-quest="rabbit" data-check="rabbit" data-aura="250"><span class="aura-tick"></span><span class="aura-q">Go all the way down the rabbit hole<small>all three steps, from first read to the Canon</small></span><b data-aura-pts>+250</b></li>}
+                        {pz.today && <li data-quest="puzzle" data-check="puzzle" data-pzid={pz.today.id} data-aura="150"><span class="aura-tick"></span><span class="aura-q"><a href={`#pz-${pz.today.id}`}>Solve today's puzzle</a><small>{pz.today.title} · a wrong answer still earns 30</small></span><b data-aura-pts>+150</b></li>}
+                        <li data-quest="numbers" data-check="numbers" data-aura="50"><span class="aura-tick"></span><span class="aura-q">Nail today's number<small>within 2× on the flash card</small></span><b data-aura-pts>+50</b></li>
+                        {pz.drill && <li data-quest="drill" data-check="drill" data-drillid={pz.drill.id} data-aura="120"><span class="aura-tick"></span><span class="aura-q">Survive the incident drill<small>write a hypothesis, then replay {pz.drill.provider}'s whole timeline</small></span><b data-aura-pts>+120</b></li>}
+                        <li data-quest="canon" data-check="canon" data-aura="200"><span class="aura-tick"></span><span class="aura-q">Read a Canon chapter<small>tick step 2 of today's plan</small></span><b data-aura-pts>+200</b></li>
+                        {question && <li data-quest="explain" data-check="claim" data-aura="80"><span class="aura-tick"></span><span class="aura-q">Answer the question of the day out loud, in under two minutes<small>{question.q}</small></span><button type="button" data-claim>I did it</button><b data-aura-pts>+80</b></li>}
+                        {bf.cves[0] && <li data-quest="exploit" data-check="claim" data-aura="60"><span class="aura-tick"></span><span class="aura-q"><a href={u('/briefing/#cves')}>Understand today's exploit</a><small>{bf.cves[0].vendor} {bf.cves[0].product}: what breaks, and how you'd defend</small></span><button type="button" data-claim>I did it</button><b data-aura-pts>+60</b></li>}
+                        {practice && <li data-quest={`practice-${practice.id}-w${week}`} data-check="practice" data-weekkey={`${practice.id}-w${week}`} data-aura="400"><span class="aura-tick"></span><span class="aura-q"><a href="#practice">Solve the weekly problem</a><small>{practice.name} · once a week</small></span><b data-aura-pts>+400</b></li>}
+                    </ol>
+                </div>
+            </div>
+        </section>
+
         <!-- ===== The puzzle page ===== -->
         {pz.today && (
             <section class="fp-band reveal puzzle-band">
@@ -441,6 +472,11 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
     <ReadingClient />
     <PuzzleClient />
 </Base>
+
+<script>
+    import { mountAura } from '../lib/aura-client';
+    mountAura();
+</script>
 
 <script>
     import { getSet } from '../lib/progress-client';

@@ -44,6 +44,7 @@ function finish(card: HTMLElement, ok: boolean | null, record = true) {
         const r = load<Results>(RESULTS, {});
         if (!r[card.dataset.puzzle!]) { r[card.dataset.puzzle!] = { ok, at: Date.now() }; save(RESULTS, r); }
         paintStreaks();
+        document.dispatchEvent(new CustomEvent('aura:update'));
     }
 }
 
@@ -140,7 +141,9 @@ export function mountNumbers() {
         const gap = ok ? (prev.misses ? 7 : 21) : 2;
         deck[card.dataset.card!] = { due: ymd(new Date(Date.now() + gap * 864e5)), misses: prev.misses + (ok ? 0 : 1), seen: prev.seen + 1 };
         save(DECK, deck);
+        save(`numbers:result:${today}`, ok);
         show(ok, g);
+        document.dispatchEvent(new CustomEvent('aura:update'));
     });
 }
 
@@ -166,6 +169,7 @@ export function mountDrill() {
     next.addEventListener('click', () => {
         if (!note.value.trim() && state.step === 0 && !confirmSkip()) return;
         state.step++; save(KEY, state); paint();
+        document.dispatchEvent(new CustomEvent('aura:update'));
         steps[state.step - 1]?.classList.add('flash');
     });
     // Nudge (not force) writing a hypothesis first, without a browser dialog.
