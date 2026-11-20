@@ -1,6 +1,6 @@
 // The Briefing: compact, factual boxes for the engineer who wants to know what changed.
 // Release radar + end-of-life notices (endoflife.date), CVE watch (CISA Known Exploited Vulnerabilities),
-// paper drop (arXiv, matched to the Roadmap), classifieds (HN "Who is hiring?"). All public, no keys.
+// paper drop (arXiv, matched to the Roadmap). All public, no keys.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { parse } from 'yaml';
 import { XMLParser } from 'fast-xml-parser';
@@ -138,58 +138,15 @@ async function papers(now: number) {
     return { picks: picks.slice(0, 12), seen: kept.length, cats: CATS };
 }
 
-// ---------- Classifieds ----------
-export interface Job { id: number; company: string; role: string; location: string; remote: boolean; remoteAnywhere: boolean; india: boolean; tags: string[]; url: string; text: string; score: number }
-const JOB_TAGS: [RegExp, string, number][] = [
-    [/\bbackend|back-end|server-side\b/i, 'backend', 3], [/\binfra(structure)?\b|platform engineer|\bsre\b|devops|reliability/i, 'infra', 3],
-    [/distributed|scalab|high[- ]throughput|low[- ]latency/i, 'distributed', 3], [/payments?|fintech|ledger|billing|stripe/i, 'payments', 3],
-    [/\b(llm|genai|ai engineer|machine learning|\bml\b|agents?)\b/i, 'AI', 2], [/\bgolang|\bgo\b/i, 'Go', 1], [/\bpython\b/i, 'Python', 1],
-    [/\bpostgres|database|kafka|\bredis\b/i, 'data', 2], [/security|appsec/i, 'security', 1], [/\bfull[- ]?stack\b/i, 'full stack', 1],
-];
-async function jobs() {
-    const s: any = await (await get('https://hn.algolia.com/api/v1/search_by_date?tags=story,author_whoishiring&hitsPerPage=6')).json();
-    const thread = (s.hits ?? []).find((h: any) => /who is hiring/i.test(h.title));
-    if (!thread) return { list: [] as Job[], thread: undefined };
-    const item: any = await (await get(`https://hn.algolia.com/api/v1/items/${thread.objectID}`)).json();
-    const list: Job[] = [];
-    for (const c of item.children ?? []) {
-        const text = strip(c.text ?? '');
-        if (!text || text.length < 60) continue;
-        // The first paragraph is the "Company | Role | Location | …" line.
-        const header = strip(String(c.text).split(/<p>/i)[0]).slice(0, 260);
-        const parts = header.split('|').map(x => x.trim()).filter(Boolean);
-        if (parts.length < 2) continue;
-        const role = parts.find((p, i) => i > 0 && /engineer|developer|sre|architect|lead|scientist|devops|staff|founding/i.test(p)) ?? parts[1];
-        const remote = /\bremote\b/i.test(header);
-        // "REMOTE (US)" is remote only for people in that region.
-        const limited = /remote[^|]{0,40}\b(US|USA|U\.S\.|United States|Canada|North America|EU|Europe|UK|LATAM|Americas|Australia)\b/i.test(header) && !/worldwide|global|anywhere|any time ?zone/i.test(header);
-        const remoteAnywhere = remote && !limited;
-        const india = /\b(india|bangalore|bengaluru|hyderabad|pune|mumbai|delhi|gurgaon|gurugram|noida|chennai)\b/i.test(text);
-        const tags: string[] = []; let score = 0;
-        for (const [re, tag, w] of JOB_TAGS) if (re.test(text)) { tags.push(tag); score += w; }
-        if (/\b(frontend|front-end) (only|engineer)\b/i.test(header) && !tags.includes('backend')) score -= 2;
-        if (/phd|postdoc|intern\b/i.test(header)) score -= 3;
-        score += remote ? 2 : 0;
-        list.push({
-            id: c.id, company: parts[0].slice(0, 60), role: role.slice(0, 90),
-            location: (parts.find(p => p !== role && /remote|onsite|on-site|hybrid|\b(USA?|UK|EU|EMEA|APAC|India|Canada|Germany|NYC|SF|Bay Area|San Francisco|New York|London|Berlin|Amsterdam|Paris|Toronto|Singapore|Bangalore|Bengaluru)\b|,\s*[A-Z]{2}\b/.test(p)) ?? '').slice(0, 70), remote, remoteAnywhere, india, tags: tags.slice(0, 4),
-            url: `https://news.ycombinator.com/item?id=${c.id}`, text: text.slice(header.length, header.length + 420).trim(), score,
-        });
-    }
-    list.sort((a, b) => b.score - a.score);
-    return { list, thread: { title: thread.title as string, url: `https://news.ycombinator.com/item?id=${thread.objectID}`, count: list.length } };
-}
-
 let cache: ReturnType<typeof build> | undefined;
 export const getBriefing = () => (cache ??= build());
 async function build() {
     const now = Date.now();
     const safe = async <T>(f: () => Promise<T>, fallback: T): Promise<T> => { try { return await f(); } catch (e) { console.warn('[briefing]', (e as Error).message); return fallback; } };
-    const [life, cve, paper, job] = await Promise.all([
+    const [life, cve, paper] = await Promise.all([
         safe(() => lifecycles(now), { releases: [], eols: [], failed: 0, watched: 0 }),
         safe(() => cves(now), { list: [] as Cve[], total: 0 }),
         safe(() => papers(now), { picks: [] as Paper[], seen: 0, cats: CATS }),
-        safe(() => jobs(), { list: [] as Job[], thread: undefined }),
     ]);
-    return { now, ...life, cves: cve.list, kevTotal: cve.total, papers: paper.picks, papersSeen: paper.seen, cats: CATS, jobs: job.list, thread: job.thread };
+    return { now, ...life, cves: cve.list, kevTotal: cve.total, papers: paper.picks, papersSeen: paper.seen, cats: CATS };
 }

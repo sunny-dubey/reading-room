@@ -1201,13 +1201,6 @@ body { font-size: 15px; line-height: 1.5; }
 .bf-by { font-size: 11.5px; color: var(--faint); }
 .bf-paper details summary { cursor: pointer; font-size: 12px; color: var(--ed-accent); }
 .bf-paper details p { font: 13.5px/1.5 var(--serif-d); color: var(--muted); margin-top: 4px; }
-.bf-jobs { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 0 26px; }
-.bf-jobs li { border-top: 1px solid var(--border); }
-.bf-jobs li[hidden] { display: none; }
-.bf-jobs a { display: grid; gap: 1px; padding: 6px 0; }
-.bf-job-h { font-size: 13.5px; color: var(--fg); }
-.bf-jobs a:hover .bf-job-h { text-decoration: underline; }
-.bf-job-meta { font-size: 11.5px; color: var(--faint); }
 @media (max-width: 900px) {
     .bf-two { grid-template-columns: 1fr; }
     .bf-cve > summary { grid-template-columns: 1fr; }
@@ -1438,3 +1431,4 @@ details.inc[open] .inc-cause-line { display: none; }
 .wk-desk li .desk-title { display: block; }
 .wk-n { font: 500 11px var(--sans); color: var(--faint); text-transform: none; letter-spacing: 0; margin-left: 6px; }
 @media (max-width: 900px) { .wk-desks { grid-template-columns: minmax(0, 1fr); } }
+

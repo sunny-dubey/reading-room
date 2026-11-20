@@ -45,7 +45,7 @@ It's curated from the best experts in each field, puts the latest first, and pre
 | **Canon** (`/canon/`) | 93 hand-picked foundational reads in order: papers, books, courses and classic articles |
 | **Notebook** (`/notebook/`) | Notes on what I've understood, in my own words |
 | **Saved** (`/library/`) | Links worth keeping, each with a line on why |
-| **Briefing** (`/briefing/`) | Facts that change weekly: release radar and end-of-life dates for your stack, vulnerabilities being exploited right now (CISA), new arXiv papers matched to your Roadmap, and hiring from HN's monthly thread |
+| **Briefing** (`/briefing/`) | Facts that change weekly: release radar and end-of-life dates for your stack, vulnerabilities being exploited right now (CISA) and new arXiv papers matched to your Roadmap |
 | **Puzzles** (`/puzzles/`) | 56 engineering puzzles (spot the bug, back-of-the-envelope, distributed-systems scenarios, interleavings, complexity), each verified by running code or enumerating cases, plus 40 "numbers you should know" cards. Today shows the daily puzzle, a flash card and an incident drill built from a real outage |
 | **Incidents** (`/outages/`) | Incident lessons from public status pages (cloud, CDN, developer tools, AI APIs): case studies of resolved incidents with a stated cause or a postmortem, a per-provider reliability table, and every other incident as a linked list. Three sit on Today |
 | **Markets** (`/markets/`) | A snapshot of indices, yields, FX, oil, copper, gold and Bitcoin taken at build time, plus a calendar of upcoming central-bank meetings and CPI releases |

@@ -29,7 +29,6 @@ const pz = await getPuzzles();
 const bf = await getBriefing();
 const webPicks = todaysPicks(await getWebPuzzles(), now);
 const bfDay = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-const bfJobs = bf.jobs.filter(j => j.score >= 3 && (j.remoteAnywhere || j.india)).slice(0, 5);
 // Incident lessons: case studies picked in outages.ts.
 const outages = await getOutages();
 const outAnchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
@@ -188,10 +187,6 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 <div class="bf-box">
                     <h3 class="fp-box-h"><a href={u('/briefing/#papers')}>Paper drop</a></h3>
                     <ul role="list">{bf.papers.slice(0, 4).map(p => <li><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a><span class="bf-date">{p.topic?.name}</span></li>)}</ul>
-                </div>
-                <div class="bf-box">
-                    <h3 class="fp-box-h"><a href={u('/briefing/#hiring')}>Classifieds · hiring</a></h3>
-                    <ul role="list">{bfJobs.map(j => <li><a href={j.url} target="_blank" rel="noopener noreferrer"><b>{j.company}</b> · {j.role}</a><span class="bf-date">{j.india ? 'India' : 'remote'}{j.tags.length ? ` · ${j.tags.slice(0, 2).join(', ')}` : ''}</span></li>)}</ul>
                 </div>
             </div>
         </section>

@@ -8,13 +8,12 @@ import { u } from '../lib/url';
 const b = await getBriefing();
 const day = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const when = (d: number) => d === 0 ? 'today' : d > 0 ? `in ${d} ${d === 1 ? 'day' : 'days'}` : `${-d} ${d === -1 ? 'day' : 'days'} ago`;
-const jobsShown = b.jobs.filter(j => j.score >= 3).slice(0, 60);
 ---
-<Base title="The briefing" description="What changed for engineers: releases, end-of-life dates, exploited vulnerabilities, new papers and hiring." accent="reading">
+<Base title="The briefing" description="What changed for engineers: releases, end-of-life dates, exploited vulnerabilities, and new papers." accent="reading">
     <div class="rd fp briefing">
-        <ReadingMast compact title="The briefing" sub="What changed in the world your code runs in: releases, obituaries, exploited vulnerabilities, new papers and who's hiring. Facts, from public sources, refreshed with every edition." updated={new Date(b.now)} />
+        <ReadingMast compact title="The briefing" sub="What changed in the world your code runs in: releases, obituaries, exploited vulnerabilities and new papers. Facts, from public sources, refreshed with every edition." updated={new Date(b.now)} />
         <nav class="bf-index" aria-label="Sections">
-            <a href="#releases">Release radar</a><a href="#eol">Obituaries</a><a href="#cves">CVE watch</a><a href="#papers">Paper drop</a><a href="#hiring">Classifieds</a><a href={u('/startups/')}>Startups →</a><a href={u('/pulse/')}>Pulse: the week's headlines →</a>
+            <a href="#releases">Release radar</a><a href="#eol">Obituaries</a><a href="#cves">CVE watch</a><a href="#papers">Paper drop</a><a href={u('/startups/')}>Startups →</a><a href={u('/pulse/')}>Pulse: the week's headlines →</a>
         </nav>
 
         <div class="bf-two">
@@ -81,39 +80,6 @@ const jobsShown = b.jobs.filter(j => j.score >= 3).slice(0, 60);
                 ))}
             </div>
         </section>
-
-        <section class="fp-band" id="hiring">
-            <h2 class="fp-band-h"><span>Classifieds · {b.thread?.title ?? 'Who is hiring?'}</span></h2>
-            <div class="out-controls" role="group" aria-label="Filter jobs">
-                <div class="out-seg">
-                    <button type="button" data-job-where="remote-india" aria-pressed="true">Open to India (remote worldwide or in India)</button>
-                    <button type="button" data-job-where="remote" aria-pressed="false">Remote</button>
-                    <button type="button" data-job-where="all" aria-pressed="false">Anywhere</button>
-                </div>
-            </div>
-            <ul class="bf-jobs" role="list">
-                {jobsShown.map(j => (
-                    <li data-remote={j.remote ? '1' : undefined} data-anywhere={j.remoteAnywhere ? '1' : undefined} data-india={j.india ? '1' : undefined}>
-                        <a href={j.url} target="_blank" rel="noopener noreferrer">
-                            <span class="bf-job-h"><b>{j.company}</b> · {j.role}</span>
-                            <span class="bf-job-meta">{[j.location, j.remote && !/remote/i.test(j.location) ? (j.remoteAnywhere ? 'remote' : 'remote, region-limited') : '', j.tags.join(', ')].filter(Boolean).join(' · ')}</span>
-                        </a>
-                    </li>
-                ))}
-            </ul>
-            <p class="side-note">From {b.thread ? <a href={b.thread.url} target="_blank" rel="noopener noreferrer">this month's thread</a> : 'the monthly thread'} ({b.thread?.count ?? 0} posts), ranked for backend, infra, distributed systems, payments and AI roles. Read each post before applying.</p>
-        </section>
     </div>
     <ReadingClient />
 </Base>
-
-<script>
-    const apply = (w: string) => document.querySelectorAll<HTMLElement>('.bf-jobs li').forEach(li => {
-        li.hidden = w === 'all' ? false : w === 'remote' ? !li.dataset.remote : !(li.dataset.anywhere || li.dataset.india);
-    });
-    document.querySelectorAll<HTMLButtonElement>('[data-job-where]').forEach(b => b.addEventListener('click', () => {
-        document.querySelectorAll('[data-job-where]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-        apply(b.dataset.jobWhere!);
-    }));
-    apply('remote-india');
-</script>

@@ -14,7 +14,7 @@ const build = () => {
     if (b.status !== 0) { console.error(out.split('\n').filter(l => /error/i.test(l)).slice(0, 20).join('\n') || out.slice(-3000)); process.exit(1); }
     return out.match(/(\d+) page\(s\) built/)?.[1] ?? '?';
 };
-console.log('Building a fresh edition (feeds, outages, CVEs, papers, jobs)…');
+console.log('Building a fresh edition (feeds, outages, CVEs, papers)…');
 const pages = build();
 
 
@@ -42,7 +42,7 @@ console.log(`  Puzzle:      ${puzzle}`);
 console.log(`  Question:    ${question}`);
 console.log(`  Weather:     ${weather}`);
 console.log(`  Outages:     ${outages}`);
-console.log(`  Briefing:    ${releases.length} releases (${releases.slice(0, 4).join(', ')}) · ${count(box('Obituaries'))} end-of-life · ${count(box('CVE watch'))} CVEs · ${count(box('Paper drop'))} papers · ${count(box('Classifieds'))} jobs`);
+console.log(`  Briefing:    ${releases.length} releases (${releases.slice(0, 4).join(', ')}) · ${count(box('Obituaries'))} end-of-life · ${count(box('CVE watch'))} CVEs · ${count(box('Paper drop'))} papers`);
 
 // Is the preview server up? It serves dist/, so a running one already shows this edition.
 const up = await new Promise(r => { const s = createConnection(4321, '127.0.0.1'); s.on('connect', () => { s.end(); r(true); }); s.on('error', () => r(false)); });
