@@ -15,6 +15,7 @@ It covers the areas a strong engineer needs:
 - **Applied Mathematics**: probability, optimisation, numerical methods and the maths behind systems, ML and markets
 - **Security**: web vulnerabilities, cryptography, cloud security, detection and exploitation (a full cybersecurity engineer roadmap)
 - **CS Research**: algorithms, theory and performance, from researchers and new arXiv papers
+- **HFT & Low-Latency Engineering**: caches, memory ordering, kernel bypass, market data and matching engines
 - **Quantitative Finance**: probability, pricing, risk, market microstructure and the engineering behind trading
 - **Macro & Markets**: central banks, inflation, growth and jobs, from data-led sources (the Fed, the New York Fed, the Bank of England, FRED)
 - **Postmortems**: real failures, explained
@@ -44,15 +45,41 @@ It's curated from the best experts in each field, puts the latest first, and pre
 | **Canon** (`/canon/`) | 93 hand-picked foundational reads in order: papers, books, courses and classic articles |
 | **Notebook** (`/notebook/`) | Notes on what I've understood, in my own words |
 | **Saved** (`/library/`) | Links worth keeping, each with a line on why |
-| **Briefing** (`/briefing/`) | Facts that change weekly: internet weather by region, release radar and end-of-life dates for your stack, vulnerabilities being exploited right now (CISA), new arXiv papers matched to your Roadmap, and hiring from HN's monthly thread |
+| **Briefing** (`/briefing/`) | Facts that change weekly: release radar and end-of-life dates for your stack, vulnerabilities being exploited right now (CISA), new arXiv papers matched to your Roadmap, and hiring from HN's monthly thread |
 | **Puzzles** (`/puzzles/`) | 56 engineering puzzles (spot the bug, back-of-the-envelope, distributed-systems scenarios, interleavings, complexity), each verified by running code or enumerating cases, plus 40 "numbers you should know" cards. Today shows the daily puzzle, a flash card and an incident drill built from a real outage |
-| **Outages** (`/outages/`) | A world map of outages from 18 public status pages (cloud, CDN, developer tools, AI APIs, communication), each opening into an investigation report: where, how long, the provider's own timeline, and the postmortem when published. A small version sits on Today |
+| **Incidents** (`/outages/`) | Incident lessons from public status pages (cloud, CDN, developer tools, AI APIs): case studies of resolved incidents with a stated cause or a postmortem, a per-provider reliability table, and every other incident as a linked list. Three sit on Today |
+| **Markets** (`/markets/`) | A snapshot of indices, yields, FX, oil, copper, gold and Bitcoin taken at build time, plus a calendar of upcoming central-bank meetings and CPI releases |
+| **The week** (`/week/`) | The week's big stories, each desk's best five reads of the last seven days, and the week's incident lessons |
 | **Startups** (`/startups/`) | What the best new companies are building (Launch HN, Show HN, Product Hunt, funding news) |
 | **Pulse** (`/pulse/`) | The week's ten headlines, kept off the front page on purpose |
 | **Sources** (`/sources/`) | Every feed the site reads from, what each is contributing right now (posts, deep reads, latest post, its best current read), and feed health |
 | **Search** | Roadmap topics, the Canon, articles, notes and saved links |
 
 Every matched article carries a **"Why read"** line, e.g. *"You'll get better at **Failover Strategies** (Reliability & Fault Tolerance). Teaches you to plan for the moment the primary disappears…"*, so you always know what a piece will do for you.
+
+## Features
+
+**Read anywhere**
+- **Offline reading.** After your first visit, the browser keeps the current edition: the front page, every desk, the briefing, markets, incidents, puzzles, the week, the Roadmap, the Canon and search, with their thumbnails. With no connection, those pages still open. Online, the live edition always loads first, so you never get stuck on an old one. (A service worker, `src/pages/sw.js.ts`; the articles themselves live on their authors' sites and need a connection.)
+- **Install it as an app.** Add it to your phone's home screen or install it from the browser; it opens in its own window.
+- **Phone-friendly, light and dark.** Single column on small screens; the paper tint follows the time of day (morning, midday, evening, late); every motion effect is turned off when you prefer reduced motion.
+
+**Know what's new**
+- **New since your last visit.** A count on the front page and "New" badges on each card, measured from your previous visit, not a fixed window.
+- **Stale-edition notice.** If the edition you're reading is more than a day old, the front page says so.
+- **The big story.** When three or more independent sources cover the same thing in three days, it gets a strip under the ticker.
+- **Markets ticker and "Coming up".** Key market numbers and the next central-bank and inflation dates, under the masthead.
+
+**Read with a purpose**
+- **"Why read" on every matched article**: the Roadmap topic it will make you better at.
+- **Choose desks.** Hide disciplines you don't want on the front page (remembered in your browser).
+- **Search** across topics, the Canon, articles, notes and saved links.
+- **Progress without an account.** Canon, Roadmap and puzzle ticks and your reading history stay in your browser; read pieces are dimmed. List ids in `progress.yaml` to share progress across devices.
+
+**Practise**
+- **A daily puzzle**, "numbers you should know" flash cards with spaced repetition, and an **incident drill** that reveals a real outage one update at a time. Click-only, no typing.
+- **A weekly design prompt** with curated reads and a hard question.
+- **Puzzles from around the web**, linked and credited, never copied.
 
 ## How it works
 
