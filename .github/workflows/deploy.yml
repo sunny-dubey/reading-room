@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:   # also runnable by hand from the Actions tab
-  # No schedule: a new edition is published when it's pushed (or run by hand), not on a timer.
+  schedule:
+    - cron: '30 0 * * *'   # a fresh edition every morning at 06:00 IST (GitHub may start it a little late)
 
 permissions:
   contents: read

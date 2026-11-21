@@ -48,7 +48,9 @@ const isStatic = url => /\\/(_astro|thumbs)\\//.test(url.pathname) || /\\.(woff2
 async function networkFirst(request) {
     const cache = await caches.open(VERSION);
     try {
-        const res = await fetch(request);
+        // no-cache: always check with the server, so a new edition shows at once
+        // (GitHub Pages lets browsers reuse a page for 10 minutes otherwise).
+        const res = await fetch(request.url, { cache: 'no-cache' });
         if (res.ok) cache.put(request, res.clone());
         return res;
     } catch (err) {
