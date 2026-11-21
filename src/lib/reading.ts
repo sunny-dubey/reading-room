@@ -8,6 +8,8 @@ import { getMeta, makeThumb, cleanDescription } from './meta';
 import { mapLimit } from './summarize';
 
 const DAY = 864e5;
+/** Each edition carries only articles published in the 24 hours before the build. */
+export const EDITION_WINDOW = DAY;
 
 /** How much an item deserves attention right now. The reader wants the latest, so freshness is strong:
  *  +4 today, +2 at 2.5 days, +1 at 5 days, +0.25 at 10. Worth (×2, so 2–10) still keeps weak posts down. */
@@ -34,9 +36,12 @@ async function buildReading() {
     const now = +fetchedAt;
     const learning = items.filter(i => !SIDE.has(i.category));
     const roadmap = await getRoadmap(learning); // attaches .skill to matched articles
-    const byRank = [...learning].sort((a, b) => rank(b, now) - rank(a, now) || +b.date - +a.date);
+    // The edition shows only what was published in the 24 hours before it was built (Sunny, 2026-11-21).
+    // The week page, Pulse, Startups, search and the Roadmap's reading lists still use everything fetched.
+    const edition = learning.filter(i => +i.date <= now && now - +i.date < EDITION_WINDOW);
+    const byRank = [...edition].sort((a, b) => rank(b, now) - rank(a, now) || +b.date - +a.date);
     // The big story: the same thing covered by several independent sources (headline feeds count too).
-    const big = await bigStories(items, now);
+    const big = await bigStories(items, now, 1);
     if (process.env.BIG_DEBUG) for (const b of big) console.log('[big]', b.sources, b.items.map(i => `${i.feedTitle}: ${i.title}`).join(' | '));
 
     const used = new Set<string>();
@@ -51,27 +56,26 @@ async function buildReading() {
         return out;
     };
 
-    // Today's deep read: the most worthwhile thing from the last two weeks (postmortems have their own slot).
-    const recent = byRank.filter(i => now - +i.date < 7 * DAY && i.category !== 'postmortems' && i.brief?.fetched);
+    // The lead: the most worthwhile thing in this edition (postmortems have their own slot).
+    const recent = byRank.filter(i => i.category !== 'postmortems' && i.brief?.fetched);
     // Up to 5 candidates in rank order; the page shows the first one you haven't read or been shown on an
-    // earlier day, so the plan's deep read changes daily even when the same post keeps ranking first.
-    const deepCands = recent.filter(i => (i.brief?.worth ?? 0) >= 4 && !used.has(i.link)).slice(0, 5);
+    // earlier day. A quiet day with nothing at worth 4 still gets a lead: the bar drops to 3.5, then 3.
+    const leadAt = (w: number) => recent.filter(i => (i.brief?.worth ?? 0) >= w).slice(0, 5);
+    const deepCands = [4, 3.5, 3].map(leadAt).find(l => l.length) ?? [];
     const deepRead = deepCands[0];
     if (deepRead) used.add(deepRead.link);
-    // Fresh this week: the best of the last 3 days (7 if it's a quiet week), one per track first.
-    const freshPool = (days: number) => byRank.filter(i => now - +i.date < days * DAY && i.category !== 'postmortems'
-        && (i.brief?.worth ?? 0) >= 3 && (i.skill || isDeep(i)));
-    const pool = freshPool(3).length >= 6 ? freshPool(3) : freshPool(7);
+    // Fresh: the best of the edition, one per track first.
+    const pool = byRank.filter(i => i.category !== 'postmortems' && (i.brief?.worth ?? 0) >= 3 && (i.skill || isDeep(i)));
     const fresh = take(pool, 4, true);
     fresh.push(...take(pool, 8 - fresh.length));
     // More worth your time: one per track first, then fill.
-    const picks = take(byRank.filter(i => now - +i.date < 10 * DAY && isDeep(i) && i.category !== 'postmortems'), 4, true);
-    picks.push(...take(byRank.filter(i => now - +i.date < 10 * DAY && isDeep(i) && i.category !== 'postmortems'), 6 - picks.length));
+    const picks = take(byRank.filter(i => isDeep(i) && i.category !== 'postmortems'), 4, true);
+    picks.push(...take(byRank.filter(i => isDeep(i) && i.category !== 'postmortems'), 6 - picks.length));
     // Learn from failure: the best recent postmortem.
     const [postmortem] = take(byRank.filter(i => i.category === 'postmortems' && (i.brief?.worth ?? 0) >= 3), 1);
 
     const tracks = CATEGORIES.map(c => {
-        const all = learning.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now) || +b.date - +a.date);
+        const all = edition.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now) || +b.date - +a.date);
         return { ...c, all, deep: all.filter(isDeep), light: all.filter(i => !isDeep(i)), sources: status.filter(s => s.category === c.id) };
     });
 
@@ -93,11 +97,10 @@ async function buildReading() {
     // Latest from every desk: each discipline's freshest worth-reading pieces (quality floor).
     const newest = (a: FeedItem, b: FeedItem) => +b.date - +a.date;
     const desks = CATEGORIES.map(c => {
-        const mine = learning.filter(i => i.category === c.id && +i.date <= now);
+        const mine = edition.filter(i => i.category === c.id);
         // Recency-heavy rank (freshness dominates) so the latest leads, but a practical piece beats a same-day essay.
-        // Slow desks (practitioners who post monthly) look back further.
-        const win = c.id === 'hft' ? 30 : 10;
-        let list = mine.filter(i => now - +i.date < win * DAY && (i.brief?.worth ?? 0) >= 3).sort((a, b) => rank(b, now) - rank(a, now));
+        // A desk with nothing in the last 24 hours is left out of the edition.
+        let list = mine.filter(i => (i.brief?.worth ?? 0) >= 3).sort((a, b) => rank(b, now) - rank(a, now));
         if (list.length < 2) list = [...list, ...mine.filter(i => !list.includes(i) && (i.brief?.worth ?? 0) >= 2.5).sort(newest)];
         // Different sources first, so one prolific feed doesn't fill a desk.
         const seen = new Set<string>(), varied = list.filter(i => !seen.has(i.feedTitle) && seen.add(i.feedTitle));
@@ -110,12 +113,12 @@ async function buildReading() {
     // The wire: the newest headlines from every desk, for scanning.
     // At most two per source, so a batch publisher (arXiv posts its whole day at once) can't flood it.
     const perFeed = new Map<string, number>();
-    const wire = learning.filter(i => +i.date <= now && (i.brief?.worth ?? 0) >= 2.5 && i.link !== deepRead?.link).sort(newest)
+    const wire = edition.filter(i => (i.brief?.worth ?? 0) >= 2.5 && i.link !== deepRead?.link).sort(newest)
         // All arXiv listings count as one source here, so new-submission batches can't fill the wire.
         .filter(i => { const k = i.feedId.startsWith('arxiv') ? 'arxiv' : i.feedId; const n = perFeed.get(k) ?? 0; perFeed.set(k, n + 1); return n < 2; }).slice(0, 10);
     // Top stories under the lead: the best recent pieces not already in the wire or the desks.
     const shownElsewhere = new Set([...wire, ...desks.flatMap(d => d.items)].map(i => i.link));
-    const topStories = byRank.filter(i => now - +i.date < 7 * DAY && isDeep(i) && !shownElsewhere.has(i.link) && !deepCands.some(d => d.link === i.link) && i.category !== 'postmortems').slice(0, 6);
+    const topStories = byRank.filter(i => isDeep(i) && !shownElsewhere.has(i.link) && !deepCands.some(d => d.link === i.link) && i.category !== 'postmortems').slice(0, 6);
     // The article's own description and preview image for everything shown with a picture or a dek.
     const showcase = [...new Set([...deepCands, ...topStories, ...desks.flatMap(d => d.items), ...wire])];
     await mapLimit(showcase, 8, async i => {
@@ -139,7 +142,7 @@ async function buildReading() {
         return { ...c, total: mine.length, items: [...varied, ...list.filter(i => !varied.includes(i))].slice(0, 5) };
     }).filter(d => d.items.length);
 
-    return { big, week: { big: weekBig, desks: weekDesks }, items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
+    return { edition, big, week: { big: weekBig, desks: weekDesks }, items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */
