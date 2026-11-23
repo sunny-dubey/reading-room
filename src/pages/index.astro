@@ -7,7 +7,7 @@ import Thumb from '../components/Thumb.astro';
 import { categoryShort } from '../lib/feeds';
 import { editionName, istTime, istDate } from '../lib/edition';
 import ReadingClient from '../components/ReadingClient.astro';
-import { getReading, getCanon, getRevisit, rank, isDeep } from '../lib/reading';
+import { getReading, getCanon, rank, isDeep } from '../lib/reading';
 import { getToday } from '../lib/today';
 import { getOutages, fmtDuration, KINDS } from '../lib/outages';
 import { getBriefing } from '../lib/briefing';
@@ -34,13 +34,10 @@ const outages = await getOutages();
 const outAnchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
 const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
 const mins = (m?: number) => (m ? `${m} min` : '');
-const revisit = await getRevisit(now);
 const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 const deepCount = tracks.reduce((a, t) => a + t.deep.length, 0);
 const newReads = learning.filter(i => +i.date > +fetchedAt - 6 * 3600e3 && +i.date <= +fetchedAt).length;
 const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
-
-const revisitItem = revisit.week[0] ?? revisit.month[0] ?? revisit.archive;
 
 // ---------- This week's design practice (rotates every Monday, IST) ----------
 const IST = 5.5 * 3600e3;

@@ -43,8 +43,6 @@ It's curated from the best experts in each field, puts the latest first, and pre
 | **Track pages** (`/systems/`, `/architecture/`, …) | The best recent deep reads for that track, plus its Canon |
 | **Roadmap** (`/roadmap/`) | 32 areas and ~530 topics to master (a full system design roadmap plus AI, ML, payments, maths, testing, engineering judgment and cybersecurity), with a topic map (every topic placed by meaning; learned ones glow), progress ticks and the reads that teach each topic |
 | **Canon** (`/canon/`) | 93 hand-picked foundational reads in order: papers, books, courses and classic articles |
-| **Notebook** (`/notebook/`) | Notes on what I've understood, in my own words |
-| **Saved** (`/library/`) | Links worth keeping, each with a line on why |
 | **Briefing** (`/briefing/`) | Facts that change weekly: release radar and end-of-life dates for your stack, vulnerabilities being exploited right now (CISA) and new arXiv papers matched to your Roadmap |
 | **Puzzles** (`/puzzles/`) | 56 engineering puzzles (spot the bug, back-of-the-envelope, distributed-systems scenarios, interleavings, complexity), each verified by running code or enumerating cases, plus 40 "numbers you should know" cards. Today shows the daily puzzle, a flash card and an incident drill built from a real outage |
 | **Incidents** (`/outages/`) | Incident lessons from public status pages (cloud, CDN, developer tools, AI APIs): case studies of resolved incidents with a stated cause or a postmortem, a per-provider reliability table, and every other incident as a linked list. Three sit on Today |
@@ -53,7 +51,7 @@ It's curated from the best experts in each field, puts the latest first, and pre
 | **Startups** (`/startups/`) | What the best new companies are building (Launch HN, Show HN, Product Hunt, funding news) |
 | **Pulse** (`/pulse/`) | The week's ten headlines, kept off the front page on purpose |
 | **Sources** (`/sources/`) | Every feed the site reads from, what each is contributing right now (posts, deep reads, latest post, its best current read), and feed health |
-| **Search** | Roadmap topics, the Canon, articles, notes and saved links |
+| **Search** | Roadmap topics, the Canon and articles |
 
 Every matched article carries a **"Why read"** line, e.g. *"You'll get better at **Failover Strategies** (Reliability & Fault Tolerance). Teaches you to plan for the moment the primary disappears…"*, so you always know what a piece will do for you.
 
@@ -73,8 +71,8 @@ Every matched article carries a **"Why read"** line, e.g. *"You'll get better at
 **Read with a purpose**
 - **"Why read" on every matched article**: the Roadmap topic it will make you better at.
 - **Choose desks.** Hide disciplines you don't want on the front page (remembered in your browser).
-- **Search** across topics, the Canon, articles, notes and saved links.
-- **Progress without an account.** Canon, Roadmap and puzzle ticks and your reading history stay in your browser; read pieces are dimmed. List ids in `progress.yaml` to share progress across devices.
+- **Search** across topics, the Canon and articles.
+- **Progress without an account.** Canon, Roadmap and puzzle ticks and your reading history stay in your browser; read pieces are dimmed.
 
 **Practise**
 - **A daily puzzle**, "numbers you should know" flash cards with spaced repetition, and an **incident drill** that reveals a real outage one update at a time. Click-only, no typing.
@@ -111,12 +109,9 @@ The site is **read-only**: there's no editing in the browser. Add content as fil
 
 | To add | Do this |
 |---|---|
-| A note | `npm run new "What I understood about MVCC" postgres,mvcc`, or `/til` in a Claude Code session. Notes live in `src/content/notes/` |
-| A saved link | Add an entry to `src/content/library.yaml` |
 | A source | Add it to `src/content/feeds.yaml` (pick a track; optional `weight` to rank it up or down) |
 | A foundational read | Add it to `src/content/canon.yaml` (for a book or course, list its chapters under `parts`) |
 | A topic to learn | Add it to `src/content/roadmap.yaml` |
-| Progress on every device | List Canon ids or topic ids in `src/content/progress.yaml` (ticks on the site are kept per browser) |
 | Change the daily questions or explainers | Edit `src/content/questions.yaml` or `src/content/explainers.yaml` |
 | Add a puzzle or number card | `src/content/puzzles.yaml` / `src/content/numbers.yaml` (verify it and note how in `proof`) |
 | Watch another project's releases / end of life | Add it to `src/content/stack.yaml` (its endoflife.date id) |
@@ -161,9 +156,9 @@ The puzzle page links to the best puzzle collections online. **Nothing is copied
 
 ```
 src/
-  content/        everything editable: feeds, canon, roadmap, notes, saved links, progress, overrides
+  content/        everything editable: feeds, canon, roadmap, overrides
   lib/            feed fetching, article analysis, topic matching, ranking
-  pages/          Today, tracks, roadmap, canon, notebook, saved, startups, pulse, search
+  pages/          Today, tracks, roadmap, canon, startups, pulse, search
   components/     cards, canon list, header/footer, shared client script
   styles/         one stylesheet (inlined into every page)
 scripts/          note scaffolding, Canon link checker

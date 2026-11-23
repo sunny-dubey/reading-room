@@ -1,6 +1,5 @@
 import { getCollection } from 'astro:content';
 import { getFeeds, CATEGORIES, SIDE, type FeedItem } from './feeds';
-import { getNotes } from './content';
 import { getRoadmap } from './roadmap';
 import { bigStories } from './bigstory';
 import { isRoundup } from './summarize';
@@ -143,18 +142,6 @@ async function buildReading() {
     }).filter(d => d.items.length);
 
     return { edition, big, week: { big: weekBig, desks: weekDesks }, items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
-}
-
-/** Notebook entries to revisit: written about a week and about a month ago (spaced repetition). */
-export async function getRevisit(now: number) {
-    const entries = (await getNotes()).map(n => ({ title: n.data.title, href: `/notebook/${n.id}/`, date: n.data.date }));
-    const ago = (d: Date) => (now - +d) / DAY;
-    const week = entries.filter(e => ago(e.date) >= 5 && ago(e.date) <= 10);
-    const month = entries.filter(e => ago(e.date) >= 25 && ago(e.date) <= 40);
-    const older = entries.filter(e => ago(e.date) > 40);
-    // One deterministic "from the archive" pick per day.
-    const archive = older.length ? older[Math.floor(now / DAY) % older.length] : undefined;
-    return { week, month, archive, total: entries.length };
 }
 
 /** "Launch HN: Acme (YC W26) – Agents that file your taxes" → name, batch, tagline. */

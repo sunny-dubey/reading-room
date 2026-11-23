@@ -6,7 +6,7 @@ import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, rank } from '../lib/reading';
 
 const { roadmap, now } = await getReading();
-const { areas, itemsByTopic, canonByTopic, notesByTopic, savedByTopic, topicMap, topics } = roadmap;
+const { areas, itemsByTopic, canonByTopic, topicMap, topics } = roadmap;
 import { CATEGORIES } from '../lib/feeds';
 // Topic map: dots placed by meaning; size = how many reads teach the topic.
 const W = 1000, H = 600, PAD = 28;
@@ -117,22 +117,18 @@ const freshCount = (a: typeof areas[number]) => new Set(a.data.topics.flatMap(t 
                                     {g.items.map(t => {
                                         const r = reads(t.id);
                                         const c = canonByTopic.get(t.id) ?? [];
-                                        const nNotes = notesByTopic.get(t.id) ?? 0;
-                                        const nSaved = savedByTopic.get(t.id) ?? 0;
                                         return (
-                                            <li class="rm-topic" id={t.id} data-topic={t.id} data-canon={c.map(x => x.id).join(' ')} data-touched={nNotes + nSaved > 0 ? '1' : undefined}>
+                                            <li class="rm-topic" id={t.id} data-topic={t.id} data-canon={c.map(x => x.id).join(' ')}>
                                                 <label class="rm-check" title="Mark as learned">
                                                     <input type="checkbox" data-learn={t.id} aria-label={`Learned: ${t.name}`} />
                                                     <span class="rm-box"></span>
                                                 </label>
                                                 <div class="rm-topic-main">
                                                     <span class="rm-topic-name">{t.name}</span>
-                                                    {(r.length > 0 || c.length > 0 || nNotes > 0 || nSaved > 0) && (
+                                                    {(r.length > 0 || c.length > 0) && (
                                                         <div class="rm-links">
                                                             {c.map(x => <a class="rm-canon" href={x.data.url} target="_blank" rel="noopener noreferrer" title={x.data.why}>Canon: {x.data.title}</a>)}
                                                             {r.map(i => <a class="rm-read" href={i.link} target="_blank" rel="noopener noreferrer" title={`${i.feedTitle}${i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}`}>{i.title}</a>)}
-                                                            {nNotes > 0 && <a class="rm-note" href={u('/notebook/')}>{nNotes} {nNotes === 1 ? 'note' : 'notes'}</a>}
-                                                            {nSaved > 0 && <a class="rm-note" href={u('/library/')}>{nSaved} saved</a>}
                                                         </div>
                                                     )}
                                                 </div>
@@ -160,7 +156,7 @@ const freshCount = (a: typeof areas[number]) => new Set(a.data.topics.flatMap(t 
         document.querySelectorAll<HTMLElement>('[data-topic]').forEach(li => {
             const id = li.dataset.topic!;
             const isLearned = learned.has(id);
-            const started = !!li.dataset.touched || (li.dataset.canon ?? '').split(' ').some(c => c && canonDone.has(c));
+            const started = (li.dataset.canon ?? '').split(' ').some(c => c && canonDone.has(c));
             li.classList.toggle('is-learned', isLearned);
             li.classList.toggle('is-started', !isLearned && started);
             const cb = li.querySelector<HTMLInputElement>('[data-learn]');

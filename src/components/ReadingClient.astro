@@ -1,13 +1,10 @@
 ---
 // Shared behaviour for every Reading Room page. Include once per page.
 import { getCollection } from 'astro:content';
-import { getProgress } from '../lib/progress';
-const progress = await getProgress();
 // Chapters of long Canon works, for "next chapter" everywhere.
 const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.data.parts?.length)
     .map(c => [c.id, { title: c.data.title, url: c.data.url, parts: c.data.parts }]));
 ---
-<script type="application/json" id="repo-progress" set:html={JSON.stringify(progress)} />
 <script type="application/json" id="canon-parts" set:html={JSON.stringify(parts)} />
 <script>
     import { getSet, setProgress } from '../lib/progress-client';

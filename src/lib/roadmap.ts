@@ -1,9 +1,7 @@
-// Matches articles, Canon items, notes and saved links to Roadmap topics by meaning.
+// Matches articles and Canon items to Roadmap topics by meaning.
 import { getCollection, type CollectionEntry } from 'astro:content';
 import type { FeedItem } from './feeds';
 import { embed, cosine } from './embed';
-import { getNotes, getLibrary } from './content';
-import { getProgress } from './progress';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { UMAP } from 'umap-js';
 import { parse } from 'yaml';
@@ -35,7 +33,6 @@ export interface SkillMatch {
 
 // Similarity thresholds for all-MiniLM-L6-v2 (normalised vectors).
 const MATCH = 0.42;     // article ↔ topic: strong enough to claim "you'll get better at X"
-const COVER = 0.40;     // note/saved ↔ topic: counts as coverage of the topic
 const CLASSIC = 0.5;    // article ↔ Canon read: close enough to say "builds on"
 
 // Which roadmap areas an article may match, by the track of its source. Keeps "voting" in a maths
@@ -70,26 +67,22 @@ async function build(articles: FeedItem[]) {
         text.set(t.id, `${a.data.title}${t.group ? ` > ${t.group}` : ''} > ${t.name}. ${t.about ?? ''}`.trim());
     }
     const topicList = [...topics.values()];
-    const [canon, notes, library] = await Promise.all([getCollection('canon'), getNotes(), getLibrary()]);
+    const canon = await getCollection('canon');
 
     const all = await embed([
         ...topicList.map(t => text.get(t.id)!),
         ...articles.map(i => i.embedText ?? i.title),
         ...canon.map(c => `${c.data.title}. ${c.data.why}`),
-        ...notes.map(n => `${n.data.title}. ${(n.body ?? '').slice(0, 1200)}`),
-        ...library.map(l => `${l.data.title}. ${l.data.why}`),
     ]);
 
     const practiceTopics = areas.filter(a => a.data.n === 24).flatMap(a => a.data.topics.filter(t => /^Design a /i.test(t.name)));
-    const empty = { areas, topics, enabled: false, practice: practiceTopics.map(t => ({ id: t.id, name: t.name, topics: [] as Topic[], canon: [] as CollectionEntry<'canon'>[] })), itemsByTopic: new Map<string, FeedItem[]>(), canonByTopic: new Map<string, CollectionEntry<'canon'>[]>(), notesByTopic: new Map<string, number>(), savedByTopic: new Map<string, number>(), topicMap: [] as MapPoint[], topicVec: new Map<string, number[]>() };
+    const empty = { areas, topics, enabled: false, practice: practiceTopics.map(t => ({ id: t.id, name: t.name, topics: [] as Topic[], canon: [] as CollectionEntry<'canon'>[] })), itemsByTopic: new Map<string, FeedItem[]>(), canonByTopic: new Map<string, CollectionEntry<'canon'>[]>(), topicMap: [] as MapPoint[], topicVec: new Map<string, number[]>() };
     if (!all) return empty;
 
     let k = 0;
     const tv = topicList.map(() => all[k++]);
     const av = articles.map(() => all[k++]);
     const cv = canon.map(() => all[k++]);
-    const nv = notes.map(() => all[k++]);
-    const lv = library.map(() => all[k++]);
 
     const best = (v: number[], n = 1, tracks?: string[]) =>
         topicList.map((t, idx) => ({ t, sim: cosine(v, tv[idx]) }))
@@ -98,12 +91,6 @@ async function build(articles: FeedItem[]) {
 
     // Topic map: every topic placed in 2D by meaning (UMAP, seeded so the layout is stable between builds).
     const topicMap = await layoutTopics(topicList.map(t => t.id), tv);
-
-    // Coverage: what you've written about or saved.
-    const notesByTopic = new Map<string, number>();
-    const savedByTopic = new Map<string, number>();
-    for (const v of nv) for (const m of best(v, 2)) if (m.sim >= COVER) notesByTopic.set(m.t.id, (notesByTopic.get(m.t.id) ?? 0) + 1);
-    for (const v of lv) for (const m of best(v, 2)) if (m.sim >= COVER) savedByTopic.set(m.t.id, (savedByTopic.get(m.t.id) ?? 0) + 1);
 
     // Canon reads per topic.
     const canonByTopic = new Map<string, CollectionEntry<'canon'>[]>();
@@ -115,15 +102,6 @@ async function build(articles: FeedItem[]) {
         }
     });
 
-    // Progress from the repo: learned topics and finished Canon reads count as covered.
-    const progress = await getProgress();
-    const learned = new Set(progress.learned);
-    const canonDoneTopics = new Map<string, number>();
-    for (const [tid, cs] of canonByTopic) {
-        const n = cs.filter(c => progress.canon.includes(c.id)).length;
-        if (n) canonDoneTopics.set(tid, n);
-    }
-
     // Manual overrides (src/content/overrides.yaml): pin a topic for a URL, or "none".
     let overrides = new Map<string, string>();
     try {
@@ -131,7 +109,7 @@ async function build(articles: FeedItem[]) {
         overrides = new Map(list.filter((o: any) => o?.url && o?.topic).map((o: any) => [o.url, String(o.topic)]));
     } catch {}
 
-    // Articles: closest topic, with a boost that favours topics you haven't covered yet.
+    // Articles: closest topic, with a rank boost that grows with how clearly the piece teaches it.
     const itemsByTopic = new Map<string, FeedItem[]>();
     articles.forEach((i, idx) => {
         const pinned = overrides.get(i.link);
@@ -148,11 +126,8 @@ async function build(articles: FeedItem[]) {
             i.movedFrom = i.category;
             i.category = top.t.track;
         }
-        const covered = learned.has(top.t.id) ? 3
-            : (notesByTopic.get(top.t.id) ?? 0) + (savedByTopic.get(top.t.id) ?? 0) * 0.5 + (canonDoneTopics.get(top.t.id) ?? 0);
-        const gap = covered === 0 ? 1 : covered < 3 ? 0.6 : 0.3;
         const strength = Math.min(1, (top.sim - bar) / 0.2 + 0.3);
-        i.skill = { topic: top.t, sim: top.sim, boost: Math.round(1.5 * strength * gap * 100) / 100 };
+        i.skill = { topic: top.t, sim: top.sim, boost: Math.round(1.5 * strength * 100) / 100 };
         if (!itemsByTopic.has(top.t.id)) itemsByTopic.set(top.t.id, []);
         itemsByTopic.get(top.t.id)!.push(i);
     });
@@ -198,7 +173,7 @@ async function build(articles: FeedItem[]) {
     });
 
     const topicVec = new Map(topicList.map((t, i) => [t.id, tv[i]] as [string, number[]]));
-    return { areas, topics, enabled: true, itemsByTopic, canonByTopic, notesByTopic, savedByTopic, practice, topicMap, topicVec };
+    return { areas, topics, enabled: true, itemsByTopic, canonByTopic, practice, topicMap, topicVec };
 }
 
 export interface MapPoint { id: string; x: number; y: number }

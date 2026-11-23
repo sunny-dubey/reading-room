@@ -7,7 +7,6 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "new": "node scripts/new.mjs",
     "astro": "astro",
     "check:links": "node scripts/check-links.mjs",
     "edition": "node scripts/edition.mjs"

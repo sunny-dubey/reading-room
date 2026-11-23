@@ -9,9 +9,6 @@ const sections = [
     { href: u('/canon/'), label: 'Canon', cat: '' },
     { href: u('/sources/'), label: 'Sources', cat: '' },
 ];
-const notebookPaths = ['/notebook/'].map(p => u(p));
-const isNotebook = notebookPaths.some(p => path.startsWith(p));
-const isSaved = path.startsWith(u('/library/'));
 ---
 <div class="nav-wrap">
     <nav class="nav" aria-label="Primary">

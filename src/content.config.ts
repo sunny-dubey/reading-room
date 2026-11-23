@@ -1,33 +1,5 @@
 import { defineCollection, z } from 'astro:content';
-import { glob, file } from 'astro/loaders';
-
-const tags = z.array(z.string().transform(t => t.toLowerCase().trim())).default([]);
-
-// Notebook: one kind of entry. What I understood, in my own words.
-const notes = defineCollection({
-    loader: glob({ pattern: '**/[^_]*.md', base: './src/content/notes' }),
-    schema: z.object({
-        title: z.string(),
-        date: z.coerce.date(),
-        tags,
-        source: z.string().url().optional(), // the piece this note is about
-        draft: z.boolean().default(false),
-    }),
-});
-
-// Links worth keeping: one line on why.
-const library = defineCollection({
-    loader: file('./src/content/library.yaml'),
-    schema: z.object({
-        title: z.string(),
-        url: z.string().url(),
-        author: z.string().optional(),
-        kind: z.enum(['article', 'video', 'talk', 'paper', 'repo', 'tool', 'book', 'thread']).default('article'),
-        why: z.string(),
-        added: z.coerce.date(),
-        tags,
-    }),
-});
+import { file } from 'astro/loaders';
 
 // RSS/Atom feeds read on the Reading tab.
 const feeds = defineCollection({
@@ -79,4 +51,4 @@ const roadmap = defineCollection({
     }),
 });
 
-export const collections = { notes, library, feeds, canon, roadmap };
+export const collections = { feeds, canon, roadmap };

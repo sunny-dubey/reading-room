@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 ---
 <Base title="Search">
     <div class="narrow">
-        <header class="page-head"><h1>Search</h1><p class="lead">Roadmap topics, the Canon, recent articles, your notes and saved links.</p></header>
+        <header class="page-head"><h1>Search</h1><p class="lead">Roadmap topics, the Canon and recent articles.</p></header>
         <label class="tile search-box">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <input id="q" class="search-input" type="search" placeholder="idempotency, raft, evals, queueing…" autocomplete="off" autofocus aria-label="Search" />
@@ -45,12 +45,12 @@ import Base from '../layouts/Base.astro';
                 else return { d, score: 0 };
             }
             // Topics and foundations first when equally relevant: they're the map, articles are the territory.
-            score += ({ topic: 1.5, canon: 1, note: 0.8, saved: 0.5 } as Record<string, number>)[d.kind] ?? 0;
+            score += ({ topic: 1.5, canon: 1 } as Record<string, number>)[d.kind] ?? 0;
             return { d, score };
         }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
         status.textContent = `${scored.length} result${scored.length === 1 ? '' : 's'}`;
         list.innerHTML = scored.map(({ d }) => {
-            const ext = d.kind !== 'topic' && d.kind !== 'note';
+            const ext = d.kind !== 'topic';
             return `<li class="tile hoverable k-${d.kind}"><div class="row"><span class="kind">${d.kind}</span>
                 <a class="row-title stretched" href="${esc(d.href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(d.title)}${ext ? ' ↗' : ''}</a></div>
                 <p class="row-blurb">${esc(snippet(d.text, terms[0]))}</p></li>`;
