@@ -91,6 +91,15 @@
   maxAgeDays: 180
   weight: 0.8
 
+- id: scott-aaronson
+  title: "Shtetl-Optimized (Scott Aaronson)"
+  url: 'https://scottaaronson.blog/?feed=rss2'
+  site: https://scottaaronson.blog/
+  category: research
+  limit: 3
+  maxAgeDays: 60
+  weight: -0.3
+
 # ---------- systems ----------
 - id: marc-brooker
   title: Marc Brooker
@@ -187,6 +196,25 @@
   category: systems
   limit: 5
   maxAgeDays: 90
+
+- id: antithesis
+  title: "Antithesis"
+  url: 'https://antithesis.com/blog/rss.xml'
+  site: https://antithesis.com/blog/
+  category: systems
+  limit: 4
+  maxAgeDays: 90
+  weight: 0.3
+
+- id: scylladb
+  title: "ScyllaDB"
+  url: 'https://www.scylladb.com/feed/'
+  site: https://www.scylladb.com/blog/
+  category: systems
+  limit: 3
+  maxAgeDays: 60
+  weight: -0.3
+  skipTitles: 'webinar|summit|\bnow available\b|release notes|customer'
 
 # ---------- backend ----------
 - id: brandur
@@ -333,6 +361,39 @@
   maxAgeDays: 180
   weight: 0.3
 
+- id: datadog-eng
+  title: "Datadog Engineering"
+  url: 'https://www.datadoghq.com/blog/engineering/index.xml'
+  site: https://www.datadoghq.com/blog/engineering/
+  category: backend
+  limit: 4
+  maxAgeDays: 60
+
+- id: grab-eng
+  title: "Grab Engineering"
+  url: 'https://engineering.grab.com/feed.xml'
+  site: https://engineering.grab.com/
+  category: backend
+  limit: 4
+  maxAgeDays: 60
+
+- id: spotify-eng
+  title: "Spotify Engineering"
+  url: 'https://engineering.atspotify.com/feed/'
+  site: https://engineering.atspotify.com/
+  category: backend
+  limit: 3
+  maxAgeDays: 60
+
+- id: samwho
+  title: "Sam Rose (samwho.dev)"
+  url: 'https://samwho.dev/rss.xml'
+  site: https://samwho.dev/
+  category: backend
+  limit: 3
+  maxAgeDays: 180
+  weight: 0.5
+
 # ---------- ai-eng ----------
 - id: simon-willison
   title: Simon Willison
@@ -416,6 +477,15 @@
   weight: 0.4
   onlyTags: [Engineering, Product]
   skipTitles: '\bfor (Sales|Law|Business|Teams|Enterprise|Education|Government|Nonprofits|Healthcare)\b|partner|customers?\b|leaders'
+
+- id: sean-goedecke
+  title: "Sean Goedecke"
+  url: 'https://www.seangoedecke.com/rss.xml'
+  site: https://www.seangoedecke.com/
+  category: ai-eng
+  limit: 3
+  maxAgeDays: 30
+  weight: -0.2
 
 # ---------- ml ----------
 - id: lilian-weng
@@ -527,6 +597,16 @@
   limit: 3
   maxAgeDays: 120
   weight: 1
+
+- id: together-ai
+  title: "Together AI research"
+  url: 'https://www.together.ai/blog/rss.xml'
+  site: https://www.together.ai/blog
+  category: ml
+  limit: 4
+  maxAgeDays: 60
+  weight: 0
+  skipTitles: '\bis (now )?(live|available)\b|^introducing|security event|partner|customers?\b|webinar'
 
 # ---------- postmortems ----------
 - id: github-availability
@@ -703,6 +783,22 @@
   maxAgeDays: 45
   weight: -0.5
 
+- id: google-security
+  title: "Google Security Blog"
+  url: 'https://security.googleblog.com/feeds/posts/default'
+  site: https://security.googleblog.com/
+  category: security
+  limit: 3
+  maxAgeDays: 60
+
+- id: qualys-research
+  title: "Qualys Threat Research"
+  url: 'https://blog.qualys.com/vulnerabilities-threat-research/feed'
+  site: https://blog.qualys.com/vulnerabilities-threat-research
+  category: security
+  limit: 3
+  maxAgeDays: 30
+
 # ---------- HFT & low-latency engineering ----------
 # Practitioners of performance: compilers, CPU microarchitecture, profiling, and trading-system engineering.
 # HRT, Optiver, IMC, Jump and Databento publish no usable RSS (or block readers); Jane Street is above.
@@ -754,6 +850,15 @@
   limit: 2
   maxAgeDays: 7
   weight: -1.5          # papers are often trading-strategy theory, not engineering; practitioners lead the desk
+
+- id: travis-downs
+  title: "Travis Downs (Performance Matters)"
+  url: 'https://travisdowns.github.io/feed.xml'
+  site: https://travisdowns.github.io/
+  category: hft
+  limit: 3
+  maxAgeDays: 365
+  weight: 0.8
 
 # ---------- quantitative finance ----------
 - id: quantocracy
@@ -898,6 +1003,14 @@
   maxAgeDays: 14
   weight: -0.3
 
+- id: employ-america
+  title: "Employ America"
+  url: 'https://www.employamerica.org/feed/'
+  site: https://www.employamerica.org/
+  category: macro
+  limit: 4
+  maxAgeDays: 30
+
 # ---------- math ----------
 - id: jeremy-kun
   title: Math ∩ Programming (Jeremy Kun)
@@ -961,3 +1074,20 @@
   limit: 3
   maxAgeDays: 365
   weight: 0.5
+
+- id: terence-tao
+  title: "What's new (Terence Tao)"
+  url: 'https://terrytao.wordpress.com/feed/'
+  site: https://terrytao.wordpress.com/
+  category: math
+  limit: 4
+  maxAgeDays: 60
+  weight: 0.8
+
+- id: gil-kalai
+  title: "Combinatorics and more (Gil Kalai)"
+  url: 'https://gilkalai.wordpress.com/feed/'
+  site: https://gilkalai.wordpress.com/
+  category: math
+  limit: 3
+  maxAgeDays: 60

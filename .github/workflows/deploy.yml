@@ -5,7 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:   # also runnable by hand from the Actions tab
   schedule:
-    - cron: '30 0 * * *'   # a fresh edition every morning at 06:00 IST (GitHub may start it a little late)
+    - cron: '47 0,6,12,18 * * *'   # four editions a day: 06:17, 12:17, 18:17, 00:17 IST (odd minute = less queueing; GitHub may still start late)
 
 permissions:
   contents: read
