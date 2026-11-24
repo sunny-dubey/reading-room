@@ -100,6 +100,21 @@
   maxAgeDays: 60
   weight: -0.3
 
+- id: max-bernstein
+  title: "Max Bernstein (compilers & runtimes)"
+  url: 'https://bernsteinbear.com/feed.xml'
+  site: https://bernsteinbear.com/
+  category: research
+  limit: 3
+
+- id: laurence-tratt
+  title: "Laurence Tratt"
+  url: 'https://tratt.net/laurie/blog/blog.rss'
+  site: https://tratt.net/laurie/blog/
+  category: research
+  limit: 2
+
+
 # ---------- systems ----------
 - id: marc-brooker
   title: Marc Brooker
@@ -215,6 +230,52 @@
   maxAgeDays: 60
   weight: -0.3
   skipTitles: 'webinar|summit|\bnow available\b|release notes|customer'
+
+- id: kleppmann
+  title: "Martin Kleppmann"
+  url: 'https://martin.kleppmann.com/feed.rss'
+  site: https://martin.kleppmann.com/
+  category: systems
+  limit: 3
+  weight: 0.5
+
+- id: jepsen-aphyr
+  title: "Kyle Kingsbury (aphyr / Jepsen)"
+  url: 'https://aphyr.com/posts.atom'
+  site: https://aphyr.com/
+  category: systems
+  limit: 3
+  weight: 0.5
+
+- id: database-architects
+  title: "Database Architects (Thomas Neumann & Viktor Leis)"
+  url: 'https://databasearchitects.blogspot.com/feeds/posts/default'
+  site: https://databasearchitects.blogspot.com/
+  category: systems
+  limit: 3
+  weight: 0.5
+
+- id: small-datum
+  title: "Small Datum (Mark Callaghan)"
+  url: 'https://smalldatum.blogspot.com/feeds/posts/default'
+  site: https://smalldatum.blogspot.com/
+  category: systems
+  limit: 3
+
+- id: jamie-brandon
+  title: "Jamie Brandon"
+  url: 'https://www.scattered-thoughts.net/rss.xml'
+  site: https://www.scattered-thoughts.net/
+  category: systems
+  limit: 2
+
+- id: ink-and-switch
+  title: "Ink & Switch (local-first research)"
+  url: 'https://www.inkandswitch.com/index.xml'
+  site: https://www.inkandswitch.com/
+  category: systems
+  limit: 2
+
 
 # ---------- backend ----------
 - id: brandur
@@ -394,6 +455,23 @@
   maxAgeDays: 180
   weight: 0.5
 
+- id: fly-blog
+  title: "Fly.io blog"
+  url: 'https://fly.io/blog/feed.xml'
+  site: https://fly.io/blog/
+  category: backend
+  limit: 3
+  weight: 0
+  skipTitles: 'pricing|launch|now available|\bnew\b.*\bfeature'
+
+- id: mitchellh
+  title: "Mitchell Hashimoto"
+  url: 'https://mitchellh.com/feed.xml'
+  site: https://mitchellh.com/
+  category: backend
+  limit: 2
+
+
 # ---------- ai-eng ----------
 - id: simon-willison
   title: Simon Willison
@@ -486,6 +564,16 @@
   limit: 3
   maxAgeDays: 30
   weight: -0.2
+
+- id: vllm
+  title: "vLLM blog"
+  url: 'https://vllm.ai/blog/rss.xml'
+  site: https://vllm.ai/blog
+  category: ai-eng
+  limit: 3
+  weight: 0
+  skipTitles: 'day-?0|support for|meetup|recap'
+
 
 # ---------- ml ----------
 - id: lilian-weng
@@ -607,6 +695,49 @@
   maxAgeDays: 60
   weight: 0
   skipTitles: '\bis (now )?(live|available)\b|^introducing|security event|partner|customers?\b|webinar'
+
+- id: epoch-ai
+  title: "Epoch AI (data on AI progress)"
+  url: 'https://epoch.ai/atom.xml'
+  site: https://epoch.ai/
+  category: ml
+  limit: 3
+  weight: 0.3
+
+- id: ai2
+  title: "Ai2 (Allen Institute for AI)"
+  url: 'https://allenai.org/rss.xml'
+  site: https://allenai.org/blog
+  category: ml
+  limit: 3
+  weight: 0
+  skipTitles: 'partner|collaborat|comes to|rating|fellowship|award'
+
+- id: pytorch
+  title: "PyTorch blog"
+  url: 'https://pytorch.org/blog/feed.xml'
+  site: https://pytorch.org/blog/
+  category: ml
+  limit: 3
+  weight: 0
+  skipTitles: 'conference|summit|foundation|welcomes|ambassador|newsletter'
+
+- id: apple-ml
+  title: "Apple Machine Learning Research"
+  url: 'https://machinelearning.apple.com/rss.xml'
+  site: https://machinelearning.apple.com/
+  category: ml
+  limit: 3
+
+- id: sander-dieleman
+  title: "Sander Dieleman"
+  url: 'https://sander.ai/feed.xml'
+  site: https://sander.ai/
+  category: ml
+  limit: 2
+  maxAgeDays: 120
+  weight: 0.5
+
 
 # ---------- postmortems ----------
 - id: github-availability
@@ -799,6 +930,51 @@
   limit: 3
   maxAgeDays: 30
 
+- id: google-threat-intel
+  title: "Google Threat Intelligence (Mandiant)"
+  url: 'https://feeds.feedburner.com/threatintelligence/pvexyqv7v0v'
+  site: https://cloud.google.com/blog/topics/threat-intelligence
+  category: security
+  limit: 3
+
+- id: elastic-security-labs
+  title: "Elastic Security Labs"
+  url: 'https://www.elastic.co/security-labs/rss/feed.xml'
+  site: https://www.elastic.co/security-labs
+  category: security
+  limit: 3
+
+- id: datadog-security-labs
+  title: "Datadog Security Labs"
+  url: 'https://securitylabs.datadoghq.com/rss/feed.xml'
+  site: https://securitylabs.datadoghq.com/
+  category: security
+  limit: 3
+
+- id: zdi
+  title: "Zero Day Initiative"
+  url: 'https://www.zerodayinitiative.com/blog?format=rss'
+  site: https://www.zerodayinitiative.com/blog
+  category: security
+  limit: 3
+  weight: 0
+  skipTitles: 'security update review|patch tuesday|pwn2own.*(schedule|results|day)'
+
+- id: quarkslab
+  title: "Quarkslab"
+  url: 'https://blog.quarkslab.com/feeds/all.rss.xml'
+  site: https://blog.quarkslab.com/
+  category: security
+  limit: 3
+
+- id: soatok
+  title: "Soatok (applied cryptography)"
+  url: 'https://soatok.blog/feed/'
+  site: https://soatok.blog/
+  category: security
+  limit: 2
+
+
 # ---------- HFT & low-latency engineering ----------
 # Practitioners of performance: compilers, CPU microarchitecture, profiling, and trading-system engineering.
 # HRT, Optiver, IMC, Jump and Databento publish no usable RSS (or block readers); Jane Street is above.
@@ -859,6 +1035,37 @@
   limit: 3
   maxAgeDays: 365
   weight: 0.8
+
+- id: rigtorp
+  title: "Erik Rigtorp"
+  url: 'https://rigtorp.se/index.xml'
+  site: https://rigtorp.se/
+  category: hft
+  limit: 2
+  maxAgeDays: 120
+  weight: 0.5
+
+- id: nullprogram
+  title: "nullprogram (Chris Wellons)"
+  url: 'https://nullprogram.com/feed/'
+  site: https://nullprogram.com/
+  category: hft
+  limit: 2
+
+- id: ash-vardanian
+  title: "Ash Vardanian (SIMD & performance)"
+  url: 'https://ashvardanian.com/index.xml'
+  site: https://ashvardanian.com/
+  category: hft
+  limit: 2
+
+- id: code-addict
+  title: "Confessions of a Code Addict (Abhinav Upadhyay)"
+  url: 'https://blog.codingconfessions.com/feed'
+  site: https://blog.codingconfessions.com/
+  category: hft
+  limit: 2
+
 
 # ---------- quantitative finance ----------
 - id: quantocracy
@@ -931,6 +1138,23 @@
   category: quant
   limit: 6
   maxAgeDays: 14
+
+- id: robert-carver
+  title: "Robert Carver (systematic trading)"
+  url: 'https://qoppac.blogspot.com/feeds/posts/default'
+  site: https://qoppac.blogspot.com/
+  category: quant
+  limit: 3
+  weight: 0.5
+
+- id: klement
+  title: "Klement on Investing"
+  url: 'https://klementoninvesting.substack.com/feed'
+  site: https://klementoninvesting.substack.com/
+  category: quant
+  limit: 2
+  weight: -0.3
+
 
 # ---------- macro & markets (informative, data-led sources) ----------
 - id: fred-blog
@@ -1010,6 +1234,38 @@
   category: macro
   limit: 4
   maxAgeDays: 30
+
+- id: feds-notes
+  title: "FEDS Notes (Federal Reserve Board staff)"
+  url: 'https://www.federalreserve.gov/feeds/feds_notes.xml'
+  site: https://www.federalreserve.gov/econres/notes/feds-notes/default.htm
+  category: macro
+  limit: 3
+  weight: 0.5
+
+- id: voxeu
+  title: "CEPR VoxEU (research-based policy columns)"
+  url: 'https://cepr.org/rss/vox-content'
+  site: https://cepr.org/voxeu
+  category: macro
+  limit: 3
+
+- id: conversable-economist
+  title: "Conversable Economist (Timothy Taylor)"
+  url: 'https://conversableeconomist.com/feed/'
+  site: https://conversableeconomist.com/
+  category: macro
+  limit: 2
+
+- id: sf-fed-letter
+  title: "SF Fed Economic Letter"
+  url: 'https://www.frbsf.org/feed/?post_type=economic-letter'
+  site: https://www.frbsf.org/research-and-insights/publications/economic-letter/
+  category: macro
+  limit: 2
+  maxAgeDays: 90
+  weight: 0.3
+
 
 # ---------- math ----------
 - id: jeremy-kun
@@ -1091,3 +1347,52 @@
   category: math
   limit: 3
   maxAgeDays: 60
+
+- id: gelman
+  title: "Statistical Modeling (Andrew Gelman)"
+  url: 'https://statmodeling.stat.columbia.edu/feed/'
+  site: https://statmodeling.stat.columbia.edu/
+  category: math
+  limit: 2
+  weight: 0
+  skipTitles: 'fellowship|job|position|postdoc|hiring'
+
+- id: peter-cameron
+  title: "Peter Cameron"
+  url: 'https://cameroncounts.wordpress.com/feed/'
+  site: https://cameroncounts.wordpress.com/
+  category: math
+  limit: 2
+
+- id: gowers
+  title: "Gowers's Weblog (Timothy Gowers)"
+  url: 'https://gowers.wordpress.com/feed/'
+  site: https://gowers.wordpress.com/
+  category: math
+  limit: 2
+  maxAgeDays: 120
+  weight: 0.3
+
+- id: frank-harrell
+  title: "Statistical Thinking (Frank Harrell)"
+  url: 'https://www.fharrell.com/index.xml'
+  site: https://www.fharrell.com/
+  category: math
+  limit: 2
+
+- id: gundersen
+  title: "Gregory Gundersen"
+  url: 'https://gregorygundersen.com/feed.xml'
+  site: https://gregorygundersen.com/
+  category: math
+  limit: 2
+  maxAgeDays: 120
+  weight: 0.3
+
+- id: ams-feature-column
+  title: "AMS Feature Column"
+  url: 'https://mathvoices.ams.org/featurecolumn/feed/'
+  site: https://mathvoices.ams.org/featurecolumn/
+  category: math
+  limit: 2
+
