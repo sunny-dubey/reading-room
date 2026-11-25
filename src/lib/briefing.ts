@@ -78,7 +78,7 @@ async function cves(now: number) {
 }
 
 // ---------- Paper drop ----------
-export interface Paper { id: string; title: string; url: string; authors: string; cat: string; abstract: string; date: number; topic?: Topic; sim: number }
+export interface Paper { id: string; title: string; url: string; authors: string; cat: string; abstract: string; date: number; topic?: Topic; sim: number; code?: { repo: string; stars: number } }
 const CATS: Record<string, { label: string; tracks: string[] }> = {
     'cs.DC': { label: 'Distributed computing', tracks: ['systems', 'backend'] },
     'cs.DB': { label: 'Databases', tracks: ['systems', 'backend'] },
@@ -139,15 +139,96 @@ async function papers(now: number) {
     return { picks: picks.slice(0, 12), seen: kept.length, cats: CATS };
 }
 
+// ---------------------------------------------------------------- standards radar
+// What changed in the systems underneath your code, last 24 hours: new RFCs (RFC Editor), Linux kernel
+// releases (kernel.org), and release announcements from PostgreSQL, Python, Rust, Node.js and Kubernetes.
+export interface Standard { kind: 'RFC' | 'Kernel' | 'Release'; title: string; url: string; date: number; who: string }
+const STD_FEEDS: [string, string, RegExp][] = [
+    ['PostgreSQL', 'https://www.postgresql.org/news.rss', /released|release/i],
+    ['Python', 'https://blog.python.org/feeds/posts/default', /python \d|release/i],
+    ['Rust', 'https://blog.rust-lang.org/feed.xml', /announcing rust|rust \d/i],
+    ['Node.js', 'https://nodejs.org/en/feed/blog.xml', /node(\.js)? v?\d|release/i],
+    ['Kubernetes', 'https://kubernetes.io/feed.xml', /kubernetes v?\d\.\d+|release/i],
+];
+async function standards(now: number): Promise<Standard[]> {
+    const out: Standard[] = [];
+    const xml = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', isArray: n => ['item', 'entry', 'link'].includes(n) });
+    const items = (x: any) => x?.rss?.channel?.item ?? x?.feed?.entry ?? x?.['rdf:RDF']?.item ?? [];
+    const link = (i: any) => typeof i.link?.[0] === 'string' ? i.link[0] : i.link?.find?.((l: any) => !l['@_rel'] || l['@_rel'] === 'alternate')?.['@_href'] ?? i.link?.[0]?.['@_href'] ?? '';
+    await Promise.all([
+        get('https://www.rfc-editor.org/rfcrss.xml').then(r => r.text()).then(t => { for (const i of items(xml.parse(t))) {
+            const date = +new Date(i.pubDate ?? i['dc:date']); if (now - date < EDITION_WINDOW + DAY) out.push({ kind: 'RFC', title: strip(String(i.title)), url: link(i), date, who: 'RFC Editor' });
+        } }),
+        get('https://www.kernel.org/releases.json').then(r => r.json()).then((d: any) => { for (const r of d.releases ?? []) {
+            const date = +new Date(r.released?.isodate); if (now - date < DATE_ONLY_WINDOW) out.push({ kind: 'Kernel', title: `Linux ${r.version} (${r.moniker})`, url: r.changelog || 'https://www.kernel.org/', date, who: 'kernel.org' });
+        } }),
+        ...STD_FEEDS.map(([who, url, re]) => get(url).then(r => r.text()).then(t => { for (const i of items(xml.parse(t)).slice(0, 15)) {
+            const title = strip(String(i.title?.['#text'] ?? i.title)); const date = +new Date(i.pubDate ?? i.published ?? i.updated);
+            if (re.test(title) && now - date < EDITION_WINDOW) out.push({ kind: 'Release', title, url: link(i), date, who });
+        } })),
+    ].map(p => p.catch(e => console.warn('[briefing] standards:', (e as Error).message))));
+    return out.sort((a, b) => b.date - a.date);
+}
+
+// ---------------------------------------------------------------- talk radar
+// New conference talks in the last 24 hours, from the conferences' own YouTube channels (public RSS). Shorts skipped.
+export interface Talk { title: string; url: string; date: number; who: string }
+const TALK_CHANNELS: [string, string][] = [
+    ['USENIX', 'UC4-GrpQBx6WCGwmwozP744Q'], ['CppCon', 'UCMlGfpWw-RUdWX_JbLCukXg'], ['PyData', 'UCOjD18EJYcsBog4IozkF_7w'],
+    ['InfoQ', 'UCkQX1tChV7Z7l1LFF4L9j_g'], ['GOTO', 'UCs_tLP3AiwYKwdUHpltJPuA'], ['NDC', 'UCTdw38Cw6jcm0atBPA39a0Q'],
+    ['Papers We Love', 'UCoj4eQh_dZR37lL78ymC6XA'], ['CMU Database Group', 'UCHnBsf2rH-K7pn09rb3qvkA'], ['Jane Street', 'UCDsVC_ewpcEW_AQcO-H-RDQ'],
+    ['Black Hat', 'UCJ6q9Ie29ajGqKApbLqfBOg'], ['DEF CON', 'UC6Om9kAkl32dWlDSNlDS9Iw'], ['Computerphile', 'UC9-y-6csu5WGm29I7JiwpnA'],
+];
+async function talks(now: number): Promise<Talk[]> {
+    const xml = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', isArray: n => n === 'entry' });
+    const out: Talk[] = [];
+    await Promise.all(TALK_CHANNELS.map(([who, id]) => get(`https://www.youtube.com/feeds/videos.xml?channel_id=${id}`).then(r => r.text()).then(t => {
+        for (const e of xml.parse(t)?.feed?.entry ?? []) {
+            const url = e.link?.['@_href'] ?? `https://www.youtube.com/watch?v=${e['yt:videoId']}`, title = strip(String(e.title)), date = +new Date(e.published);
+            if (now - date < EDITION_WINDOW && !/\/shorts\/|#shorts/i.test(`${url} ${title}`)) out.push({ title, url, date, who });
+        }
+    }).catch(err => console.warn(`[briefing] talks ${who}:`, (err as Error).message))));
+    return out.sort((a, b) => b.date - a.date);
+}
+
+// ---------------------------------------------------------------- paper → code
+// For each paper in the drop, its implementation on GitHub if one exists: repos whose README or description
+// mention the arXiv id (GitHub search API). Lists and digests that mention hundreds of papers are skipped.
+// Cached per paper; a paper with no code is checked again after 2 days.
+async function paperCode(picks: Paper[], now: number) {
+    const file = '.cache/paper-code.json';
+    let cache: Record<string, { at: number; repo?: string; stars?: number }> = {};
+    try { cache = JSON.parse(await readFile(file, 'utf8')); } catch {}
+    const headers: Record<string, string> = { Accept: 'application/vnd.github+json', 'User-Agent': 'reading-room-build', ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}) };
+    for (const p of picks) {
+        const id = p.id.replace(/v\d+$/, '');
+        const c = cache[id];
+        if (!c || (!c.repo && now - c.at > 2 * DAY)) {
+            try {
+                const r = await fetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(`"${id}" in:readme,description`)}&sort=stars&per_page=10`, { headers, signal: AbortSignal.timeout(15_000) });
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                const d: any = await r.json();
+                const repo = (d.items ?? []).find((x: any) => !/awesome|papers?[-_ ]?(list|reading|daily|digest)|reading[-_]list|arxiv[-_]?(daily|digest|sanity)|daily[-_]?papers/i.test(`${x.full_name} ${x.description ?? ''}`));
+                cache[id] = { at: now, repo: repo?.full_name, stars: repo?.stargazers_count };
+            } catch (e) { console.warn(`[briefing] paper code ${id}:`, (e as Error).message); break; } // rate limited: try again next build
+        }
+        if (cache[id]?.repo) (p as Paper & { code?: { repo: string; stars: number } }).code = { repo: cache[id].repo!, stars: cache[id].stars ?? 0 };
+    }
+    try { await mkdir('.cache', { recursive: true }); await writeFile(file, JSON.stringify(cache)); } catch {}
+}
+
 let cache: ReturnType<typeof build> | undefined;
 export const getBriefing = () => (cache ??= build());
 async function build() {
     const now = Date.now();
     const safe = async <T>(f: () => Promise<T>, fallback: T): Promise<T> => { try { return await f(); } catch (e) { console.warn('[briefing]', (e as Error).message); return fallback; } };
-    const [life, cve, paper] = await Promise.all([
+    const [life, cve, paper, std, talk] = await Promise.all([
         safe(() => lifecycles(now), { releases: [], eols: [], failed: 0, watched: 0 }),
         safe(() => cves(now), { list: [] as Cve[], total: 0 }),
         safe(() => papers(now), { picks: [] as Paper[], seen: 0, cats: CATS }),
+        safe(() => standards(now), [] as Standard[]),
+        safe(() => talks(now), [] as Talk[]),
     ]);
-    return { now, ...life, cves: cve.list, kevTotal: cve.total, papers: paper.picks, papersSeen: paper.seen, cats: CATS };
+    await safe(() => paperCode(paper.picks, now), undefined);
+    return { now, ...life, cves: cve.list, kevTotal: cve.total, papers: paper.picks, papersSeen: paper.seen, cats: CATS, standards: std, talks: talk };
 }

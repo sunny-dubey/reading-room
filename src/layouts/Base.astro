@@ -23,6 +23,7 @@ const fullTitle = title ? `${title} · The Reading Room` : 'The Reading Room';
     <title>{fullTitle}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='2' width='13' height='13' rx='4' fill='%23ea580c'/><rect x='17' y='2' width='13' height='13' rx='4' fill='%237c3aed'/><rect x='2' y='17' width='13' height='13' rx='4' fill='%232563eb'/><rect x='17' y='17' width='13' height='13' rx='4' fill='%23059669'/></svg>" />
     <link rel="manifest" href={u('/manifest.webmanifest')} />
+    <link rel="alternate" type="application/rss+xml" title="The Reading Room" href={u('/rss.xml')} />
     <link rel="apple-touch-icon" href={u('/icon-180.png')} />
     {import.meta.env.PROD && (
         <script is:inline define:vars={{ sw: u('/sw.js'), scope: u('/') }}>

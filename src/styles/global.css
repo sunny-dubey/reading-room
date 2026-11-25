@@ -1211,7 +1211,7 @@ body { font-size: 15px; line-height: 1.5; }
 .bf-box li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 6px; padding: 4px 0; }
 .bf-box li .bf-date { margin-left: auto; white-space: nowrap; }
 .bf-box li .bf-tag { margin-left: 0; }
-@media (min-width: 1100px) { .bf-boxes { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 26px; } }
+@media (min-width: 1100px) { .bf-boxes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 30px; } } /* six boxes: two rows of three */
 
 /* ---------- Puzzles from around the web (links, credited) ---------- */
 .puzzle-main { display: grid; gap: 18px; align-content: start; min-width: 0; }
@@ -1506,3 +1506,23 @@ details.inc[open] .inc-cause-line { display: none; }
 .cm-front-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px 28px; }
 .cm-front-list li { border-top: 1px solid var(--border-2); padding-top: 8px; }
 .cm-front-k { margin: 0 0 3px; font: 700 12px var(--sans); text-transform: uppercase; letter-spacing: .1em; color: var(--ed-accent); }
+
+/* What you'll get: kind of read, what it covers, the skill it builds */
+.gets { margin: 6px 0 4px; font: 14.5px/1.5 var(--serif-d); color: var(--muted); max-width: 70ch; }
+.gets-k { font: 700 12.5px var(--sans); text-transform: uppercase; letter-spacing: .06em; color: var(--cc, var(--ed-accent)); }
+.gets-covers { color: var(--fg); }
+.gets-skill a { color: var(--fg); }
+.gets.compact { font-size: 13.5px; margin: 3px 0; }
+.gets.compact .gets-k { font-size: 12px; }
+
+.bf-code { margin: 4px 0; font: 13px var(--sans); color: var(--muted); }
+.bf-code a { color: var(--fg); font-family: var(--mono); }
+
+/* Time budget */
+.tb { margin: 8px 0 2px; }
+.tb-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tb-k { font: 700 12px var(--sans); text-transform: uppercase; letter-spacing: .12em; color: var(--ed-accent); margin-right: 4px; }
+.tb-list { margin: 10px 0 4px; padding-left: 22px; display: grid; gap: 6px; font: 16px/1.4 var(--serif-d); }
+.tb-list a { color: var(--fg); }
+.tb-meta { font: 12.5px var(--sans); color: var(--faint); }
+.tb-sum { list-style: none; margin-left: -22px; font: 600 12.5px var(--sans); color: var(--muted); }

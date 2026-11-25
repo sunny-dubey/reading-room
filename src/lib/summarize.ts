@@ -13,7 +13,28 @@ export interface Brief {
     worth: number;        // 1-5: how much it builds lasting understanding (news ≈ 1)
     fetched: boolean;     // false = only the feed's short summary was available
     text?: string;        // start of the article text, used for topic matching then dropped
+    outline?: string[];   // the article's own section headings (h2/h3), up to 5: "what it covers" in the author's words
+    kind: ReadKind;       // what kind of time investment it is
 }
+
+/** What kind of read a piece is, and what that means for your time. Rule-based from the title, the text and the source. */
+export type ReadKind = 'howto' | 'deep' | 'case' | 'postmortem' | 'paper' | 'benchmark' | 'analysis' | 'opinion' | 'news' | 'roundup' | 'long' | 'article' | 'short';
+export const KIND: Record<ReadKind, { label: string; intent: string }> = {
+    howto: { label: 'How-to', intent: 'Hands-on: you can follow along and apply it.' },
+    deep: { label: 'Deep dive', intent: 'How it works inside, step by step.' },
+    case: { label: 'Case study', intent: 'A real team’s decisions and their trade-offs.' },
+    postmortem: { label: 'Postmortem', intent: 'How a real system failed and what fixed it.' },
+    paper: { label: 'Paper', intent: 'A new research result: read the abstract first.' },
+    benchmark: { label: 'Benchmark', intent: 'Measurements you can reuse in your own estimates.' },
+    analysis: { label: 'Analysis', intent: 'Findings and data from someone who looked closely.' },
+    // Nothing in the title says what kind it is: label by length only, and claim nothing more.
+    long: { label: 'Long read', intent: 'Set aside real time; it goes far into the subject.' },
+    article: { label: 'Article', intent: '' },
+    short: { label: 'Short read', intent: 'A few minutes.' },
+    opinion: { label: 'Opinion', intent: 'An argument, not a recipe: read for perspective.' },
+    news: { label: 'News', intent: 'What changed: skim it.' },
+    roundup: { label: 'Roundup', intent: 'A list of links: skim for the one you need.' },
+};
 
 const CACHE_DIR = join(process.cwd(), '.cache', 'articles');
 const CACHE_DAYS = 30;
@@ -24,7 +45,26 @@ const ENT: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apo
 const decode = (s: string) => s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) =>
     e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10)) : ENT[e.toLowerCase()] ?? m);
 
-interface Extract { text: string; words: number; code: number; headings: number }
+interface Extract { text: string; words: number; code: number; headings: number; outline?: string[] }
+
+// Page furniture: the article is over once one of these appears.
+const FURNITURE = /^(recent (comments|posts|articles)|top posts|popular (posts|articles)|related (posts|articles)|more from .*|you (may|might) also like.*|\d+ (comments?|responses?|replies)|leave a (reply|comment)|post navigation|share this.*|submission history|access paper.*|monthly briefing|categories|archives?|blogroll)$/i;
+// Headings that say nothing about the content.
+const GENERIC = /^(bibliographic.*|executive summary|key takeaways|share (this|on).*|post navigation|navigation|menu|sidebar|meta|blogroll|links|archive|install(ation)?|prerequisites|getting started|introduction|intro|conclusions?|summary|tl;?dr|references|footnotes|notes|comments?|related( posts| articles)?|share( this)?|subscribe|table of contents|contents|acknowledge?ments|about( the)? authors?|further reading|wrapping up|final thoughts|closing thoughts|thanks|appendix|faq|what'?s next\??|next steps|resources|recent posts|categories|tags|archives?|search|newsletter|follow us|leave a (reply|comment)|you (may|might) also like.*|more from.*|popular.*)$/i;
+
+/** Section headings worth showing: tidy, de-duplicated, generic ones dropped, and the list cut at the first
+ *  piece of page furniture ("Recent comments", "Top posts"), since sidebars and footers follow the article. */
+export function cleanOutline(raw: string[] = [], max = 5) {
+    const seen = new Set<string>(), out: string[] = [];
+    for (const r of raw) {
+        const t = r.replace(/\s+/g, ' ').replace(/^(\d+[.)]|step \d+:?)\s*/i, '').replace(/[:.]$/, '').trim();
+        if (FURNITURE.test(t)) break;
+        if (t.length < 3 || t.length > 80 || GENERIC.test(t) || seen.has(t.toLowerCase())) continue;
+        seen.add(t.toLowerCase()); out.push(t);
+        if (out.length >= max) break;
+    }
+    return out;
+}
 
 export function extractText(html: string): Extract {
     let h = html.replace(/<!--[\s\S]*?-->/g, ' ');
@@ -33,10 +73,11 @@ export function extractText(html: string): Extract {
     if (region && region.length > 1500) h = region;
     const code = (h.match(/<pre[\s>]/gi) ?? []).length;
     const headings = (h.match(/<h[23][\s>]/gi) ?? []).length;
+    const outline = cleanOutline([...h.matchAll(/<h[23][^>]*>([\s\S]*?)<\/h[23]>/gi)].map(m => decode(m[1].replace(/<[^>]+>/g, ' '))), 12);
     h = h.replace(/<(script|style|noscript|svg|nav|header|footer|aside|form|figure|button|iframe|pre)[\s\S]*?<\/\1>/gi, ' ');
     h = h.replace(/<\/(p|div|li|h[1-6]|blockquote|tr|section)>/gi, '\n').replace(/<br\s*\/?>/gi, '\n');
     const text = decode(h.replace(/<[^>]+>/g, ' ')).replace(/[ \t\r\f\v]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim();
-    return { text, words: text.split(/\s+/).filter(Boolean).length, code, headings };
+    return { text, words: text.split(/\s+/).filter(Boolean).length, code, headings, outline };
 }
 
 async function fetchArticle(url: string): Promise<Extract | null> {
@@ -45,7 +86,8 @@ async function fetchArticle(url: string): Promise<Extract | null> {
     if (existsSync(file)) {
         try {
             const c = JSON.parse(await readFile(file, 'utf8'));
-            if (Date.now() - c.at < CACHE_DAYS * 864e5) return c.data;
+            // Entries cached before section headings were kept (no `outline`) are fetched once more.
+            if (Date.now() - c.at < CACHE_DAYS * 864e5 && (c.data === null || c.data.outline !== undefined)) return c.data;
         } catch {}
     }
     let data: Extract | null = null;
@@ -175,7 +217,24 @@ export async function makeBrief(i: { title: string; link: string; summary: strin
     if (/arxiv\.org\/abs\//.test(i.link)) worth = Math.max(worth, 3.5);
     worth = Math.max(1, Math.min(5, Math.round(worth * 2) / 2));
 
-    return { concepts: found, minutes: fetched ? minutes : 0, depth, worth, fetched, text: text.slice(0, 1200) };
+    const firstPersonHeavy = fetched && words > 300 && (text.match(/\b(I|I'm|I've|I'd|my)\b/g) ?? []).length / words * 1000 > 14;
+    const kind = readKind(i, { depth, code: fetched ? ex!.code : 0, firstPersonHeavy, minutes: fetched ? minutes : 0 });
+    return { concepts: found, minutes: fetched ? minutes : 0, depth, worth, fetched, text: text.slice(0, 1200), outline: fetched && !/arxiv\.org\//.test(i.link) ? cleanOutline(ex!.outline) : undefined, kind };
+}
+
+function readKind(i: { title: string; link: string; category: string }, f: { depth: Brief['depth']; code: number; firstPersonHeavy: boolean; minutes: number }): ReadKind {
+    const t = i.title;
+    if (ROUNDUP.test(t)) return 'roundup';
+    if (/arxiv\.org\/(abs|pdf)\//.test(i.link) || /\[pdf\]/i.test(t)) return 'paper';
+    if (i.category === 'postmortems' || /\b(post-?mortem|incident (report|review)|outage|root cause)\b/i.test(t)) return 'postmortem';
+    if (ANNOUNCE.test(t)) return 'news';
+    if (OPINION.test(t) || f.firstPersonHeavy) return 'opinion';
+    if (/\b(benchmark\w*|measur(ing|ed|ement)s?|faster than|\bvs\.?\b|versus|latency of|throughput of)\b/i.test(t)) return 'benchmark';
+    if (/\b(how to|guide|tutorial|walkthrough|step[- ]by[- ]step|from scratch|build(ing)? (a|an|your)|implement(ing)?|cookbook|recipe)\b/i.test(t)) return 'howto';
+    if (/\b(case study|lessons|how we|why we|migrat\w+|at scale|in production|our journey)\b/i.test(t)) return 'case';
+    if (/\b(deep dive|internals|under the hood|how .{1,40} works|explained|anatomy of|inside)\b/i.test(t) || (f.depth === 'deep' && f.code >= 3)) return 'deep';
+    if (/\b(trends?|report|analysis|state of|survey|tactics|findings|what the data|data (on|shows?))\b/i.test(t)) return 'analysis';
+    return f.minutes >= 12 ? 'long' : f.minutes && f.minutes <= 4 ? 'short' : 'article';
 }
 
 /** Run an async mapper with limited concurrency. */

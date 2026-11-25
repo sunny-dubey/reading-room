@@ -22,6 +22,7 @@ const seconds = restDeep.slice(0, 2);
 const columns = restDeep.slice(2);
 const SHOW = 9;
 const mins = (m?: number) => (m ? `${m} min` : '');
+import Gets from '../components/Gets.astro';
 ---
 <Base title={t.label} description={t.blurb} accent="reading">
     <div class="rd fp" data-cat={t.id}>
@@ -40,7 +41,7 @@ const mins = (m?: number) => (m ? `${m} min` : '');
                 <article class="fp-lead-wrap fp-lead" data-link={lead.link} data-ts={+lead.date} data-cat={lead.category} data-story>
                     <p class="fp-kicker"><span class="new-badge" data-new hidden>New</span>The lead · {mins(lead.brief?.minutes)}{lead.brief?.depth === 'deep' ? ' · Deep dive' : ''}</p>
                     <h2 class:list={["fp-lead-h", { long: lead.title.length > 60 }]}><a href={lead.link} target="_blank" rel="noopener noreferrer" data-read>{lead.title}</a></h2>
-                    {lead.skill && <p class="fp-deck">You'll get better at <a href={u(`/roadmap/#${lead.skill.topic.id}`)}>{lead.skill.topic.name}</a>. {lead.skill.topic.why}</p>}
+                    <Gets i={lead} />
                     <p class="fp-byline">By {lead.feedTitle} · <time data-rel datetime={lead.date.toISOString()}></time></p>
                     <a href={lead.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={lead.title} track={lead.category} w={640} h={260} class="fp-lead-art" /></a>
                     {lead.classic && <p class="fp-footnote"><span>Builds on a classic</span><a href={lead.classic.url} target="_blank" rel="noopener noreferrer">{lead.classic.title}</a>, {lead.classic.author}</p>}

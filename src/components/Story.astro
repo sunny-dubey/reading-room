@@ -4,6 +4,7 @@ import type { FeedItem } from '../lib/feeds';
 import { categoryShort } from '../lib/feeds';
 import { u } from '../lib/url';
 import Thumb from './Thumb.astro';
+import Gets from './Gets.astro';
 interface Props { i: FeedItem; cover?: boolean; deck?: boolean; size?: 'col' | 'brief' | 'take'; kicker?: string }
 const { i, cover = false, deck = true, size = 'col', kicker } = Astro.props;
 const b = i.brief;
@@ -16,8 +17,6 @@ const b = i.brief;
     </p>
     <h3 class="story-h"><a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a></h3>
     {i.meta?.description && <p class="story-dek" title="The author's own description">{i.meta.description}</p>}
-    {deck && i.skill && (
-        <p class="story-deck">On <a href={u(`/roadmap/#${i.skill.topic.id}`)}>{i.skill.topic.name}</a>. {i.skill.topic.why}</p>
-    )}
+    <Gets i={i} compact={!deck} />
     <p class="story-by">{i.feedTitle} · <time data-rel datetime={i.date.toISOString()}></time></p>
 </article>

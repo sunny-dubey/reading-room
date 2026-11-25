@@ -76,10 +76,30 @@ const when = (d: number) => d === 0 ? 'today' : d > 0 ? `in ${d} ${d === 1 ? 'da
                         <p class="fp-kicker">{b.cats[p.cat].label} · <a href={u(`/roadmap/#${p.topic!.id}`)}>{p.topic!.name}</a></p>
                         <h3><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a></h3>
                         <p class="bf-by">{p.authors.split(',').slice(0, 3).join(',')}{p.authors.split(',').length > 3 ? ' et al.' : ''}</p>
+                        {p.code && <p class="bf-code">Code: <a href={`https://github.com/${p.code.repo}`} target="_blank" rel="noopener noreferrer">{p.code.repo}</a> ★{p.code.stars.toLocaleString('en-US')}</p>}
                         <details><summary>Abstract</summary><p>{p.abstract}</p></details>
                     </article>
                 ))}
             </div>
+            <p class="side-note">"Code" links a GitHub repository whose README or description names the paper's arXiv id (GitHub search); paper lists and digests are skipped.</p>
+        </section>
+
+        <section class="fp-band" id="standards">
+            <h2 class="fp-band-h"><span>Standards radar · last 24 hours</span></h2>
+            <p class="bf-lede">What changed underneath your code: new RFCs, Linux kernel releases, and release announcements from PostgreSQL, Python, Rust, Node.js and Kubernetes.</p>
+            {b.standards.length === 0 && <p class="fp-empty">Nothing new in the last 24 hours.</p>}
+            <table class="bf-table">
+                <tbody>{b.standards.map(x => <tr><td>{x.kind === 'Release' ? x.who : x.kind}</td><td><a href={x.url} target="_blank" rel="noopener noreferrer">{x.title}</a></td><td>{day(x.date)}</td></tr>)}</tbody>
+            </table>
+        </section>
+
+        <section class="fp-band" id="talks">
+            <h2 class="fp-band-h"><span>Talk radar · last 24 hours</span></h2>
+            <p class="bf-lede">New talks from the conferences' own channels: USENIX, CppCon, PyData, InfoQ, GOTO, NDC, Papers We Love, CMU Database Group, Jane Street, Black Hat, DEF CON and Computerphile.</p>
+            {b.talks.length === 0 && <p class="fp-empty">No new talks in the last 24 hours.</p>}
+            <table class="bf-table">
+                <tbody>{b.talks.map(x => <tr><td>{x.who}</td><td><a href={x.url} target="_blank" rel="noopener noreferrer">{x.title}</a></td><td>{day(x.date)}</td></tr>)}</tbody>
+            </table>
         </section>
     </div>
     <ReadingClient />

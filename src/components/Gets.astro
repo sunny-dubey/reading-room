@@ -1,0 +1,25 @@
+---
+// "What you'll get" from a piece, so you know why to spend the time: the kind of read and what that means,
+// what it covers (the author's own section headings, else the concepts it touches), the Roadmap skill it
+// builds and the reading time. All computed at build time from the article (summarize.ts); no AI, no summary.
+import type { FeedItem } from '../lib/feeds';
+import { KIND } from '../lib/summarize';
+import { u } from '../lib/url';
+interface Props { i: FeedItem; compact?: boolean }
+const { i, compact = false } = Astro.props;
+const b = i.brief;
+const kind = b?.kind ? KIND[b.kind] : undefined;
+const short = (s: string) => (s.length > 48 ? s.slice(0, 46).replace(/\s+\S*$/, '') + '…' : s);
+const covers = b?.outline?.length ? b.outline.slice(0, compact ? 2 : 4).map(short) : [];
+const touches = !covers.length && b?.concepts?.length ? b.concepts.slice(0, 3) : [];
+const head = kind ? `${kind.label}${b?.minutes ? ` · ${b.minutes} min` : ''}.` : '';
+// Built as one string so spacing never depends on how the template collapses whitespace.
+// An AI "You'll learn …" sentence (learn.ts), when there is one, says it better than the kind's generic intent.
+const rest = [
+    i.learn ?? (!compact && kind?.intent),
+    !(compact && i.learn) && (covers.length ? `Covers: ${covers.join(' · ')}.` : touches.length ? `Touches ${touches.join(', ')}.` : ''),
+].filter(Boolean).join(' ');
+---
+{kind && (
+    <p class:list={['gets', { compact }]}><b class="gets-k">{head}</b>{rest && ` ${rest}`}{!compact && i.skill && <> You'll get better at <a href={u(`/roadmap/#${i.skill.topic.id}`)}>{i.skill.topic.name}</a>.</>}</p>
+)}

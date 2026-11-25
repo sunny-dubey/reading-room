@@ -5,6 +5,7 @@ import { bigStories } from './bigstory';
 import { isRoundup } from './summarize';
 import { getMeta, makeThumb, cleanDescription } from './meta';
 import { mapLimit } from './summarize';
+import { addLearn } from './learn';
 
 const DAY = 864e5;
 import { EDITION_WINDOW } from './edition';
@@ -131,6 +132,8 @@ async function buildReading() {
     const uses = new Map<string, number>();
     for (const i of showcase) if (i.meta?.image) uses.set(`${i.feedId} ${i.meta.image}`, (uses.get(`${i.feedId} ${i.meta.image}`) ?? 0) + 1);
     for (const i of showcase) if (i.meta?.image && (uses.get(`${i.feedId} ${i.meta.image}`) ?? 0) > 1) delete i.meta.image;
+    // "You'll learn" sentences for everything shown with a card: the front page first, then the desk pages.
+    await addLearn([...showcase, ...CATEGORIES.flatMap(c => edition.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 12))]);
     const thumbFor = async (i: FeedItem, w: number) => { if (i.meta?.image) i.meta.thumb = await makeThumb(i.meta.image, w); };
     await mapLimit(deepCands, 4, i => thumbFor(i, 760));
     await mapLimit([...topStories, ...desks.map(d => d.items[0])].filter(Boolean), 6, i => thumbFor(i, 360));

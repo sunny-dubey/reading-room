@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import Story from '../components/Story.astro';
 import Cover from '../components/Cover.astro';
 import Thumb from '../components/Thumb.astro';
+import Gets from '../components/Gets.astro';
 import { categoryShort } from '../lib/feeds';
 import { editionName, istTime, istDate, EDITION_WINDOW } from '../lib/edition';
 import ReadingClient from '../components/ReadingClient.astro';
@@ -20,6 +21,7 @@ import { getPuzzles } from '../lib/puzzles';
 import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
 import WebPuzzleList from '../components/WebPuzzleList.astro';
 import { getGitHub, LABEL } from '../lib/github';
+import { KIND } from '../lib/summarize';
 import { getBusiness, outlet } from '../lib/business';
 import { getCommunities, communityName } from '../lib/communities';
 
@@ -41,6 +43,10 @@ const recentIncidents = outages.incidents.filter(i => now - lastUpdate(i) < EDIT
 const recentLessons = [...recentIncidents].sort((a, b) => Number(!!(b.cause || b.rca)) - Number(!!(a.cause || a.rca)) || lastUpdate(b) - lastUpdate(a)).slice(0, 3);
 const gh = await getGitHub(now, roadmap);
 const biz = await getBusiness();
+// Time budget: the edition's worthwhile pieces with a known reading time, best first (picked in the browser).
+const budgetPool = learning.filter(i => +i.date <= now && now - +i.date < 864e5 && (i.brief?.worth ?? 0) >= 3 && (i.brief?.minutes ?? 0) > 0)
+    .sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 60)
+    .map(i => ({ u: i.link, t: i.title, m: i.brief!.minutes, k: i.brief?.kind ? KIND[i.brief.kind].label : '', d: categoryShort(i.category) }));
 const cm = await getCommunities(now, roadmap);
 const bizFront = [...biz.top, ...biz.river].slice(0, 6);
 const ghStars = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n);
@@ -77,6 +83,18 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         </header>
         <MarketBrief />
 
+        <!-- ===== Time budget: pick how long you have; the browser assembles the best unread reads that fit ===== -->
+        {budgetPool.length > 0 && (
+            <section class="tb" aria-label="Time budget">
+                <div class="tb-bar" role="group" aria-label="How much time do you have?">
+                    <span class="tb-k">How long do you have?</span>
+                    {[15, 30, 60].map(m => <button type="button" class="desk-chip" data-budget={m} aria-pressed="false">{m === 60 ? '1 hour' : `${m} min`}</button>)}
+                </div>
+                <ol class="tb-list" data-budget-list hidden></ol>
+                <script type="application/json" id="budget-pool" set:html={JSON.stringify(budgetPool)} />
+            </section>
+        )}
+
         <!-- ===== The big story: one thing covered by several independent sources ===== -->
         {big.length > 0 && (
             <section class="big-strip" aria-label="The big story">
@@ -99,7 +117,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                             <p class="fp-kicker">The deep read · {categoryShort(d.category)} · {mins(d.brief?.minutes)}</p>
                             <h2 class:list={["fp-lead-h", { long: d.title.length > 60 }]}><a href={d.link} target="_blank" rel="noopener noreferrer" data-read>{d.title}</a></h2>
                             {d.meta?.description && <p class="fp-dek" title="The author's own description">{d.meta.description}</p>}
-                            {d.skill && <p class="fp-deck">You'll get better at <a href={u(`/roadmap/#${d.skill.topic.id}`)}>{d.skill.topic.name}</a>. {d.skill.topic.why}</p>}
+                            <Gets i={d} />
                             <p class="fp-byline">By {d.feedTitle}</p>
                             <a href={d.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Thumb i={d} w={760} h={280} class="fp-lead-art" eager={n === 0} /></a>
                             {d.classic && <p class="fp-footnote"><span>Builds on a classic</span><a href={d.classic.url} target="_blank" rel="noopener noreferrer">{d.classic.title}</a>, {d.classic.author}</p>}
@@ -183,6 +201,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                                 <p class="desk-meta"><span class="new-badge" data-new hidden>New</span><time data-rel datetime={i.date.toISOString()}></time>{n === 0 && i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}{n === 0 && i.brief?.depth === 'deep' ? ' · deep dive' : ''}</p>
                                 <a class="desk-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
                                 {n === 0 && i.meta?.description && <p class="desk-dek">{i.meta.description}</p>}
+                                {n === 0 && <Gets i={i} compact />}
                                 <span class="desk-src">{i.feedTitle}</span>
                             </article>
                         ))}
@@ -262,7 +281,17 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 <div class="bf-box">
                     <h3 class="fp-box-h"><a href={u('/briefing/#papers')}>Paper drop</a></h3>
                     {bf.papers.length === 0 && <p class="fp-empty">No new arXiv papers in the last 24 hours (arXiv doesn’t post at weekends).</p>}
-                    <ul role="list">{bf.papers.slice(0, 4).map(p => <li><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a><span class="bf-date">{p.topic?.name}</span></li>)}</ul>
+                    <ul role="list">{bf.papers.slice(0, 4).map(p => <li><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a><span class="bf-date">{p.code ? <a href={`https://github.com/${p.code.repo}`} target="_blank" rel="noopener noreferrer">code ★{p.code.stars}</a> : p.topic?.name}</span></li>)}</ul>
+                </div>
+                <div class="bf-box">
+                    <h3 class="fp-box-h"><a href={u('/briefing/#standards')}>Standards radar</a></h3>
+                    {bf.standards.length === 0 && <p class="fp-empty">No new RFCs, kernels or runtime releases in the last 24 hours.</p>}
+                    <ul role="list">{bf.standards.slice(0, 5).map(x => <li><a href={x.url} target="_blank" rel="noopener noreferrer">{x.title}</a><span class="bf-date">{x.kind === 'Release' ? x.who : x.kind}</span></li>)}</ul>
+                </div>
+                <div class="bf-box">
+                    <h3 class="fp-box-h"><a href={u('/briefing/#talks')}>Talk radar</a></h3>
+                    {bf.talks.length === 0 && <p class="fp-empty">No new conference talks in the last 24 hours.</p>}
+                    <ul role="list">{bf.talks.slice(0, 5).map(x => <li><a href={x.url} target="_blank" rel="noopener noreferrer">{x.title}</a><span class="bf-date">{x.who}</span></li>)}</ul>
                 </div>
             </div>
         </section>
@@ -340,6 +369,41 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
 
 <script>
     import { getHistory } from '../lib/history-client';
+    // ---------- Time budget: best unread pieces that fit, one per desk first (remembered for today) ----------
+    {
+        type P = { u: string; t: string; m: number; k: string; d: string };
+        const pool: P[] = (() => { try { return JSON.parse(document.getElementById('budget-pool')?.textContent ?? '[]'); } catch { return []; } })();
+        const list = document.querySelector<HTMLOListElement>('[data-budget-list]');
+        const today = new Date().toDateString();
+        const pick = (mins: number) => {
+            const read = new Set(getHistory().map(r => r.u));
+            const fresh = pool.filter(p => !read.has(p.u) && p.m <= mins);
+            const out: P[] = [], desks = new Set<string>();
+            let used = 0;
+            for (const pass of [0, 1]) for (const p of fresh) {
+                if (out.includes(p) || used + p.m > mins || (pass === 0 && desks.has(p.d))) continue;
+                out.push(p); desks.add(p.d); used += p.m;
+            }
+            return { out, used };
+        };
+        const show = (mins: number | null) => {
+            document.querySelectorAll<HTMLButtonElement>('[data-budget]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.budget) === mins)));
+            try { localStorage.setItem('budget:day', JSON.stringify(mins ? { day: today, mins } : {})); } catch {}
+            if (!list) return;
+            if (!mins) { list.hidden = true; list.innerHTML = ''; return; }
+            const { out, used } = pick(mins);
+            const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+            list.innerHTML = out.length
+                ? out.map(p => `<li><a href="${esc(p.u)}" target="_blank" rel="noopener noreferrer" data-read>${esc(p.t)}</a> <span class="tb-meta">${esc(p.k)} · ${esc(p.d)} · ${p.m} min</span></li>`).join('') + `<li class="tb-sum">${used} of ${mins} minutes</li>`
+                : '<li class="tb-sum">Nothing unread fits; try a longer slot.</li>';
+            list.hidden = false;
+        };
+        document.querySelectorAll<HTMLButtonElement>('[data-budget]').forEach(b => b.addEventListener('click', () => {
+            const m = Number(b.dataset.budget);
+            show(b.getAttribute('aria-pressed') === 'true' ? null : m);
+        }));
+        try { const saved = JSON.parse(localStorage.getItem('budget:day') ?? '{}'); if (saved.day === today && saved.mins) show(saved.mins); } catch {}
+    }
 
     // ---------- Lead story: keep today's pick all day, else the best one you haven't opened or been shown ----------
     {

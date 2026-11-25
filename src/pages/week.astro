@@ -15,6 +15,7 @@ const anchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
 const day = (d: Date) => d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
 const from = new Date(+fetchedAt - 7 * 864e5);
 const total = week.desks.reduce((a, d) => a + d.total, 0);
+import Gets from '../components/Gets.astro';
 ---
 <Base title="The week" description="The week in every desk: what several sources covered, and each discipline's best five reads of the last seven days." accent="reading">
     <div class="rd fp week-page">
@@ -45,6 +46,7 @@ const total = week.desks.reduce((a, d) => a + d.total, 0);
                             {d.items.map(i => (
                                 <li data-link={i.link} data-story>
                                     <a class="desk-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                                    <Gets i={i} compact />
                                     <span class="desk-src">{i.feedTitle} · {day(i.date)}{i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}{i.brief?.depth === 'deep' ? ' · deep dive' : ''}</span>
                                 </li>
                             ))}

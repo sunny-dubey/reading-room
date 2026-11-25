@@ -26,10 +26,19 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Cache fetched articles (summaries)
+      # Local models (embeddings + the "You'll learn" writer, ~1.8 GB): a fixed key, so they're saved once and only
+      # restored after that. Change the key when a model changes.
+      - name: Cache local models
         uses: actions/cache@v4
         with:
-          path: .cache
+          path: .cache/models
+          key: models-minilm-qwen2.5-1.5b-q4-v1
+      - name: Cache fetched articles and build data (everything in .cache except the models)
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache
+            !.cache/models
           key: articles-${{ github.run_id }}
           restore-keys: articles-
       - run: npm run build 2>&1 | tee build.log; test ${PIPESTATUS[0]} -eq 0

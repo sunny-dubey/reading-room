@@ -17,6 +17,7 @@ export interface FeedItem {
     meta?: { description?: string; image?: string; thumb?: string }; // the article's own description and preview thumbnail
     classic?: { id: string; title: string; url: string; author: string; sim: number }; // closest Canon read (Old meets new)
     brief?: Brief;       // build-time summary (learning tracks only)
+    learn?: string;      // "You'll learn …": one AI sentence (learn.ts), only when a Gemini key is set
     content?: string;    // full feed HTML, used for summarising then dropped
     comments?: string;   // discussion link (Hacker News)
     points?: number;
