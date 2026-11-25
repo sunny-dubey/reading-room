@@ -124,7 +124,7 @@ const freshCount = (a: typeof areas[number]) => new Set(a.data.topics.flatMap(t 
                                                     <span class="rm-box"></span>
                                                 </label>
                                                 <div class="rm-topic-main">
-                                                    <span class="rm-topic-name">{t.name}</span>
+                                                    <span class="rm-topic-name">{t.name}</span>{topics.get(t.id)?.level && <span class:list={['lvl', `lvl-${topics.get(t.id)!.level.toLowerCase()}`]} title="How hard this is to understand">{topics.get(t.id)!.level}</span>}
                                                     {(r.length > 0 || c.length > 0) && (
                                                         <div class="rm-links">
                                                             {c.map(x => <a class="rm-canon" href={x.data.url} target="_blank" rel="noopener noreferrer" title={x.data.why}>Canon: {x.data.title}</a>)}

@@ -78,7 +78,7 @@ async function cves(now: number) {
 }
 
 // ---------- Paper drop ----------
-export interface Paper { id: string; title: string; url: string; authors: string; cat: string; abstract: string; date: number; topic?: Topic; sim: number; code?: { repo: string; stars: number } }
+export interface Paper { id: string; title: string; url: string; authors: string; cat: string; abstract: string; date: number; topic?: Topic; sim: number; code?: { repo: string; stars: number }; paper?: import('./learn').PaperGist }
 const CATS: Record<string, { label: string; tracks: string[] }> = {
     'cs.DC': { label: 'Distributed computing', tracks: ['systems', 'backend'] },
     'cs.DB': { label: 'Databases', tracks: ['systems', 'backend'] },
@@ -230,5 +230,6 @@ async function build() {
         safe(() => talks(now), [] as Talk[]),
     ]);
     await safe(() => paperCode(paper.picks, now), undefined);
+    await safe(() => import('./learn').then(l => l.addPaperGists(paper.picks)), undefined);
     return { now, ...life, cves: cve.list, kevTotal: cve.total, papers: paper.picks, papersSeen: paper.seen, cats: CATS, standards: std, talks: talk };
 }

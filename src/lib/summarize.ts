@@ -15,7 +15,10 @@ export interface Brief {
     text?: string;        // start of the article text, used for topic matching then dropped
     outline?: string[];   // the article's own section headings (h2/h3), up to 5: "what it covers" in the author's words
     kind: ReadKind;       // what kind of time investment it is
+    level: Level;         // how hard it is to follow (rule-based, see readLevel)
 }
+
+export type Level = 'Intro' | 'Intermediate' | 'Advanced';
 
 /** What kind of read a piece is, and what that means for your time. Rule-based from the title, the text and the source. */
 export type ReadKind = 'howto' | 'deep' | 'case' | 'postmortem' | 'paper' | 'benchmark' | 'analysis' | 'opinion' | 'news' | 'roundup' | 'long' | 'article' | 'short';
@@ -219,7 +222,27 @@ export async function makeBrief(i: { title: string; link: string; summary: strin
 
     const firstPersonHeavy = fetched && words > 300 && (text.match(/\b(I|I'm|I've|I'd|my)\b/g) ?? []).length / words * 1000 > 14;
     const kind = readKind(i, { depth, code: fetched ? ex!.code : 0, firstPersonHeavy, minutes: fetched ? minutes : 0 });
-    return { concepts: found, minutes: fetched ? minutes : 0, depth, worth, fetched, text: text.slice(0, 1200), outline: fetched && !/arxiv\.org\//.test(i.link) ? cleanOutline(ex!.outline) : undefined, kind };
+    const level = readLevel(kind, { text, words, code: fetched ? ex!.code : 0, concepts: found.length, depth });
+    return { concepts: found, minutes: fetched ? minutes : 0, depth, worth, fetched, text: text.slice(0, 1200), outline: fetched && !/arxiv\.org\//.test(i.link) ? cleanOutline(ex!.outline) : undefined, kind, level };
+}
+
+/** How hard a piece is to follow, from the text itself: code, density of technical concepts, maths, the kind of read
+ *  and length. Points: 0–1 Intro, 2–3 Intermediate, 4+ Advanced. */
+function readLevel(kind: ReadKind, f: { text: string; words: number; code: number; concepts: number; depth: Brief['depth'] }): Level {
+    let p = 0;
+    if (kind === 'paper') p += 3;
+    if (kind === 'deep' || kind === 'benchmark') p += 1;
+    if (kind === 'news' || kind === 'opinion' || kind === 'roundup') p -= 1;
+    if (f.code >= 3) p += 1;
+    if (f.code >= 8) p += 1;
+    if (f.concepts >= 3) p += 1;
+    if (f.concepts >= 5) p += 1;
+    if (f.depth === 'deep') p += 1;
+    // Maths: equations, Greek letters, complexity notation per 1,000 words.
+    const math = (f.text.match(/[=≤≥≈∑∫∂√∈⊆]|\b(O|Θ|Ω)\(|[α-ωΑ-Ω]|\b(theorem|lemma|proof|corollary|eigen\w*|gradient|variance|stochastic)\b/g) ?? []).length;
+    if (f.words > 200 && math / f.words * 1000 > 6) p += 1;
+    if (/\b(introduction to|beginner|for beginners|basics|101|getting started|what is)\b/i.test(f.text.slice(0, 300))) p -= 2;
+    return p >= 4 ? 'Advanced' : p >= 2 ? 'Intermediate' : 'Intro';
 }
 
 function readKind(i: { title: string; link: string; category: string }, f: { depth: Brief['depth']; code: number; firstPersonHeavy: boolean; minutes: number }): ReadKind {

@@ -15,6 +15,7 @@ export interface Topic {
     areaTitle: string;
     areaN: number;
     track: string;
+    level: 'Intro' | 'Intermediate' | 'Advanced';  // how hard the topic is to understand (topicLevel)
 }
 
 export interface Practice {
@@ -52,6 +53,17 @@ const ALLOWED: Record<string, string[]> = {
     math: ['math', 'ml'],
 };
 
+// How hard each Roadmap topic is to understand: a base level per area (fundamentals and craft are Intro; HFT, quant,
+// advanced distributed systems and testing & correctness are Advanced; the rest Intermediate), nudged by the topic's
+// own words ("internals", "consensus", "formal" up; "what is", "basics" down).
+const AREA_LEVEL: Record<number, number> = { 1: 0, 2: 0, 3: 0, 23: 0, 25: 0, 31: 0, 19: 2, 30: 2, 33: 2, 34: 2 };
+const HARDER = /\b(advanced|internals?|consensus|paxos|raft|byzantine|formal|tla\+|model checking|crdts?|lock-free|memory ordering|linearizab\w*|serializab\w*|mvcc|kernel bypass|fpga|stochastic|itô|ito|calculus|eigen\w*|measure theory|vector clocks?|quorum|deterministic simulation|compiler|jit|garbage collect\w*|market making|microstructure|interpretability|rlhf|kv[- ]cache)\b/i;
+const EASIER = /\b(what is|introduction|intro to|basics?|fundamentals|overview|getting started|101|beginner)\b/i;
+export function topicLevel(areaN: number, text: string): Topic['level'] {
+    const p = (AREA_LEVEL[areaN] ?? 1) + (HARDER.test(text) ? 1 : 0) - (EASIER.test(text) ? 1 : 0);
+    return p <= 0 ? 'Intro' : p >= 2 ? 'Advanced' : 'Intermediate';
+}
+
 let cached: ReturnType<typeof build> | undefined;
 /** Build the topic index once per build. Pass the learning articles; they get `.skill` attached. */
 export const getRoadmap = (articles: FeedItem[]) => (cached ??= build(articles));
@@ -64,7 +76,7 @@ async function build(articles: FeedItem[]) {
     const text = new Map<string, string>();
     for (const a of areas) for (const t of a.data.topics) {
         if (topics.has(t.id)) continue;
-        topics.set(t.id, { id: t.id, name: t.name, group: t.group, why: t.why ?? a.data.why, areaId: a.id, areaTitle: a.data.title, areaN: a.data.n, track: a.data.track });
+        topics.set(t.id, { id: t.id, name: t.name, group: t.group, why: t.why ?? a.data.why, areaId: a.id, areaTitle: a.data.title, areaN: a.data.n, track: a.data.track, level: topicLevel(a.data.n, `${t.name} ${t.about ?? ''}`) });
         text.set(t.id, `${a.data.title}${t.group ? ` > ${t.group}` : ''} > ${t.name}. ${t.about ?? ''}`.trim());
     }
     const topicList = [...topics.values()];

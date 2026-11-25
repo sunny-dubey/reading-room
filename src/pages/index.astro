@@ -25,7 +25,7 @@ import { KIND } from '../lib/summarize';
 import { getBusiness, outlet } from '../lib/business';
 import { getCommunities, communityName } from '../lib/communities';
 
-const { big, learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap } = await getReading();
+const { big, learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap, bigtech } = await getReading();
 const canon = await getCanon();
 const { question, rabbitHoles, twoTakes, quickCands, explainer, readMap } = await getToday();
 const STEP_NAMES = ['Start here', 'Go deeper', 'Master it'];
@@ -198,7 +198,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                         {d.items.map((i, n) => (
                             <article class:list={['desk-item', { first: n === 0 }]} data-link={i.link} data-ts={+i.date} data-story>
                                 {n === 0 && <a href={i.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Thumb i={i} w={360} h={110} /></a>}
-                                <p class="desk-meta"><span class="new-badge" data-new hidden>New</span><time data-rel datetime={i.date.toISOString()}></time>{n === 0 && i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}{n === 0 && i.brief?.depth === 'deep' ? ' · deep dive' : ''}</p>
+                                <p class="desk-meta"><span class="new-badge" data-new hidden>New</span><time data-rel datetime={i.date.toISOString()}></time></p>
                                 <a class="desk-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
                                 {n === 0 && i.meta?.description && <p class="desk-dek">{i.meta.description}</p>}
                                 {n === 0 && <Gets i={i} compact />}
@@ -208,6 +208,22 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     </section>
                 ))}
             </div>
+        </section>
+
+        <!-- ===== Big tech engineering: what large companies' engineering teams published, last 24 hours ===== -->
+        <section class="fp-band reveal bt-front" aria-label="Big tech engineering">
+            <h2 class="fp-band-h"><span>Big tech engineering · last 24 hours</span></h2>
+            {bigtech.day.length === 0 && <p class="fp-empty">No new posts from big tech engineering teams in the last 24 hours. <a href={u('/big-tech/')}>See the week →</a></p>}
+            <ol class="bt-grid" role="list">
+                {bigtech.day.slice(0, 6).map(i => (
+                    <li data-link={i.link} data-ts={+i.date} data-cat={i.category}>
+                        <p class="bt-co">{i.feedTitle.replace(/\s*(Engineering|Tech Blog|Tech|Technology|Global Tech|Code as Craft|Blog)$/i, '')}</p>
+                        <a class="bt-h" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                        <Gets i={i} compact />
+                    </li>
+                ))}
+            </ol>
+            {bigtech.day.length > 0 && <a class="fp-more" href={u('/big-tech/')}>All big tech engineering posts this week →</a>}
         </section>
 
         <!-- ===== On GitHub: the best technical project being built in the open, picked per edition ===== -->

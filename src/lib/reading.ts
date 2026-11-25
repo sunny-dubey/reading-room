@@ -5,7 +5,7 @@ import { bigStories } from './bigstory';
 import { isRoundup } from './summarize';
 import { getMeta, makeThumb, cleanDescription } from './meta';
 import { mapLimit } from './summarize';
-import { addLearn } from './learn';
+import { addLearn, addPaperGists } from './learn';
 
 const DAY = 864e5;
 import { EDITION_WINDOW } from './edition';
@@ -132,8 +132,14 @@ async function buildReading() {
     const uses = new Map<string, number>();
     for (const i of showcase) if (i.meta?.image) uses.set(`${i.feedId} ${i.meta.image}`, (uses.get(`${i.feedId} ${i.meta.image}`) ?? 0) + 1);
     for (const i of showcase) if (i.meta?.image && (uses.get(`${i.feedId} ${i.meta.image}`) ?? 0) > 1) delete i.meta.image;
+    // Big tech engineering blogs (feeds with bigtech: true): the last 24 hours, and the week for /big-tech/.
+    const bigtechDay = edition.filter(i => i.bigtech).sort((a, b) => +b.date - +a.date);
+    const bigtechWeek = learning.filter(i => i.bigtech && +i.date <= now && now - +i.date < 7 * DAY && !bigtechDay.includes(i)).sort((a, b) => +b.date - +a.date);
     // "You'll learn" sentences for everything shown with a card: the front page first, then the desk pages.
-    await addLearn([...showcase, ...CATEGORIES.flatMap(c => edition.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 12))]);
+    // Research papers shown anywhere in the edition: a plain-words gist and why it matters, first.
+    const isPaper = (i: FeedItem) => /arxiv\.org\/(abs|pdf)\//.test(i.link);
+    await addPaperGists([...showcase, ...CATEGORIES.flatMap(c => edition.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 12))].filter(isPaper));
+    await addLearn([...showcase, ...bigtechDay, ...CATEGORIES.flatMap(c => edition.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 12))]);
     const thumbFor = async (i: FeedItem, w: number) => { if (i.meta?.image) i.meta.thumb = await makeThumb(i.meta.image, w); };
     await mapLimit(deepCands, 4, i => thumbFor(i, 760));
     await mapLimit([...topStories, ...desks.map(d => d.items[0])].filter(Boolean), 6, i => thumbFor(i, 360));
@@ -147,7 +153,7 @@ async function buildReading() {
         return { ...c, total: mine.length, items: [...varied, ...list.filter(i => !varied.includes(i))].slice(0, 5) };
     }).filter(d => d.items.length);
 
-    return { edition, big, week: { big: weekBig, desks: weekDesks }, items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
+    return { edition, big, bigtech: { day: bigtechDay, week: bigtechWeek }, week: { big: weekBig, desks: weekDesks }, items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** "Launch HN: Acme (YC W26) – Agents that file your taxes" → name, batch, tagline. */

@@ -12,12 +12,14 @@ export interface FeedItem {
     summary: string;
     embedText?: string;  // title + start of article, for topic matching
     weight?: number;     // source-level ranking nudge from feeds.yaml
+    bigtech?: boolean;   // from a big tech company's engineering blog (feeds.yaml `bigtech: true`)
     movedFrom?: string;  // original desk when the article was moved to the desk its topic belongs to (roadmap.ts)
     skill?: import('./roadmap').SkillMatch; // closest Roadmap topic (build time)
     meta?: { description?: string; image?: string; thumb?: string }; // the article's own description and preview thumbnail
     classic?: { id: string; title: string; url: string; author: string; sim: number }; // closest Canon read (Old meets new)
     brief?: Brief;       // build-time summary (learning tracks only)
-    learn?: string;      // "You'll learn …": one AI sentence (learn.ts), only when a Gemini key is set
+    learn?: string;      // "You'll learn …": one sentence from the local model (learn.ts)
+    paper?: import('./learn').PaperGist; // research papers: plain-words gist and why it matters (learn.ts)
     content?: string;    // full feed HTML, used for summarising then dropped
     comments?: string;   // discussion link (Hacker News)
     points?: number;
@@ -173,7 +175,7 @@ async function load(): Promise<{ items: FeedItem[]; status: FeedStatus[]; fetche
                 .filter(i => !data.skipTitles || !new RegExp(data.skipTitles, 'i').test(i.title))
                 .sort((a, b) => +b.date - +a.date)
                 .slice(0, data.limit)
-                .map(({ tags, ...i }) => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, weight: data.weight }));
+                .map(({ tags, ...i }) => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, weight: data.weight, bigtech: data.bigtech || undefined }));
             return { status: { ...base, ok: true, count: items.length }, items };
         } catch (err) {
             const error = err instanceof Error ? err.message : String(err);

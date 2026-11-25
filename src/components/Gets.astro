@@ -12,14 +12,14 @@ const kind = b?.kind ? KIND[b.kind] : undefined;
 const short = (s: string) => (s.length > 48 ? s.slice(0, 46).replace(/\s+\S*$/, '') + '…' : s);
 const covers = b?.outline?.length ? b.outline.slice(0, compact ? 2 : 4).map(short) : [];
 const touches = !covers.length && b?.concepts?.length ? b.concepts.slice(0, 3) : [];
-const head = kind ? `${kind.label}${b?.minutes ? ` · ${b.minutes} min` : ''}.` : '';
+const head = kind ? `${kind.label}${b?.level ? ` · ${b.level}` : ''}${b?.minutes ? ` · ${b.minutes} min` : ''}.` : '';
 // Built as one string so spacing never depends on how the template collapses whitespace.
 // An AI "You'll learn …" sentence (learn.ts), when there is one, says it better than the kind's generic intent.
-const rest = [
-    i.learn ?? (!compact && kind?.intent),
-    !(compact && i.learn) && (covers.length ? `Covers: ${covers.join(' · ')}.` : touches.length ? `Touches ${touches.join(', ')}.` : ''),
-].filter(Boolean).join(' ');
+const lead = i.learn ?? (!compact ? kind?.intent : '') ?? '';
+const coversText = !(compact && i.learn) ? (covers.length ? `Covers: ${covers.join(' · ')}.` : touches.length ? `Touches ${touches.join(', ')}.` : '') : '';
 ---
-{kind && (
-    <p class:list={['gets', { compact }]}><b class="gets-k">{head}</b>{rest && ` ${rest}`}{!compact && i.skill && <> You'll get better at <a href={u(`/roadmap/#${i.skill.topic.id}`)}>{i.skill.topic.name}</a>.</>}</p>
+{kind && i.paper ? (
+    <p class:list={['gets', 'gets-paper', { compact }]}><b class="gets-k">{head}</b><span class="gets-lead"> <b>In plain words:</b> {i.paper.gist}</span><span class="gets-impact"> <b>Why it matters:</b> {i.paper.impact}</span></p>
+) : kind && (
+    <p class:list={['gets', { compact, 'has-learn': !!i.learn }]}><b class="gets-k">{head}</b>{lead && <span class="gets-lead">{` ${lead}`}</span>}{coversText && <span class="gets-covers">{` ${coversText}`}</span>}{!compact && i.skill && <span class="gets-skill"> You'll get better at <a href={u(`/roadmap/#${i.skill.topic.id}`)}>{i.skill.topic.name}</a>{i.skill.topic.level ? ` (${i.skill.topic.level.toLowerCase()} topic)` : ''}.</span>}</p>
 )}

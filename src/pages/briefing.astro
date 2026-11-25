@@ -76,6 +76,7 @@ const when = (d: number) => d === 0 ? 'today' : d > 0 ? `in ${d} ${d === 1 ? 'da
                         <p class="fp-kicker">{b.cats[p.cat].label} · <a href={u(`/roadmap/#${p.topic!.id}`)}>{p.topic!.name}</a></p>
                         <h3><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a></h3>
                         <p class="bf-by">{p.authors.split(',').slice(0, 3).join(',')}{p.authors.split(',').length > 3 ? ' et al.' : ''}</p>
+                        {p.paper && <p class="gets gets-paper"><span class="gets-lead"><b>In plain words:</b> {p.paper.gist}</span><span class="gets-impact"> <b>Why it matters:</b> {p.paper.impact}</span></p>}
                         {p.code && <p class="bf-code">Code: <a href={`https://github.com/${p.code.repo}`} target="_blank" rel="noopener noreferrer">{p.code.repo}</a> ★{p.code.stars.toLocaleString('en-US')}</p>}
                         <details><summary>Abstract</summary><p>{p.abstract}</p></details>
                     </article>

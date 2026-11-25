@@ -1,0 +1,47 @@
+---
+// Big tech engineering: what the engineering teams of large tech companies published (feeds with bigtech: true).
+// The last 24 hours first, then the rest of the week (the week is kept here because these blogs post weekly, not daily).
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import Gets from '../components/Gets.astro';
+import { getReading } from '../lib/reading';
+import { getCollection } from 'astro:content';
+const { bigtech, fetchedAt } = await getReading();
+const blogs = (await getCollection('feeds')).filter(f => f.data.bigtech).map(f => f.data.title).sort();
+const company = (t: string) => t.replace(/\s*(Engineering|Tech Blog|Tech|Technology|Global Tech|Code as Craft|Blog|Science|Architecture Blog)$/i, '').replace(/^JioHotstar$/, 'JioHotstar').trim();
+---
+<Base title="Big tech engineering" description="What the engineering teams of large tech companies published: the last 24 hours, then the week." accent="reading">
+    <div class="rd bt-page">
+        <ReadingMast compact title="Big tech engineering" sub={`What ${blogs.length} big tech engineering teams published: the last 24 hours, then the rest of the week.`} updated={fetchedAt} />
+        <section class="fp-band" aria-label="Last 24 hours">
+            <h2 class="fp-band-h"><span>Last 24 hours</span></h2>
+            {bigtech.day.length === 0 && <p class="fp-empty">No new posts from these teams in the last 24 hours. Most post weekly; the week is below.</p>}
+            <ol class="bt-list" role="list">
+                {bigtech.day.map(i => (
+                    <li data-link={i.link} data-ts={+i.date}>
+                        <p class="bt-co">{company(i.feedTitle)} · <time data-rel datetime={i.date.toISOString()}></time></p>
+                        <a class="bt-h" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                        <Gets i={i} />
+                    </li>
+                ))}
+            </ol>
+        </section>
+        {bigtech.week.length > 0 && (
+            <section class="fp-band" aria-label="Earlier this week">
+                <h2 class="fp-band-h"><span>Earlier this week</span></h2>
+                <ol class="bt-list" role="list">
+                    {bigtech.week.map(i => (
+                        <li data-link={i.link} data-ts={+i.date}>
+                            <p class="bt-co">{company(i.feedTitle)} · <time data-rel datetime={i.date.toISOString()}></time></p>
+                            <a class="bt-h" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                            <Gets i={i} compact />
+                        </li>
+                    ))}
+                </ol>
+            </section>
+        )}
+        <p class="side-note">Blogs: {blogs.join(', ')}. Uber, LinkedIn, DoorDash, X, Coinbase, Atlassian and PhonePe aren't included: they block automated readers or publish no feed.</p>
+    </div>
+    <ReadingClient />
+</Base>

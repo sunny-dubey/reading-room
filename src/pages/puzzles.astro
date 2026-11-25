@@ -93,18 +93,27 @@ const fmt = (n: number) => (Math.abs(n) >= 1e7 ? n.toExponential(2).replace('e+'
         <section class="fp-band">
             <h2 class="fp-band-h"><span>Every puzzle</span></h2>
             <div class="pz-grid">
-                {puzzles.filter(p => p !== today).map(p => <PuzzleCard p={p} />)}
+                {puzzles.filter(p => p !== today).slice(0, 6).map(p => <PuzzleCard p={p} />)}
             </div>
+            {puzzles.filter(p => p !== today).length > 6 && (
+                <details class="more-block">
+                    <summary>All {puzzles.filter(p => p !== today).length} puzzles</summary>
+                    <div class="pz-grid">{puzzles.filter(p => p !== today).slice(6).map(p => <PuzzleCard p={p} />)}</div>
+                </details>
+            )}
         </section>
 
         <section class="fp-band" id="numbers">
             <h2 class="fp-band-h"><span>Numbers you should know</span></h2>
             <p class="side-note">The full deck. Today shows one a day; here you can study them all. Cover the right side and test yourself.</p>
-            <dl class="num-deck">
-                {numbers.map(c => (
-                    <div><dt>{c.q}</dt><dd><b>{fmt(c.answer)} {c.unit}</b><span>{c.how}</span><em>{c.source}</em></dd></div>
-                ))}
-            </dl>
+            <details class="more-block">
+                <summary>Open the deck ({numbers.length} numbers)</summary>
+                <dl class="num-deck">
+                    {numbers.map(c => (
+                        <div><dt>{c.q}</dt><dd><b>{fmt(c.answer)} {c.unit}</b><span>{c.how}</span><em>{c.source}</em></dd></div>
+                    ))}
+                </dl>
+            </details>
         </section>
     </div>
     <ReadingClient />

@@ -293,6 +293,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  bigtech: true
 - id: cloudflare
   title: Cloudflare
   url: https://blog.cloudflare.com/rss/
@@ -300,6 +301,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  bigtech: true
 - id: netflix
   title: Netflix Tech Blog
   url: https://netflixtechblog.com/feed
@@ -307,6 +309,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  bigtech: true
 - id: github-eng
   title: GitHub Engineering
   url: https://github.blog/engineering/feed/
@@ -314,6 +317,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  bigtech: true
 - id: slack-eng
   title: Slack Engineering
   url: https://slack.engineering/feed/
@@ -321,6 +325,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  bigtech: true
 - id: shopify-eng
   title: Shopify Engineering
   url: https://shopify.engineering/blog.atom
@@ -328,6 +333,7 @@
   category: backend
   limit: 4
   maxAgeDays: 90
+  bigtech: true
 - id: bytebytego
   title: ByteByteGo
   url: https://blog.bytebytego.com/feed
@@ -383,6 +389,7 @@
   category: backend
   limit: 4
   maxAgeDays: 90
+  bigtech: true
 - id: meta-eng
   title: Meta Engineering
   url: https://engineering.fb.com/feed/
@@ -390,6 +397,7 @@
   category: backend
   limit: 5
   maxAgeDays: 60
+  bigtech: true
 
 - id: dropbox
   title: Dropbox Tech
@@ -398,6 +406,7 @@
   category: backend
   limit: 5
   maxAgeDays: 120
+  bigtech: true
 - id: pinterest
   title: Pinterest Engineering
   url: 'https://medium.com/feed/pinterest-engineering'
@@ -405,6 +414,7 @@
   category: backend
   limit: 5
   maxAgeDays: 90
+  bigtech: true
 - id: charity
   title: Charity Majors
   url: 'https://charity.wtf/feed/'
@@ -429,6 +439,7 @@
   category: backend
   limit: 4
   maxAgeDays: 60
+  bigtech: true
 
 - id: grab-eng
   title: "Grab Engineering"
@@ -437,6 +448,7 @@
   category: backend
   limit: 4
   maxAgeDays: 60
+  bigtech: true
 
 - id: spotify-eng
   title: "Spotify Engineering"
@@ -445,6 +457,7 @@
   category: backend
   limit: 3
   maxAgeDays: 60
+  bigtech: true
 
 - id: samwho
   title: "Sam Rose (samwho.dev)"
@@ -471,6 +484,152 @@
   category: swe
   limit: 2
 
+
+# ---------- big tech engineering blogs (added 2026-11-25; the Big tech section collects every feed with bigtech: true) ----------
+- id: salesforce-eng
+  title: "Salesforce Engineering"
+  url: 'https://engineering.salesforce.com/feed/'
+  site: https://engineering.salesforce.com/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: expedia-tech
+  title: "Expedia Group Technology"
+  url: 'https://medium.com/feed/expedia-group-tech'
+  site: https://medium.com/expedia-group-tech
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: booking-eng
+  title: "Booking.com Engineering"
+  url: 'https://medium.com/feed/booking-com-development'
+  site: https://medium.com/booking-com-development
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: lyft-eng
+  title: "Lyft Engineering"
+  url: 'https://eng.lyft.com/feed'
+  site: https://eng.lyft.com/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: zalando-eng
+  title: "Zalando Engineering"
+  url: 'https://engineering.zalando.com/atom.xml'
+  site: https://engineering.zalando.com/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: yelp-eng
+  title: "Yelp Engineering"
+  url: 'https://engineeringblog.yelp.com/feed.xml'
+  site: https://engineeringblog.yelp.com/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: walmart-tech
+  title: "Walmart Global Tech"
+  url: 'https://medium.com/feed/walmartglobaltech'
+  site: https://medium.com/walmartglobaltech
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: canva-eng
+  title: "Canva Engineering"
+  url: 'https://www.canva.dev/blog/engineering/feed.xml'
+  site: https://www.canva.dev/blog/engineering/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: instacart-tech
+  title: "Instacart Tech"
+  url: 'https://tech.instacart.com/feed'
+  site: https://tech.instacart.com/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: etsy-eng
+  title: "Etsy Code as Craft"
+  url: 'https://www.etsy.com/codeascraft/rss'
+  site: https://www.etsy.com/codeascraft
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: amazon-science
+  title: "Amazon Science"
+  url: 'https://www.amazon.science/index.rss'
+  site: https://www.amazon.science/
+  category: ml
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: aws-architecture
+  title: "AWS Architecture Blog"
+  url: 'https://aws.amazon.com/blogs/architecture/feed/'
+  site: https://aws.amazon.com/blogs/architecture/
+  category: backend
+  limit: 3
+  bigtech: true
+  weight: -0.3
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event|launch'
+
+- id: nubank-eng
+  title: "Nubank Engineering"
+  url: 'https://building.nubank.com/feed/'
+  site: https://building.nubank.com/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: razorpay-eng
+  title: "Razorpay Engineering"
+  url: 'https://engineering.razorpay.com/feed'
+  site: https://engineering.razorpay.com/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: hotstar-tech
+  title: "JioHotstar Tech"
+  url: 'https://blog.hotstar.com/feed'
+  site: https://blog.hotstar.com/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
+
+- id: flipkart-tech
+  title: "Flipkart Tech"
+  url: 'https://blog.flipkart.tech/feed'
+  site: https://blog.flipkart.tech/
+  category: backend
+  limit: 3
+  bigtech: true
+  skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
 
 # ---------- software engineering (the craft: design, testing, debugging, performance, languages, tools) ----------
 # Chosen for technical depth over opinion (2026-11-25). Fowler, Julia Evans, Dan Luu, Hillel Wayne,

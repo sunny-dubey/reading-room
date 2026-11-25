@@ -14,6 +14,7 @@ const feeds = defineCollection({
         weight: z.number().min(-2).max(2).default(0), // ranking nudge for this source (depth/quality)
         onlyTags: z.array(z.string()).optional(),   // keep only items whose own <category> tags include one of these
         skipTitles: z.string().optional(),          // regex (case-insensitive): drop items whose title matches
+        bigtech: z.boolean().default(false),        // a big tech company's engineering blog (the Big tech section)
     }),
 });
 
