@@ -1,0 +1,16 @@
+---
+// The "Research" part of the edition: the full bands for this part (src/components/Edition.astro).
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import Edition from '../components/Edition.astro';
+import { getReading } from '../lib/reading';
+const { fetchedAt } = await getReading();
+---
+<Base title="Research" description="New papers, explained in plain words first: what each one does and why it matters." accent="reading">
+    <div class="rd calm">
+        <ReadingMast compact title="Research" sub="New papers, explained in plain words first: what each one does and why it matters." updated={fetchedAt} />
+        <Edition part="research" />
+    </div>
+    <ReadingClient />
+</Base>

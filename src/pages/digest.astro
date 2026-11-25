@@ -1,0 +1,106 @@
+---
+// The whole edition on one page: for each of the six parts, a short summary written by the local model
+// (digest skill, skills.ts) from that part's own items, with the items listed under it so every line is checkable.
+// Where the model had no time or its paragraph didn't name an item, the part shows the list alone.
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { u } from '../lib/url';
+import { getReading } from '../lib/reading';
+import { getStartups } from '../lib/startups';
+import { getGitHub } from '../lib/github';
+import { getBusiness, outlet } from '../lib/business';
+import { getBriefing } from '../lib/briefing';
+import { getCommunities } from '../lib/communities';
+import { categoryShort } from '../lib/feeds';
+import { digest, saveSkills } from '../lib/skills';
+import { KIND } from '../lib/summarize';
+import { bandOf } from '../lib/reading';
+
+const r = await getReading();
+const { now, fetchedAt, deepCands, topStories, wire, bigtech, experimental, research, thoughts, roadmap } = r;
+const su = await getStartups();
+const gh = await getGitHub(now, roadmap);
+const cm = await getCommunities(now, roadmap);
+const biz = await getBusiness();
+const bf = await getBriefing();
+const day = new Date(now).toISOString().slice(0, 10);
+
+// The reading plan: the few pieces most worth the time today, in an order that builds: start readable, then go
+// deeper, then something to try, then one paper. Each with what you'll learn, level, minutes and a question.
+const seen = new Set<string>();
+const take = (list: typeof topStories, n: number) => list.filter(i => !seen.has(i.link) && !i.hype && (i.brief?.minutes ?? 0) > 0 && seen.add(i.link)).slice(0, n);
+const plan = [
+    ...take(deepCands, 1),
+    ...take(topStories.filter(i => i.brief?.level !== 'Advanced'), 1),
+    ...take(topStories, 1),
+    ...take(bigtech.day.filter(i => bandOf(i) !== 'research'), 1),
+    ...take(experimental, 1),
+    ...take(research, 1),
+].slice(0, 6);
+const planMinutes = plan.reduce((n, i) => n + (i.brief?.minutes ?? 0), 0);
+const step = (i: (typeof plan)[number], k: number) =>
+    k === 0 ? 'Start here' : bandOf(i) === 'experimental' ? 'Then try it' : bandOf(i) === 'research' ? 'If you have time: a paper' : i.bigtech ? 'How a big team does it' : k === 1 ? 'Next' : 'Go deeper';
+
+interface Line { title: string; href: string; meta: string; note?: string }
+const parts: { n: number; name: string; href: string; lines: Line[] }[] = [
+    { n: 1, name: 'Discover', href: '/discover/', lines: [
+        ...su.targets.slice(0, 3).map(t => ({ title: t.name, href: t.url, meta: t.signal, note: t.headline })),
+        ...bigtech.day.slice(0, 3).map(i => ({ title: i.title, href: i.link, meta: i.feedTitle, note: i.learn })),
+        ...(gh.featured ? [{ title: gh.featured.name, href: gh.featured.url, meta: 'On GitHub', note: gh.featured.description }] : []),
+        ...cm.everywhere.slice(0, 2).map(g => ({ title: g.threads[0].title, href: g.threads[0].url, meta: 'Discussed in several communities' })),
+    ] },
+    { n: 2, name: 'Learn', href: '/learn/', lines: [...deepCands.slice(0, 1), ...topStories.slice(0, 5)].map(i => ({ title: i.title, href: i.link, meta: `${categoryShort(i.category)} · ${i.feedTitle}`, note: i.learn })) },
+    { n: 3, name: 'News', href: '/news/', lines: [
+        ...[...biz.top, ...biz.river].slice(0, 3).map(b => ({ title: b.lead.title, href: b.lead.link, meta: `Business · ${outlet(b.lead)}` })),
+        ...wire.filter(i => !i.hype).slice(0, 3).map(i => ({ title: i.title, href: i.link, meta: `${categoryShort(i.category)} · ${i.feedTitle}` })),
+        ...bf.standards.slice(0, 1).map(x => ({ title: x.title, href: x.url, meta: `Standards · ${x.who}` })),
+        ...bf.cves.slice(0, 1).map(c => ({ title: `${c.vendor} ${c.product}: ${c.name}`, href: `https://nvd.nist.gov/vuln/detail/${c.id}`, meta: 'Exploited vulnerability' })),
+    ] },
+    { n: 4, name: 'Try it', href: '/try/', lines: experimental.slice(0, 5).map(i => ({ title: i.title, href: i.link, meta: i.feedTitle, note: i.learn })) },
+    { n: 5, name: 'Research', href: '/papers/', lines: research.slice(0, 5).map(i => ({ title: i.title, href: i.link, meta: i.feedTitle, note: i.paper?.gist })) },
+    { n: 6, name: 'Thoughts', href: '/thoughts/', lines: thoughts.slice(0, 4).map(i => ({ title: i.title, href: i.link, meta: i.feedTitle, note: i.learn })) },
+];
+// One paragraph per part, in priority order (shared time budget; cached per edition).
+const summaries: (string | null)[] = [];
+for (const p of parts) summaries.push(await digest(day, p.name, p.lines.map(l => ({ title: l.title, note: l.note }))));
+await saveSkills();
+---
+<Base title="Today's summary" description="What to read today and in what order, then each part of the edition in two or three sentences." accent="reading">
+    <div class="rd dg-page calm">
+        <ReadingMast compact title="Today's summary" sub="What to read today and in what order, then each part of the edition in two or three sentences. Summaries are written by a local AI from the items listed under them; check anything that matters at the source." updated={fetchedAt} />
+
+        {plan.length > 0 && (
+            <section class="dg-plan" aria-labelledby="dg-plan-h">
+                <h2 id="dg-plan-h">Your reading plan <span class="dg-plan-total">{plan.length} pieces · about {planMinutes} min</span></h2>
+                <ol class="dg-plan-list" role="list">
+                    {plan.map((i, k) => (
+                        <li data-link={i.link}>
+                            <p class="dg-step"><span class="dg-step-n">{k + 1}</span>{step(i, k)} · {i.brief?.kind ? KIND[i.brief.kind].label : 'Article'} · {i.brief?.level ?? ''} · {i.brief?.minutes} min</p>
+                            <a class="dg-plan-t" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
+                            <p class="dg-plan-src">{i.feedTitle} · {categoryShort(i.category)}</p>
+                            {(i.learn || i.paper?.gist) && <p class="dg-plan-learn">{i.learn ?? `In plain words: ${i.paper!.gist}`}</p>}
+                            {i.check && <p class="dg-plan-check"><b>After reading, ask yourself:</b> {i.check}</p>}
+                        </li>
+                    ))}
+                </ol>
+                <p class="side-note">Pieces you've opened are ticked in this browser. The order goes from the most readable to the deepest; stop wherever your time runs out.</p>
+            </section>
+        )}
+
+        <h2 class="dg-parts-h">The edition, part by part</h2>
+        {parts.map((p, k) => (
+            <section class="dg-part" aria-labelledby={`dg-${p.n}`}>
+                <h2 id={`dg-${p.n}`}><span class="fp-part-n">{p.n}</span> <a href={u(p.href)}>{p.name}</a></h2>
+                {summaries[k] ? <p class="dg-sum">{summaries[k]}</p> : p.lines.length > 0 && <p class="dg-sum dg-plain">{p.lines.length} {p.lines.length === 1 ? 'item' : 'items'} today; the list is below.</p>}
+                {p.lines.length === 0 ? <p class="fp-empty">Nothing new in this part in the last 24 hours.</p> : (
+                    <ol class="dg-items" role="list">
+                        {p.lines.map(l => <li><a href={l.href} target="_blank" rel="noopener noreferrer" data-read>{l.title}</a> <span class="dg-meta">{l.meta}</span></li>)}
+                    </ol>
+                )}
+                <a class="fp-sum-open" href={u(p.href)}>Open {p.name} →</a>
+            </section>
+        ))}
+    </div>
+    <ReadingClient />
+</Base>

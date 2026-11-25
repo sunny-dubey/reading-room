@@ -4,17 +4,13 @@ import { u } from '../lib/url';
 <footer class="site-footer">
     <div class="foot-about">
         <strong>The Reading Room</strong>
-        <span>A daily paper for engineers who read like researchers, curated by Sunny Dubey from the best experts in CS research, systems, system design, software engineering, agentic AI, security, HFT tech, quant finance, macro and applied maths.</span>
+        <span>A reading and discovery room for careers in software and the industries around it, curated by Sunny Dubey from the best experts and edited at build time by a local language model (no cloud AI). Discover, learn, stay informed, try things; research and opinion come last.</span>
     </div>
-    <span class="links">
-        <a href={u('/canon/')}>canon</a>
-        <a href={u('/roadmap/')}>roadmap</a>
-        <a href={u('/sources/')}>sources</a>
-        <a href={u('/startups/')}>startups</a>
-        <a href={u('/pulse/')}>pulse</a>
-        <a href={u('/rss.xml')}>rss</a>
-        <a href="https://traces.sunnydubey.in/" target="_blank" rel="noopener noreferrer">portfolio</a>
-        <a href="https://github.com/sunny-dubey" target="_blank" rel="noopener noreferrer">github</a>
-        <a href="https://x.com/sunnydub_" target="_blank" rel="noopener noreferrer">twitter</a>
-    </span>
+    <nav class="foot-map" aria-label="Site map">
+        <div><b>Discover</b><a href={u('/digest/')}>Today's summary</a><a href={u('/discover/')}>Today's finds</a><a href={u('/startups/')}>Startups</a><a href={u('/big-tech/')}>Big tech</a><a href={u('/communities/')}>Communities</a></div>
+        <div><b>Learn</b><a href={u('/learn/')}>Today's reads</a><a href={u('/roadmap/')}>Roadmap</a><a href={u('/canon/')}>Canon</a><a href={u('/week/')}>The week</a><a href={u('/sources/')}>Sources</a></div>
+        <div><b>News</b><a href={u('/news/')}>Today's news</a><a href={u('/business/')}>Business</a><a href={u('/briefing/')}>Briefing</a><a href={u('/markets/')}>Markets</a><a href={u('/outages/')}>Incidents</a><a href={u('/pulse/')}>Pulse</a></div>
+        <div><b>Try · Research · Thoughts</b><a href={u('/try/')}>Try it</a><a href={u('/puzzles/')}>Puzzles</a><a href={u('/papers/')}>Research</a><a href={u('/thoughts/')}>Thoughts</a></div>
+        <div><b>Elsewhere</b><a href={u('/rss.xml')}>RSS</a><a href="https://traces.sunnydubey.in/" target="_blank" rel="noopener noreferrer">Portfolio</a><a href="https://github.com/sunny-dubey" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://x.com/sunnydub_" target="_blank" rel="noopener noreferrer">X</a></div>
+    </nav>
 </footer>

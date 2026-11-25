@@ -5,7 +5,8 @@ import { bigStories } from './bigstory';
 import { isRoundup } from './summarize';
 import { getMeta, makeThumb, cleanDescription } from './meta';
 import { mapLimit } from './summarize';
-import { addLearn, addPaperGists } from './learn';
+import * as skills from './skills';
+import type { ReadKind } from './summarize';
 
 const DAY = 864e5;
 import { EDITION_WINDOW } from './edition';
@@ -20,6 +21,16 @@ export const rank = (i: FeedItem, now: number) => {
 };
 
 export const isDeep = (i: FeedItem) => (i.brief?.worth ?? 0) >= 3.5;
+
+/** The front page's bands, in Sunny's priority order (2026-11-25): discover, readable, learn, informative,
+ *  experimental, research, thoughts. Each article goes to one band by its kind of read. */
+export type Band = 'learn' | 'informative' | 'experimental' | 'research' | 'thoughts';
+const BAND: Record<ReadKind, Band> = {
+    howto: 'experimental', benchmark: 'experimental', paper: 'research', opinion: 'thoughts',
+    news: 'informative', analysis: 'informative', roundup: 'informative',
+    deep: 'learn', case: 'learn', postmortem: 'learn', long: 'learn', article: 'learn', short: 'learn',
+};
+export const bandOf = (i: FeedItem): Band => (i.brief?.kind ? BAND[i.brief.kind] : /arxiv\.org\//.test(i.link) ? 'research' : 'learn');
 
 export async function getCanon() {
     const all = await getCollection('canon');
@@ -44,6 +55,12 @@ async function buildReading() {
     const big = await bigStories(items.filter(i => i.category !== 'business'), now, 1); // business news has its own page
     if (process.env.BIG_DEBUG) for (const b of big) console.log('[big]', b.sources, b.items.map(i => `${i.feedTitle}: ${i.title}`).join(' | '));
 
+    // Substance check (local model): front-page candidates that are hype stay off the front page (desk pages keep them).
+    const hype = await skills.substance(byRank.filter(i => bandOf(i) !== 'research').slice(0, 40));
+    for (const i of edition) if (hype.has(i.link)) i.hype = true;
+    // What may lead or headline the front: not a paper, not an opinion, not news, not hype.
+    const frontable = (i: FeedItem) => !i.hype && ['learn', 'experimental'].includes(bandOf(i));
+
     const used = new Set<string>();
     const take = (pool: FeedItem[], n: number, distinctTrack = false) => {
         const out: FeedItem[] = [];
@@ -57,7 +74,9 @@ async function buildReading() {
     };
 
     // The lead: the most worthwhile thing in this edition (postmortems have their own slot).
-    const recent = byRank.filter(i => i.category !== 'postmortems' && i.brief?.fetched);
+    // Readable first: Intro and Intermediate pieces before Advanced ones of similar rank.
+    const readable = (i: FeedItem) => (i.brief?.level === 'Advanced' ? 1 : 0);
+    const recent = byRank.filter(i => i.category !== 'postmortems' && i.brief?.fetched && frontable(i)).sort((a, b) => readable(a) - readable(b));
     // Up to 5 candidates in rank order; the page shows the first one you haven't read or been shown on an
     // earlier day. A quiet day with nothing at worth 4 still gets a lead: the bar drops to 3.5, then 3.
     const leadAt = (w: number) => recent.filter(i => (i.brief?.worth ?? 0) >= w).slice(0, 5);
@@ -114,14 +133,19 @@ async function buildReading() {
     // The wire: the newest headlines from every desk, for scanning.
     // At most two per source, so a batch publisher (arXiv posts its whole day at once) can't flood it.
     const perFeed = new Map<string, number>();
-    const wire = edition.filter(i => (i.brief?.worth ?? 0) >= 2.5 && i.link !== deepRead?.link).sort(newest)
+    const wire = edition.filter(i => (i.brief?.worth ?? 0) >= 2.5 && i.link !== deepRead?.link && bandOf(i) !== 'research' && !i.hype).sort(newest)
         // All arXiv listings count as one source here, so new-submission batches can't fill the wire.
         .filter(i => { const k = i.feedId.startsWith('arxiv') ? 'arxiv' : i.feedId; const n = perFeed.get(k) ?? 0; perFeed.set(k, n + 1); return n < 2; }).slice(0, 11);
     // Top stories under the lead: the best recent pieces not already in the wire or the desks.
     const shownElsewhere = new Set([...wire, ...desks.flatMap(d => d.items)].map(i => i.link));
-    const topStories = byRank.filter(i => isDeep(i) && !shownElsewhere.has(i.link) && !deepCands.some(d => d.link === i.link) && i.category !== 'postmortems').slice(0, 6);
+    const topStories = byRank.filter(i => isDeep(i) && frontable(i) && bandOf(i) === 'learn' && !shownElsewhere.has(i.link) && !deepCands.some(d => d.link === i.link) && i.category !== 'postmortems').slice(0, 6);
+    // The other bands, each the best of its kind in the edition.
+    const notLead = (i: FeedItem) => !deepCands.some(d => d.link === i.link) && !topStories.includes(i);
+    const experimental = byRank.filter(i => bandOf(i) === 'experimental' && !i.hype && notLead(i) && (i.brief?.worth ?? 0) >= 2.5).slice(0, 6);
+    const research = byRank.filter(i => bandOf(i) === 'research').slice(0, 6);
+    const thoughts = byRank.filter(i => bandOf(i) === 'thoughts' && !i.hype && (i.brief?.worth ?? 0) >= 2).slice(0, 4);
     // The article's own description and preview image for everything shown with a picture or a dek.
-    const showcase = [...new Set([...deepCands, ...topStories, ...desks.flatMap(d => d.items), ...wire])];
+    const showcase = [...new Set([...deepCands, ...topStories, ...experimental, ...thoughts, ...research, ...desks.flatMap(d => d.items), ...wire])];
     await mapLimit(showcase, 8, async i => {
         // arXiv's og:image is always its logo and its description is the abstract: show neither.
         if (i.feedId.startsWith('arxiv')) { i.meta = {}; return; }
@@ -136,10 +160,14 @@ async function buildReading() {
     const bigtechDay = edition.filter(i => i.bigtech).sort((a, b) => +b.date - +a.date);
     const bigtechWeek = learning.filter(i => i.bigtech && +i.date <= now && now - +i.date < 7 * DAY && !bigtechDay.includes(i)).sort((a, b) => +b.date - +a.date);
     // "You'll learn" sentences for everything shown with a card: the front page first, then the desk pages.
-    // Research papers shown anywhere in the edition: a plain-words gist and why it matters, first.
-    const isPaper = (i: FeedItem) => /arxiv\.org\/(abs|pdf)\//.test(i.link);
-    await addPaperGists([...showcase, ...CATEGORIES.flatMap(c => edition.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 12))].filter(isPaper));
-    await addLearn([...showcase, ...bigtechDay, ...CATEGORIES.flatMap(c => edition.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 12))]);
+    // The local model's skills, in the order the edition needs them (they share one time budget; see skills.ts).
+    const deskTop = CATEGORIES.flatMap(c => edition.filter(i => i.category === c.id).sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 12));
+    const { getStartups } = await import('./startups');
+    await getStartups(now, roadmap); // the approach skill, for the Discover band
+    await skills.learn([...deepCands, ...topStories, ...bigtechDay, ...experimental, ...thoughts, ...showcase, ...deskTop].filter(i => bandOf(i) !== 'research'));
+    await skills.check([...deepCands.slice(0, 3), ...topStories]);
+    await skills.paperGist([...research, ...showcase, ...deskTop].filter(i => bandOf(i) === 'research'));
+    await skills.saveSkills();
     const thumbFor = async (i: FeedItem, w: number) => { if (i.meta?.image) i.meta.thumb = await makeThumb(i.meta.image, w); };
     await mapLimit(deepCands, 4, i => thumbFor(i, 760));
     await mapLimit([...topStories, ...desks.map(d => d.items[0])].filter(Boolean), 6, i => thumbFor(i, 360));
@@ -153,7 +181,7 @@ async function buildReading() {
         return { ...c, total: mine.length, items: [...varied, ...list.filter(i => !varied.includes(i))].slice(0, 5) };
     }).filter(d => d.items.length);
 
-    return { edition, big, bigtech: { day: bigtechDay, week: bigtechWeek }, week: { big: weekBig, desks: weekDesks }, items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
+    return { edition, big, experimental, research, thoughts, bigtech: { day: bigtechDay, week: bigtechWeek }, week: { big: weekBig, desks: weekDesks }, items, learning, status, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap };
 }
 
 /** "Launch HN: Acme (YC W26) – Agents that file your taxes" → name, batch, tagline. */

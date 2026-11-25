@@ -19,7 +19,9 @@ export interface FeedItem {
     classic?: { id: string; title: string; url: string; author: string; sim: number }; // closest Canon read (Old meets new)
     brief?: Brief;       // build-time summary (learning tracks only)
     learn?: string;      // "You'll learn …": one sentence from the local model (learn.ts)
-    paper?: import('./learn').PaperGist; // research papers: plain-words gist and why it matters (learn.ts)
+    paper?: import('./skills').PaperGist; // research papers: plain-words gist and why it matters (skills.ts)
+    check?: string;      // "Check yourself": one question about a deep read (skills.ts)
+    hype?: boolean;      // judged hype by the substance skill: kept off the front page
     content?: string;    // full feed HTML, used for summarising then dropped
     comments?: string;   // discussion link (Hacker News)
     points?: number;

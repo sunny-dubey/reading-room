@@ -1,0 +1,16 @@
+---
+// The "Learn" part of the edition: the full bands for this part (src/components/Edition.astro).
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import Edition from '../components/Edition.astro';
+import { getReading } from '../lib/reading';
+const { fetchedAt } = await getReading();
+---
+<Base title="Learn" description="The clearest pieces of the day, then every desk. Each card says what you’ll learn, how hard it is and how long it takes." accent="reading">
+    <div class="rd calm">
+        <ReadingMast compact title="Learn" sub="The clearest pieces of the day, then every desk. Each card says what you’ll learn, how hard it is and how long it takes." updated={fetchedAt} />
+        <Edition part="learn" />
+    </div>
+    <ReadingClient />
+</Base>

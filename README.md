@@ -1,97 +1,47 @@
 # The Reading Room
 
-**A personal, read-only learning site for becoming a sharper software engineer.**
+**A reading and discovery room for careers in software and the industries around it, edited by a local AI.**
 
 Live: https://sunny-dubey.github.io/reading-room/
 
-Most "what to read" feeds optimise for what's new. The Reading Room optimises for **what makes you better**: deep explanations over announcements, foundations over hype, and a clear reason for every piece you read. It's built around one loop: **read deeply → reflect → revisit**.
+A daily paper for curious engineers who want to grow without the brain rot. Four editions a day, each carrying only the last 24 hours, from the best experts in each field. Every piece tells you what it is (a how-to, a deep dive, a paper, an opinion), how hard it is, how long it takes and **what you'll learn**, so you can decide whether it's worth your time before you click. A small language model running **locally at build time** writes those lines: no cloud AI, no API keys, nothing leaves the build.
 
-It covers the areas a strong engineer needs:
+## How it's organised
 
-- **Distributed Systems & Databases**: consensus, replication, consistency, storage engines, Postgres internals
-- **Scalability & Architecture**: architectural design, trade-offs, reliability patterns, APIs
-- **AI Engineering & Agents**: agents, evals, retrieval, LLMs in production
-- **ML & LLM Foundations**: how transformers, training, fine-tuning and inference work
-- **Applied Mathematics**: probability, optimisation, numerical methods and the maths behind systems, ML and markets
-- **Security**: web vulnerabilities, cryptography, cloud security, detection and exploitation (a full cybersecurity engineer roadmap)
-- **CS Research**: algorithms, theory and performance, from researchers and new arXiv papers
-- **HFT & Low-Latency Engineering**: caches, memory ordering, kernel bypass, market data and matching engines
-- **Quantitative Finance**: probability, pricing, risk, market microstructure and the engineering behind trading
-- **Macro & Markets**: central banks, inflation, growth and jobs, from data-led sources (the Fed, the New York Fed, the Bank of England, FRED)
-- **Postmortems**: real failures, explained
+The site follows one priority order: **discover, learn, stay informed, try things; research and opinion last.**
 
-## Who it's for
-
-Engineers who read like researchers and want the newest serious work in one place:
-
-- **CS researchers** and anyone who reads papers: algorithms, theory, performance
-- **Distributed-systems and system-design** engineers
-- **Software engineers** who care about craft, correctness and production
-- **Agentic AI and ML** builders
-- **Security** engineers
-- **Quantitative finance** enthusiasts
-- **Macro** followers who want data, not punditry
-- **Applied maths and puzzle** lovers
-
-It's curated from the best experts in each field, puts the latest first, and prefers informative, practical pieces over opinion.
-
-## What's on the site
-
-| Page | What it's for |
+| Part | What's in it |
 |---|---|
-| **Today** (`/`) | A newspaper front page built for scanning: the lead story, **The wire** (the newest headlines from every desk), **Latest from every desk** (the freshest worth-reading pieces in each discipline), the puzzle page, the briefing, the outage map and more. Newest first, informative over opinion |
-| **Track pages** (`/systems/`, `/architecture/`, …) | The best recent deep reads for that track, plus its Canon |
-| **Roadmap** (`/roadmap/`) | 32 areas and ~530 topics to master (a full system design roadmap plus AI, ML, payments, maths, testing, engineering judgment and cybersecurity), with a topic map (every topic placed by meaning; learned ones glow), progress ticks and the reads that teach each topic |
-| **Canon** (`/canon/`) | 93 hand-picked foundational reads in order: papers, books, courses and classic articles |
-| **Briefing** (`/briefing/`) | Facts that change weekly: release radar and end-of-life dates for your stack, vulnerabilities being exploited right now (CISA) and new arXiv papers matched to your Roadmap |
-| **Puzzles** (`/puzzles/`) | 56 engineering puzzles (spot the bug, back-of-the-envelope, distributed-systems scenarios, interleavings, complexity), each verified by running code or enumerating cases, plus 40 "numbers you should know" cards. Today shows the daily puzzle, a flash card and an incident drill built from a real outage |
-| **Incidents** (`/outages/`) | Incident lessons from public status pages (cloud, CDN, developer tools, AI APIs): case studies of resolved incidents with a stated cause or a postmortem, a per-provider reliability table, and every other incident as a linked list. Three sit on Today |
-| **Markets** (`/markets/`) | A snapshot of indices, yields, FX, oil, copper, gold and Bitcoin taken at build time, plus a calendar of upcoming central-bank meetings and CPI releases |
-| **The week** (`/week/`) | The week's big stories, each desk's best five reads of the last seven days, and the week's incident lessons |
-| **Startups** (`/startups/`) | What the best new companies are building (Launch HN, Show HN, Product Hunt, funding news) |
-| **Pulse** (`/pulse/`) | The week's ten headlines, kept off the front page on purpose |
-| **Sources** (`/sources/`) | Every feed the site reads from, what each is contributing right now (posts, deep reads, latest post, its best current read), and feed health |
-| **On GitHub** | Project of the edition + six more: new, active, technical repos from Hacker News and GitHub search, matched to Roadmap topics |
-| **Search** | Roadmap topics, the Canon and articles |
+| **Summary** (`/digest/`) | Today's reading plan (the few pieces most worth your time, in order, with what you'll learn and a question to check yourself) and every part in two or three sentences |
+| **Discover** (`/discover/`) | Startups worth approaching for engineering roles (just funded, hiring in India or remote, YC launches) with how to approach them; big tech engineering blogs; projects on GitHub; what tech communities are discussing |
+| **Learn** (`/learn/`) | The clearest deep reads of the day, then every desk: CS research, distributed systems & databases, system design, software engineering, agentic AI, ML, security, HFT & low-latency, quant finance, macro, applied maths, postmortems |
+| **News** (`/news/`) | The markets in two sentences, the wire, business & economy, the briefing (releases, end-of-life dates, exploited CVEs, standards, new talks) and incidents |
+| **Try it** (`/try/`) | How-tos and benchmarks you can follow along with, and the daily puzzle |
+| **Research** (`/papers/`) | New papers, each explained in plain words first: what it does and why it matters |
+| **Thoughts** (`/thoughts/`) | Essays and opinion, for perspective |
 
-Every matched article carries a **"Why read"** line, e.g. *"You'll get better at **Failover Strategies** (Reliability & Fault Tolerance). Teaches you to plan for the moment the primary disappears…"*, so you always know what a piece will do for you.
+Also: the **Roadmap** (35 areas and ~530 topics, each with a difficulty level), the **Canon** (foundational reads in order), **Puzzles**, **The week**, **Startups**, **Big tech**, **Communities**, **Business**, **Markets**, **Incidents**, **Sources**, **Search** and an **RSS feed** (`/rss.xml`).
 
 ## Features
 
-**Read anywhere**
-- **Offline reading.** After your first visit, the browser keeps the current edition: the front page, every desk, the briefing, markets, incidents, puzzles, the week, the Roadmap, the Canon and search, with their thumbnails. With no connection, those pages still open. Online, the live edition always loads first, so you never get stuck on an old one. (A service worker, `src/pages/sw.js.ts`; the articles themselves live on their authors' sites and need a connection.)
-- **Install it as an app.** Add it to your phone's home screen or install it from the browser; it opens in its own window.
-- **Phone-friendly, light and dark.** Single column on small screens; the paper tint follows the time of day (morning, midday, evening, late); every motion effect is turned off when you prefer reduced motion.
-
-**Know what's new**
-- **New since your last visit.** A count on the front page and "New" badges on each card, measured from your previous visit, not a fixed window.
-- **Stale-edition notice.** If the edition you're reading is more than a day old, the front page says so.
-- **The big story.** When three or more independent sources cover the same thing in three days, it gets a strip under the ticker.
-- **Markets ticker and "Coming up".** Key market numbers and the next central-bank and inflation dates, under the masthead.
-
-**Read with a purpose**
-- **"Why read" on every matched article**: the Roadmap topic it will make you better at.
-- **Choose desks.** Hide disciplines you don't want on the front page (remembered in your browser).
-- **Search** across topics, the Canon and articles.
-- **Progress without an account.** Canon, Roadmap and puzzle ticks and your reading history stay in your browser; read pieces are dimmed.
-
-**Practise**
-- **A daily puzzle**, "numbers you should know" flash cards with spaced repetition, and an **incident drill** that reveals a real outage one update at a time. Click-only, no typing.
-- **A weekly design prompt** with curated reads and a hard question.
-- **Puzzles from around the web**, linked and credited, never copied.
+- **What you'll get, on every card:** kind of read · level (Intro / Intermediate / Advanced) · minutes, a one-sentence "You'll learn …", the article's own section headings, and the Roadmap skill it builds. Papers get "In plain words" and "Why it matters".
+- **Time budget:** pick 15 minutes, 30 minutes or an hour, and the page picks the best unread pieces that fit.
+- **Substance over hype:** the local model flags hype (announcements, listicles, vague trend talk) and keeps it off the front page.
+- **Careers:** startups worth approaching for engineering roles, with why they fit and how to reach out; HN hiring posts filtered to India or remote-worldwide.
+- **Same story once:** when several outlets or communities cover the same thing, it's shown once with the others listed.
+- **Read anywhere:** offline reading and installable as an app; phone-friendly; light and dark.
+- **No account:** read history, progress and preferences stay in your browser.
 
 ## How it works
 
-Everything happens **at build time**. There's no server, no database, no API keys and no AI service.
+Everything happens **at build time**: no server, no database, no API keys, no cloud AI.
 
-1. **Fetch.** About 75 RSS/Atom sources (`src/content/feeds.yaml`): engineering blogs like Marc Brooker, Martin Fowler, Brandur, Stripe, Cloudflare, Lilian Weng, Sebastian Raschka, Jeremy Kun and more.
-2. **Analyse.** For each article (`src/lib/summarize.ts`): uses the full text from the feed or fetches the page (cached for 30 days), then estimates reading time and depth, extracts technical concepts, and gives it a **worth score (1–5)** for how much it builds lasting understanding. Announcements, newsletters and roundups score low.
-3. **Match.** A small local embedding model (all-MiniLM-L6-v2, ~23 MB, via `@huggingface/transformers`) matches each article to its closest **Roadmap topic** by meaning (`src/lib/roadmap.ts`). That's where "Why read" comes from.
-4. **Pick today's articles.** Each edition carries only what was published in the 24 hours before it was built (the front page and every desk). The week page keeps the last seven days.
-5. **Rank.** `rank = worth × 2 + freshness + topic boost + source weight`. Depth comes first, but freshness counts for a lot (+2.5 today, halving every 4 days), so a good new post beats a slightly better old one. Topics you haven't covered yet get a boost, and authors known for depth get a small nudge (`src/lib/reading.ts`).
-6. **Render.** Astro builds static pages, deployed to GitHub Pages.
-
-**Four editions a day.** The workflow runs at 06:17, 12:17, 18:17 and 00:17 IST, and also on each push to `main` or a manual run from the Actions tab. Each run fetches everything fresh, builds and deploys a new edition. After each deploy, a separate job checks that every Canon link still works.
+1. **Fetch** ~230 RSS/Atom feeds and official APIs (`src/content/feeds.yaml`; Hacker News, Lobsters, Stack Exchange, GitHub, CISA, endoflife.date, FRED, arXiv, kernel.org and more).
+2. **Analyse** each article (`src/lib/summarize.ts`): reading time, depth, concepts, kind of read, difficulty, its own headings and a worth score.
+3. **Match** articles to Roadmap topics by meaning with a small local embedding model (all-MiniLM-L6-v2).
+4. **Edit** with a local language model (`src/lib/llm.ts`, `src/lib/skills.ts`): Qwen2.5-1.5B on GitHub's runners, Qwen3-4B for local builds. Its skills: substance check, how to approach a startup, "You'll learn", check-yourself questions, paper gists, and the edition summary. Every answer starts with a fixed opening the model completes, is format-checked, cached, and falls back to rule-based text.
+5. **Rank and place** (`src/lib/reading.ts`): `rank = worth × 2 + freshness + topic boost + source weight`; each piece goes to a part by its kind of read.
+6. **Render** static pages with Astro and deploy to GitHub Pages, four times a day (06:17, 12:17, 18:17 and 00:17 IST).
 
 ## Running it locally
 
@@ -102,7 +52,7 @@ npm run build        # production build into dist/
 npm run check:links  # verify every Canon link
 ```
 
-The first build downloads the embedding model into `.cache/` (once).
+The first build downloads the embedding model and the local language model into `.cache/models` (once; about 3 GB for the local 4B model). Set `LLM_BUDGET_MIN=2 npm run dev` for quick reloads, or `LLM_MODEL=onnx-community/Qwen2.5-1.5B-Instruct` to use the smaller model locally.
 
 ## Adding content
 

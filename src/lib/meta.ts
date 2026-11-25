@@ -1,3 +1,4 @@
+import { delatex } from './feeds';
 // The article's own metadata: the description its author wrote (og:description / meta description) and
 // its preview image (og:image). Images are downloaded once and shrunk into small WebP thumbnails served
 // from this site, so readers never load third-party images. Cached in .cache/meta and .cache/thumbs.
@@ -74,6 +75,7 @@ export function cleanDescription(d: string | undefined, title: string) {
     // og:description is sometimes entity-encoded twice ("Silberman &#8211; T."): decode what's left.
     const ENT: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…', mdash: '—', ndash: '–', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“' };
     d = d.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) => e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10)) : ENT[e.toLowerCase()] ?? m);
+    d = delatex(d); // LaTeX in descriptions too: $1/\sqrt{k}$ → 1/√k
     const t = d.replace(/\s*(Read more|Continue reading|\[…\]|\.\.\.)\s*$/i, '').trim();
     if (t.length < 40 || t.toLowerCase().startsWith(title.toLowerCase().slice(0, 40))) return undefined;
     if (/cookies|subscribe|sign up|newsletter|javascript/i.test(t.slice(0, 80))) return undefined;

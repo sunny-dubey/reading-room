@@ -1,78 +1,46 @@
 ---
+// The front page: masthead, the time budget, a link to Today's summary, and six short boxes (≤3 items each)
+// that open the part pages. The full bands live in src/components/Edition.astro.
 import { u } from '../lib/url';
 import Base from '../layouts/Base.astro';
-import Story from '../components/Story.astro';
-import Cover from '../components/Cover.astro';
-import Thumb from '../components/Thumb.astro';
 import Gets from '../components/Gets.astro';
+import ReadingClient from '../components/ReadingClient.astro';
 import { categoryShort } from '../lib/feeds';
 import { editionName, istTime, istDate, EDITION_WINDOW } from '../lib/edition';
-import ReadingClient from '../components/ReadingClient.astro';
-import { getReading, getCanon, rank, isDeep } from '../lib/reading';
-import { getToday } from '../lib/today';
-import { getOutages, fmtDuration, KINDS } from '../lib/outages';
+import { getReading, rank } from '../lib/reading';
+import { getOutages } from '../lib/outages';
 import { getBriefing } from '../lib/briefing';
-import MarketBrief from '../components/MarketBrief.astro';
-import PuzzleCard from '../components/PuzzleCard.astro';
-import NumbersCard from '../components/NumbersCard.astro';
-import IncidentDrill from '../components/IncidentDrill.astro';
-import PuzzleClient from '../components/PuzzleClient.astro';
 import { getPuzzles } from '../lib/puzzles';
-import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
-import WebPuzzleList from '../components/WebPuzzleList.astro';
-import { getGitHub, LABEL } from '../lib/github';
+import { getGitHub } from '../lib/github';
 import { KIND } from '../lib/summarize';
 import { getBusiness, outlet } from '../lib/business';
-import { getCommunities, communityName } from '../lib/communities';
+import { getCommunities } from '../lib/communities';
+import { getStartups } from '../lib/startups';
 
-const { big, learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap, bigtech } = await getReading();
-const canon = await getCanon();
-const { question, rabbitHoles, twoTakes, quickCands, explainer, readMap } = await getToday();
-const STEP_NAMES = ['Start here', 'Go deeper', 'Master it'];
-const ROMAN = ['I', 'II', 'III'];
+const { learning, fetchedAt, now, deepCands, wire, topStories, roadmap, bigtech, experimental, research, thoughts } = await getReading();
+const su = await getStartups();
 const pz = await getPuzzles();
 const bf = await getBriefing();
-const webPicks = todaysPicks(await getWebPuzzles(), now);
-const bfDay = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-// Incident lessons: case studies picked in outages.ts.
 const outages = await getOutages();
-// The front page carries only the last 24 hours: incidents with an update in the edition window,
-// lessons (a stated cause or a postmortem) first.
+// Incidents with an update in the edition window, lessons (a stated cause or a postmortem) first.
 const lastUpdate = (i: { start: number; updates: { at: number }[] }) => Math.max(i.start, ...i.updates.map(x => x.at));
-const recentIncidents = outages.incidents.filter(i => now - lastUpdate(i) < EDITION_WINDOW);
-const recentLessons = [...recentIncidents].sort((a, b) => Number(!!(b.cause || b.rca)) - Number(!!(a.cause || a.rca)) || lastUpdate(b) - lastUpdate(a)).slice(0, 3);
+const recentLessons = outages.incidents.filter(i => now - lastUpdate(i) < EDITION_WINDOW)
+    .sort((a, b) => Number(!!(b.cause || b.rca)) - Number(!!(a.cause || a.rca)) || lastUpdate(b) - lastUpdate(a)).slice(0, 3);
 const gh = await getGitHub(now, roadmap);
 const biz = await getBusiness();
+const cm = await getCommunities(now, roadmap);
 // Time budget: the edition's worthwhile pieces with a known reading time, best first (picked in the browser).
-const budgetPool = learning.filter(i => +i.date <= now && now - +i.date < 864e5 && (i.brief?.worth ?? 0) >= 3 && (i.brief?.minutes ?? 0) > 0)
+const budgetPool = learning.filter(i => +i.date <= now && now - +i.date < EDITION_WINDOW && (i.brief?.worth ?? 0) >= 3 && (i.brief?.minutes ?? 0) > 0 && !i.hype)
     .sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 60)
     .map(i => ({ u: i.link, t: i.title, m: i.brief!.minutes, k: i.brief?.kind ? KIND[i.brief.kind].label : '', d: categoryShort(i.category) }));
-const cm = await getCommunities(now, roadmap);
-const bizFront = [...biz.top, ...biz.river].slice(0, 6);
-const ghStars = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n);
-const outAnchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
 const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
-const mins = (m?: number) => (m ? `${m} min` : '');
-const today = fetchedAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-const deepCount = tracks.reduce((a, t) => a + t.deep.length, 0);
-const newReads = learning.filter(i => +i.date > +fetchedAt - 6 * 3600e3 && +i.date <= +fetchedAt).length;
-const hours = (m: number) => m >= 90 ? `${Math.round(m / 60)} h` : `${m} min`;
-
-// ---------- This week's design practice (rotates every Monday, IST) ----------
-const IST = 5.5 * 3600e3;
-const week = Math.floor((now + IST + 3 * 864e5) / (7 * 864e5)); // weeks since epoch, Monday-based
-const practice = roadmap.practice.length ? roadmap.practice[week % roadmap.practice.length] : undefined;
-// Plus the best recent article that teaches one of the exercise's topics.
-const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.id) ?? [])
-    .filter(i => isDeep(i) && (i.skill?.sim ?? 0) >= 0.5)
-    .sort((a, b) => rank(b, now) - rank(a, now))[0];
 ---
 <Base description="Learn something real every day: distributed systems, architecture, AI engineering, ML, security and maths." accent="reading">
-    <div class="rd fp">
+    <div class="rd fp calm">
         <!-- ===== Masthead ===== -->
         <header class="fp-mast">
             <h1 class="fp-title">The Reading Room</h1>
-            <p class="fp-for">A daily paper for engineers who read like researchers.</p>
+            <p class="fp-for">A reading and discovery room for careers in software and the industries around it, edited by a local AI.</p>
             <div class="fp-dateline">
                 <span>No. {issue}</span>
                 <span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span>
@@ -81,305 +49,77 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             <p class="fp-stale" data-stale={fetchedAt.toISOString()} hidden></p>
             <p class="fp-since" data-since hidden></p>
         </header>
-        <MarketBrief />
-
         <!-- ===== Time budget: pick how long you have; the browser assembles the best unread reads that fit ===== -->
         {budgetPool.length > 0 && (
             <section class="tb" aria-label="Time budget">
                 <div class="tb-bar" role="group" aria-label="How much time do you have?">
                     <span class="tb-k">How long do you have?</span>
-                    {[15, 30, 60].map(m => <button type="button" class="desk-chip" data-budget={m} aria-pressed="false">{m === 60 ? '1 hour' : `${m} min`}</button>)}
+                    {[15, 30, 60].map(m => <button type="button" class="tb-chip" data-budget={m} aria-pressed="false">{m === 60 ? '1 hour' : `${m} min`}</button>)}
                 </div>
                 <ol class="tb-list" data-budget-list hidden></ol>
                 <script type="application/json" id="budget-pool" set:html={JSON.stringify(budgetPool)} />
             </section>
         )}
 
-        <!-- ===== The big story: one thing covered by several independent sources ===== -->
-        {big.length > 0 && (
-            <section class="big-strip" aria-label="The big story">
-                {big.map(b => (
-                    <div class="big-story" data-link={b.lead.link}>
-                        <p class="big-k">The big story · {b.sources} sources</p>
-                        <a class="big-h" href={b.lead.link} target="_blank" rel="noopener noreferrer" data-read>{b.lead.title}</a>
-                        <p class="big-cov">{b.items.map((i, n) => <>{n > 0 && ' · '}<a href={i.link} target="_blank" rel="noopener noreferrer">{i.feedTitle.replace(/: .*$/, '')}</a></>)}</p>
-                    </div>
-                ))}
-            </section>
-        )}
 
-        <!-- ===== Front: the lead story and the wire ===== -->
-        <section class="fp-front">
-            {deepRead && (
-                <div class="fp-lead-wrap">
-                    {deepCands.map((d, n) => (
-                        <article class="fp-lead" data-deep-lead={d.link} data-link={d.link} data-cat={d.category} hidden={n > 0}>
-                            <p class="fp-kicker">The deep read · {categoryShort(d.category)} · {mins(d.brief?.minutes)}</p>
-                            <h2 class:list={["fp-lead-h", { long: d.title.length > 60 }]}><a href={d.link} target="_blank" rel="noopener noreferrer" data-read>{d.title}</a></h2>
-                            {d.meta?.description && <p class="fp-dek" title="The author's own description">{d.meta.description}</p>}
-                            <Gets i={d} />
-                            <p class="fp-byline">By {d.feedTitle}</p>
-                            <a href={d.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Thumb i={d} w={760} h={280} class="fp-lead-art" eager={n === 0} /></a>
-                            {d.classic && <p class="fp-footnote"><span>Builds on a classic</span><a href={d.classic.url} target="_blank" rel="noopener noreferrer">{d.classic.title}</a>, {d.classic.author}</p>}
+        <p class="fp-digest"><a href={u('/digest/')}>Today's summary: a reading plan and the edition in one page →</a></p>
+
+        <!-- ===== The six parts, short: three items each, then the part's own page ===== -->
+        {(() => {
+            const Part = (n: number, title: string, href: string, sub: string, children: any) => (
+                <section class="fp-sum" aria-labelledby={`sum-${n}`}>
+                    <header class="fp-sum-h"><span class="fp-part-n">{n}</span><h2 id={`sum-${n}`}><a href={u(href)}>{title}</a></h2><span class="fp-part-sub">{sub}</span><a class="fp-sum-open" href={u(href)}>Open {title} →</a></header>
+                    {children}
+                </section>
+            );
+            const Line = ({ href, k, title, note }: { href: string; k: string; title: string; note?: string }) => (
+                <li><p class="fp-sum-k">{k}</p><a class="fp-sum-t" href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" data-read>{title}</a>{note && <p class="fp-sum-note">{note}</p>}</li>
+            );
+            const lead = deepCands[0];
+            const discoverLines = [
+                ...su.targets.slice(0, 1).map(t => ({ href: t.url, k: `${t.kind === 'funding' ? 'Just raised' : t.kind === 'hiring' ? 'Hiring now' : 'YC launch'} · ${t.signal}`, title: t.name, note: `How to approach: ${t.approach.mention}` })),
+                ...bigtech.day.slice(0, 1).map(i => ({ href: i.link, k: `Big tech · ${i.feedTitle}`, title: i.title, note: i.learn })),
+                ...(gh.featured ? [{ href: gh.featured.url, k: `On GitHub · ${gh.featured.language || 'code'}`, title: gh.featured.name, note: gh.featured.description }] : []),
+                ...cm.everywhere.slice(0, 1).map(g => ({ href: g.threads[0].ext ?? g.threads[0].url, k: `In ${new Set(g.threads.map(t => t.community)).size} communities`, title: g.threads[0].title })),
+            ].slice(0, 3);
+            const newsLines = [
+                ...[...biz.top, ...biz.river].slice(0, 1).map(b => ({ href: b.lead.link, k: `Business · ${outlet(b.lead)}`, title: b.lead.title })),
+                ...wire.filter(i => !i.hype).slice(0, 1).map(i => ({ href: i.link, k: `The wire · ${categoryShort(i.category)}`, title: i.title })),
+                ...[...bf.standards.slice(0, 1).map(x => ({ href: x.url, k: `Standards · ${x.kind === 'Release' ? x.who : x.kind}`, title: x.title })), ...recentLessons.slice(0, 1).map(i => ({ href: i.url, k: `Incident · ${i.provider}`, title: i.title }))].slice(0, 1),
+            ];
+            return <div class="fp-sums">
+                {Part(1, 'Discover', '/discover/', "what's new and worth knowing", <>
+                    <ol class="fp-sum-list" role="list">{discoverLines.map(x => Line(x))}</ol>
+                </>)}
+                {Part(2, 'Learn', '/learn/', "the clearest pieces of the day", <>
+                    {lead && (
+                        <article class="fp-sum-lead" data-link={lead.link}>
+                            <a class="fp-sum-lead-t" href={lead.link} target="_blank" rel="noopener noreferrer" data-read>{lead.title}</a>
+                            <Gets i={lead} />
                         </article>
-                    ))}
-                    {topStories.length > 0 && (
-                        <div class="top-stories">
-                            <h3 class="fp-box-h">Top stories</h3>
-                            <div class="top-grid">{topStories.map((i, n) => <Story i={i} cover={n === 0 || !!i.meta?.thumb} deck={false} />)}</div>
-                        </div>
                     )}
-                </div>
-            )}
-
-            <aside class="fp-side">
-                <section class="fp-box wire" aria-label="The wire">
-                    <h3 class="fp-box-h">The wire <span class="web-note">newest first, every desk</span></h3>
-                    <ol class="wire-list" role="list">
-                        {wire.map(i => (
-                            <li data-link={i.link} data-cat={i.category} data-ts={+i.date}>
-                                <span class="wire-meta"><span class="new-badge" data-new hidden>New</span><span class="cat-dot" data-cat={i.category} title={categoryShort(i.category)}></span><time data-rel datetime={i.date.toISOString()}></time></span>
-                                <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
-                                <span class="wire-src">{i.feedTitle}{i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}</span>
-                            </li>
-                        ))}
+                    <ol class="fp-sum-list" role="list">{topStories.slice(0, 2).map(i => Line({ href: i.link, k: `${categoryShort(i.category)} · ${i.feedTitle}`, title: i.title, note: i.learn }))}</ol>
+                </>)}
+                {Part(3, 'News', '/news/', "what changed in the world your code runs in", <>
+                    <ol class="fp-sum-list" role="list">{newsLines.map(x => Line(x))}</ol>
+                </>)}
+                {Part(4, 'Try it', '/try/', "hands-on pieces and the puzzle", <>
+                    <ol class="fp-sum-list" role="list">
+                        {experimental.slice(0, 2).map(i => Line({ href: i.link, k: `${i.brief?.kind ? KIND[i.brief.kind].label : 'How-to'} · ${i.feedTitle}`, title: i.title, note: i.learn }))}
+                        {pz.today && Line({ href: u('/try/'), k: "Today's puzzle", title: pz.today.title })}
                     </ol>
-                </section>
-
-                {question && (
-                    <section class="fp-box qotd">
-                        <h3 class="fp-box-h">Question of the day</h3>
-                        <p class="qotd-q">{question.q}</p>
-                        {question.hint && <details class="qotd-hint"><summary>Need a hint?</summary><p>{question.hint}</p></details>}
-                        {(question.canon || question.read || question.topic) && (
-                            <p class="qotd-reads"><span>Find the answer in</span>
-                                {question.canon && <a href={question.canon.data.url} target="_blank" rel="noopener noreferrer">{question.canon.data.title}</a>}
-                                {question.read && <a href={question.read.link} target="_blank" rel="noopener noreferrer">{question.read.title}</a>}
-                                {question.topic && <a href={u(`/roadmap/#${question.topic.id}`)}>{question.topic.name} on the Roadmap</a>}
-                            </p>
-                        )}
-                    </section>
-                )}
-
-                <section class="fp-box biz-box" aria-label="Business and economy">
-                    <h3 class="fp-box-h"><a href={u('/business/')}>Business &amp; economy</a> <span class="web-note">last 24 hours</span></h3>
-                    {bizFront.length === 0 && <p class="fp-empty">No business news in the last 24 hours yet.</p>}
-                    <ol role="list">
-                        {bizFront.map(s => (
-                            <li data-link={s.lead.link} data-ts={+s.lead.date}>
-                                <a class="biz-t" href={s.lead.link} target="_blank" rel="noopener noreferrer" data-read>{s.lead.title}</a>
-                                <p class="biz-meta"><time data-rel datetime={s.lead.date.toISOString()}></time> · {outlet(s.lead)}{s.outlets > 1 ? ` + ${s.outlets - 1} more` : ''}</p>
-                            </li>
-                        ))}
-                    </ol>
-                    <a class="fp-more" href={u('/business/')}>All business &amp; economy news →</a>
-                </section>
-            </aside>
-        </section>
-
-        <!-- ===== Latest from every desk ===== -->
-        <section class="fp-band reveal">
-            <h2 class="fp-band-h"><span>Latest from every desk</span></h2>
-            <details class="desk-pick">
-                <summary>Choose desks <span data-desk-count></span></summary>
-                <div class="desk-pick-row" role="group" aria-label="Desks to show">
-                    {desks.map(d => (
-                        <button type="button" class="desk-chip" data-desk-toggle={d.id} aria-pressed="true"><span class="cat-dot" data-cat={d.id}></span>{d.short}</button>
-                    ))}
-                    <button type="button" class="desk-chip all" data-desk-all>Show all</button>
-                </div>
-                <p class="desk-pick-note">Hidden desks also leave the wire and top stories. Saved in this browser only.</p>
-            </details>
-            <p class="wk-link"><a href={u('/week/')}>Missed a few days? The week in every desk →</a></p>
-            <div class="desks">
-                {desks.map(d => (
-                    <section class="desk" data-cat={d.id}>
-                        <h3 class="desk-h"><a href={u(`/${d.slug}/`)}><span class="cat-dot" data-cat={d.id}></span>{d.short}</a></h3>
-                        {d.items.map((i, n) => (
-                            <article class:list={['desk-item', { first: n === 0 }]} data-link={i.link} data-ts={+i.date} data-story>
-                                {n === 0 && <a href={i.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Thumb i={i} w={360} h={110} /></a>}
-                                <p class="desk-meta"><span class="new-badge" data-new hidden>New</span><time data-rel datetime={i.date.toISOString()}></time></p>
-                                <a class="desk-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
-                                {n === 0 && i.meta?.description && <p class="desk-dek">{i.meta.description}</p>}
-                                {n === 0 && <Gets i={i} compact />}
-                                <span class="desk-src">{i.feedTitle}</span>
-                            </article>
-                        ))}
-                    </section>
-                ))}
-            </div>
-        </section>
-
-        <!-- ===== Big tech engineering: what large companies' engineering teams published, last 24 hours ===== -->
-        <section class="fp-band reveal bt-front" aria-label="Big tech engineering">
-            <h2 class="fp-band-h"><span>Big tech engineering · last 24 hours</span></h2>
-            {bigtech.day.length === 0 && <p class="fp-empty">No new posts from big tech engineering teams in the last 24 hours. <a href={u('/big-tech/')}>See the week →</a></p>}
-            <ol class="bt-grid" role="list">
-                {bigtech.day.slice(0, 6).map(i => (
-                    <li data-link={i.link} data-ts={+i.date} data-cat={i.category}>
-                        <p class="bt-co">{i.feedTitle.replace(/\s*(Engineering|Tech Blog|Tech|Technology|Global Tech|Code as Craft|Blog)$/i, '')}</p>
-                        <a class="bt-h" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
-                        <Gets i={i} compact />
-                    </li>
-                ))}
-            </ol>
-            {bigtech.day.length > 0 && <a class="fp-more" href={u('/big-tech/')}>All big tech engineering posts this week →</a>}
-        </section>
-
-        <!-- ===== On GitHub: the best technical project being built in the open, picked per edition ===== -->
-        {gh.featured && (
-            <section class="fp-band reveal gh-front" aria-label="On GitHub">
-                <h2 class="fp-band-h"><span>On GitHub</span></h2>
-                <div class="gh-grid">
-                    <article class="gh-feat" data-cat={gh.featured.topic?.track}>
-                        <p class="gh-k">Project of the edition</p>
-                        <h3 class="gh-name"><a href={gh.featured.url} target="_blank" rel="noopener noreferrer" data-read>{gh.featured.name}</a></h3>
-                        <p class="gh-desc">{gh.featured.description}</p>
-                        <p class="gh-meta">{gh.featured.language && <span class="gh-lang">{gh.featured.language}</span>}<span>★ {ghStars(gh.featured.stars)}</span><span>+{ghStars(gh.featured.starsPerDay)} a day</span>{gh.featured.hn && <a href={gh.featured.hn.url} target="_blank" rel="noopener noreferrer">HN · {gh.featured.hn.points} points</a>}</p>
-                        {gh.featured.topic && gh.featured.topic.sim >= LABEL && <p class="gh-why"><span class="cat-dot" data-cat={gh.featured.topic.track}></span>Why look: you'll get better at <a href={u(`/roadmap/#${gh.featured.topic.id}`)}>{gh.featured.topic.name}</a></p>}
-                    </article>
-                    <ol class="gh-list" role="list">
-                        {gh.more.map(r => (
-                            <li data-cat={r.topic?.track}>
-                                <a class="gh-name" href={r.url} target="_blank" rel="noopener noreferrer" data-read>{r.name}</a>
-                                <p class="gh-desc">{r.description}</p>
-                                <p class="gh-meta">{r.language && <span class="gh-lang">{r.language}</span>}<span>★ {ghStars(r.stars)}</span>{r.hn && <a href={r.hn.url} target="_blank" rel="noopener noreferrer">HN {r.hn.points}</a>}{r.topic && r.topic.sim >= LABEL && <span class="gh-topic"><span class="cat-dot" data-cat={r.topic.track}></span>{r.topic.name}</span>}</p>
-                            </li>
-                        ))}
-                    </ol>
-                </div>
-                <p class="gh-note">New and active open-source projects that Hacker News readers upvoted or that are gaining stars fast, kept only when they teach a Roadmap topic. Games, emulators, lists and courses are left out.</p>
-            </section>
-        )}
-
-        <!-- ===== Communities: what tech communities are discussing, last 24 hours ===== -->
-        {cm.total > 0 && (
-            <section class="fp-band reveal cm-front" aria-label="Communities">
-                <h2 class="fp-band-h"><span>Communities · last 24 hours</span></h2>
-                <ul class="cm-front-list" role="list">
-                    {cm.everywhere.slice(0, 1).map(g => (
-                        <li>
-                            <p class="cm-front-k">In {new Set(g.threads.map(t => t.community)).size} communities</p>
-                            <a class="cm-t" href={g.threads[0].ext ?? g.threads[0].url} target="_blank" rel="noopener noreferrer">{g.threads[0].title}</a>
-                            <p class="cm-meta">{[...new Set(g.threads.map(t => communityName(t.community)))].join(' · ')}</p>
-                        </li>
-                    ))}
-                    {cm.gists.filter(g => g.threads.length).map(g => (
-                        <li>
-                            <p class="cm-front-k">{g.community.name}{g.themes[0] ? ` · mostly ${g.themes[0].area}` : ''}</p>
-                            <a class="cm-t" href={g.threads[0].url} target="_blank" rel="noopener noreferrer">{g.threads[0].title}</a>
-                            <p class="cm-meta">{g.threads[0].comments.toLocaleString('en-US')} {g.community.id === 'se' ? 'answers' : 'comments'}{g.threads[0].where ? ` · ${g.threads[0].where}` : ''}</p>
-                        </li>
-                    ))}
-                </ul>
-                <a class="fp-more" href={u('/communities/')}>What every community is talking about →</a>
-            </section>
-        )}
-
-        <!-- ===== The briefing ===== -->
-        <section class="fp-band reveal bf-front">
-            <h2 class="fp-band-h"><span>The briefing</span></h2>
-            <div class="bf-boxes">
-                <div class="bf-box">
-                    <h3 class="fp-box-h"><a href={u('/briefing/#releases')}>Release radar</a></h3>
-                    {bf.releases.length === 0 && <p class="fp-empty">No new releases in your stack in the last 24 hours.</p>}
-                    <ul role="list">{bf.releases.slice(0, 6).map(r => <li><b>{r.product}</b> <span class="mono">{r.version}</span>{r.newCycle && <span class="bf-tag new">new</span>}<span class="bf-date">{bfDay(r.date)}</span></li>)}</ul>
-                </div>
-                <div class="bf-box">
-                    <h3 class="fp-box-h"><a href={u('/briefing/#eol')}>Obituaries</a></h3>
-                    <ul role="list">{bf.eols.filter(e => e.days >= -14).slice(0, 6).map(e => <li class:list={{ dead: e.days < 0 }}><b>{e.product} {e.cycle}</b><span class="bf-date">{e.days < 0 ? `died ${-e.days}d ago` : e.days === 0 ? 'dies today' : `dies in ${e.days}d`}</span></li>)}</ul>
-                </div>
-                <div class="bf-box">
-                    <h3 class="fp-box-h"><a href={u('/briefing/#cves')}>CVE watch · exploited now</a></h3>
-                    {bf.cves.length === 0 && <p class="fp-empty">CISA added no exploited vulnerabilities in the last 24 hours.</p>}
-                    <ul role="list">{bf.cves.slice(0, 5).map(c => <li class:list={{ mine: c.mine }}><b>{c.vendor} {c.product}</b>{c.ransomware && <span class="bf-tag ransom">ransomware</span>}<span class="bf-date">{bfDay(c.added)}</span></li>)}</ul>
-                </div>
-                <div class="bf-box">
-                    <h3 class="fp-box-h"><a href={u('/briefing/#papers')}>Paper drop</a></h3>
-                    {bf.papers.length === 0 && <p class="fp-empty">No new arXiv papers in the last 24 hours (arXiv doesn’t post at weekends).</p>}
-                    <ul role="list">{bf.papers.slice(0, 4).map(p => <li><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a><span class="bf-date">{p.code ? <a href={`https://github.com/${p.code.repo}`} target="_blank" rel="noopener noreferrer">code ★{p.code.stars}</a> : p.topic?.name}</span></li>)}</ul>
-                </div>
-                <div class="bf-box">
-                    <h3 class="fp-box-h"><a href={u('/briefing/#standards')}>Standards radar</a></h3>
-                    {bf.standards.length === 0 && <p class="fp-empty">No new RFCs, kernels or runtime releases in the last 24 hours.</p>}
-                    <ul role="list">{bf.standards.slice(0, 5).map(x => <li><a href={x.url} target="_blank" rel="noopener noreferrer">{x.title}</a><span class="bf-date">{x.kind === 'Release' ? x.who : x.kind}</span></li>)}</ul>
-                </div>
-                <div class="bf-box">
-                    <h3 class="fp-box-h"><a href={u('/briefing/#talks')}>Talk radar</a></h3>
-                    {bf.talks.length === 0 && <p class="fp-empty">No new conference talks in the last 24 hours.</p>}
-                    <ul role="list">{bf.talks.slice(0, 5).map(x => <li><a href={x.url} target="_blank" rel="noopener noreferrer">{x.title}</a><span class="bf-date">{x.who}</span></li>)}</ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== Incident lessons: real outages with a stated cause or a postmortem ===== -->
-        {(
-            <section class="fp-band reveal out-front">
-                <h2 class="fp-band-h"><span>Incidents · last 24 hours</span></h2>
-                {recentLessons.length === 0 && <p class="fp-empty">No public incidents at the providers we follow in the last 24 hours.</p>}
-                <ul class="out-lessons" role="list">
-                    {recentLessons.map(i => (
-                        <li>
-                            <p class="fp-kicker">{i.provider} · {KINDS[i.kind]}{i.ongoing ? ' · ongoing' : i.duration ? ` · ${fmtDuration(i.duration)} to fix` : ''}{i.rca ? ' · postmortem' : ''}</p>
-                            {outages.cases.includes(i)
-                                ? <a class="out-lesson-t" href={u(`/outages/#${outAnchor(i.id)}`)}>{i.title}</a>
-                                : <a class="out-lesson-t" href={i.url} target="_blank" rel="noopener noreferrer">{i.title}</a>}
-                            {i.cause && <p class="out-lesson-cause">{i.cause}</p>}
-                        </li>
-                    ))}
-                </ul>
-                <a class="fp-more" href={u('/outages/')}>Case studies and the reliability table →</a>
-            </section>
-        )}
-
-        <!-- ===== The puzzle page ===== -->
-        {pz.today && (
-            <section class="fp-band reveal puzzle-band">
-                <h2 class="fp-band-h"><span>The puzzle page</span></h2>
-                <div class="puzzle-grid">
-                    <div class="puzzle-main">
-                        <PuzzleCard p={pz.today} featured />
-                        {webPicks.length > 0 && (
-                            <div class="web-today">
-                                <h3 class="fp-box-h">From around the web <span class="web-note">links to the originals, credited</span></h3>
-                                <WebPuzzleList rows={webPicks} />
-                            </div>
-                        )}
-                    </div>
-                    <div class="puzzle-side">
-                        <NumbersCard cards={pz.numbers} />
-                        {pz.drill && <IncidentDrill i={pz.drill} />}
-                        <a class="fp-more" href={u('/puzzles/')}>All {pz.puzzles.length} puzzles and the full numbers deck →</a>
-                    </div>
-                </div>
-            </section>
-        )}
-
-        <!-- ===== Bottom row ===== -->
-        <section class="fp-band fp-bottom reveal">
-            {postmortem && (
-                <div class="fp-cell" data-link={postmortem.link} data-cat="postmortems">
-                    <h3 class="fp-box-h">Learn from failure</h3>
-                    <a href={postmortem.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={postmortem.title} track="postmortems" w={320} h={120} /></a>
-                    <a class="fp-cell-h" href={postmortem.link} target="_blank" rel="noopener noreferrer" data-read>{postmortem.title}</a>
-                    <p class="story-by">{postmortem.feedTitle}{postmortem.brief?.minutes ? ` · ${postmortem.brief.minutes} min` : ''}</p>
-                    <a class="fp-more" href={u('/postmortems/')}>More postmortems →</a>
-                </div>
-            )}
-            {explainer && (
-                <div class="fp-cell" data-cat={explainer.track} data-link={explainer.url}>
-                    <h3 class="fp-box-h">See it, don't just read it</h3>
-                    <a href={explainer.url} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Cover seed={explainer.title} track={explainer.track} w={320} h={120} /></a>
-                    <a class="fp-cell-h" href={explainer.url} target="_blank" rel="noopener noreferrer" data-read>{explainer.title}</a>
-                    <p class="fp-cell-p">{explainer.why}</p>
-                    <p class="story-by">{explainer.author} · {explainer.minutes} min · interactive</p>
-                </div>
-            )}
-        </section>
-
+                </>)}
+                {Part(5, 'Research', '/papers/', "new papers, in plain words first", <>
+                    <ol class="fp-sum-list" role="list">{research.slice(0, 3).map(i => Line({ href: i.link, k: `${categoryShort(i.category)} · ${i.feedTitle}`, title: i.title, note: i.paper?.gist }))}</ol>
+                </>)}
+                {Part(6, 'Thoughts', '/thoughts/', "essays and opinion, for perspective", <>
+                    <ol class="fp-sum-list" role="list">{thoughts.slice(0, 3).map(i => Line({ href: i.link, k: i.feedTitle, title: i.title }))}</ol>
+                    {thoughts.length === 0 && <p class="fp-empty">No essays in the last 24 hours.</p>}
+                </>)}
+            </div>;
+        })()}
     </div>
     <ReadingClient />
-    <PuzzleClient />
 </Base>
 
 
@@ -421,52 +161,4 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         try { const saved = JSON.parse(localStorage.getItem('budget:day') ?? '{}'); if (saved.day === today && saved.mins) show(saved.mins); } catch {}
     }
 
-    // ---------- Lead story: keep today's pick all day, else the best one you haven't opened or been shown ----------
-    {
-        const today = new Date().toLocaleDateString('en-CA');
-        const SHOWN = 'plan:deep-shown';
-        let shown: Record<string, string> = {};
-        try { shown = JSON.parse(localStorage.getItem(SHOWN) ?? '{}'); } catch {}
-        const read = new Set(getHistory().map(r => r.u));
-        const cands = [...document.querySelectorAll<HTMLElement>('[data-deep-lead]')];
-        const link = (c: HTMLElement) => c.dataset.deepLead!;
-        const pick = cands.find(c => shown[link(c)] === today)
-            ?? cands.find(c => !read.has(link(c)) && !shown[link(c)])
-            ?? cands.find(c => !read.has(link(c)))
-            ?? cands[0];
-        if (pick) {
-            cands.forEach(c => (c.hidden = c !== pick));
-            shown[link(pick)] ??= today;
-            const cutoff = new Date(Date.now() - 60 * 864e5).toLocaleDateString('en-CA');
-            for (const [k, d] of Object.entries(shown)) if (d < cutoff) delete shown[k];
-            try { localStorage.setItem(SHOWN, JSON.stringify(shown)); } catch {}
-            // Don't show the lead twice on the page.
-            document.querySelectorAll<HTMLElement>('[data-story], .wire-list li').forEach(el => { if (el.dataset.link === link(pick)) el.hidden = true; });
-        }
-    }
-
-    // ---------- choose desks: hidden desks are remembered in this browser (localStorage `desks:hidden`) ----------
-    {
-        const KEY = 'desks:hidden';
-        let off = new Set<string>();
-        try { off = new Set(JSON.parse(localStorage.getItem(KEY) ?? '[]')); } catch {}
-        const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-desk-toggle]')];
-        const count = document.querySelector<HTMLElement>('[data-desk-count]');
-        const paint = () => {
-            chips.forEach(b => b.setAttribute('aria-pressed', String(!off.has(b.dataset.deskToggle!))));
-            // Only desk sections, wire items and top stories; the lead stays.
-            document.querySelectorAll<HTMLElement>('.desk[data-cat], .wire-list li[data-cat], .top-stories [data-story][data-cat]')
-                .forEach(el => el.classList.toggle('desk-off', off.has(el.dataset.cat!)));
-            if (count) count.textContent = off.size ? `(${chips.length - off.size} of ${chips.length} shown)` : '';
-        };
-        const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...off])); } catch {} paint(); };
-        chips.forEach(b => b.addEventListener('click', () => {
-            const id = b.dataset.deskToggle!;
-            if (off.has(id)) off.delete(id);
-            else if (off.size < chips.length - 1) off.add(id); // keep at least one desk
-            save();
-        }));
-        document.querySelector('[data-desk-all]')?.addEventListener('click', () => { off.clear(); save(); });
-        paint();
-    }
 </script>

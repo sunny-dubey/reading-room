@@ -8,6 +8,7 @@ import { XMLParser } from 'fast-xml-parser';
 import { embed, cosine } from './embed';
 import { groupSame } from './bigstory';
 import { EDITION_WINDOW } from './edition';
+import { delatex } from './feeds';
 import type { Topic } from './roadmap';
 
 export interface Thread {
@@ -41,7 +42,7 @@ const UA = { 'User-Agent': 'reading-room-build (links only; https://sunny-dubey.
 const getJson = async (url: string) => { const r = await fetch(url, { headers: UA, signal: AbortSignal.timeout(20_000) }); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<any>; };
 const getText = async (url: string) => { const r = await fetch(url, { headers: UA, signal: AbortSignal.timeout(20_000) }); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); };
 const ENT: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…', mdash: '—', ndash: '–', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“' };
-const decode = (s: string) => String(s ?? '').replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) => e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10)) : ENT[e.toLowerCase()] ?? m).trim();
+const decode = (s: string) => delatex(String(s ?? '').replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) => e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10)) : ENT[e.toLowerCase()] ?? m).trim());
 
 const LOADERS: Record<string, (since: number) => Promise<Thread[]>> = {
     hn: async since => {

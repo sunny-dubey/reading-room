@@ -1049,6 +1049,152 @@
   maxAgeDays: 7
 
 # ---------- startups (a small side page, like pulse; not a learning track) ----------
+# Startups section (added 2026-11-25). Ids starting su-news-, su-deep-, su-impact- tell startups.ts what each source covers;
+# every item is also classified by its headline (funding, deep tech, impact).
+- id: su-news-tc-venture
+  title: "TechCrunch Venture"
+  url: 'https://techcrunch.com/category/venture/feed/'
+  site: https://techcrunch.com/category/venture/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-crunchbase
+  title: "Crunchbase News"
+  url: 'https://news.crunchbase.com/feed/'
+  site: https://news.crunchbase.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-eu-startups
+  title: "EU-Startups"
+  url: 'https://www.eu-startups.com/feed/'
+  site: https://www.eu-startups.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-tech-eu
+  title: "Tech.eu"
+  url: 'https://tech.eu/feed/'
+  site: https://tech.eu/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-sifted
+  title: "Sifted"
+  url: 'https://sifted.eu/feed'
+  site: https://sifted.eu/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-inc42
+  title: "Inc42"
+  url: 'https://inc42.com/feed/'
+  site: https://inc42.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-yourstory
+  title: "YourStory"
+  url: 'https://yourstory.com/feed'
+  site: https://yourstory.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-techcabal
+  title: "TechCabal"
+  url: 'https://techcabal.com/feed/'
+  site: https://techcabal.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-contxto
+  title: "Contxto"
+  url: 'https://contxto.com/en/feed/'
+  site: https://contxto.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-restofworld
+  title: "Rest of World"
+  url: 'https://restofworld.org/feed/latest/'
+  site: https://restofworld.org/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-news-yc
+  title: "Y Combinator"
+  url: 'https://www.ycombinator.com/blog/rss/'
+  site: https://www.ycombinator.com/blog
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-deep-quantum
+  title: "The Quantum Insider"
+  url: 'https://thequantuminsider.com/feed/'
+  site: https://thequantuminsider.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-deep-spacenews
+  title: "SpaceNews"
+  url: 'https://spacenews.com/feed/'
+  site: https://spacenews.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-deep-robot-report
+  title: "The Robot Report"
+  url: 'https://www.therobotreport.com/feed/'
+  site: https://www.therobotreport.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-deep-ieee
+  title: "IEEE Spectrum"
+  url: 'https://spectrum.ieee.org/feeds/feed.rss'
+  site: https://spectrum.ieee.org/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-deep-mittr
+  title: "MIT Technology Review"
+  url: 'https://www.technologyreview.com/feed/'
+  site: https://www.technologyreview.com/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-impact-tc-climate
+  title: "TechCrunch Climate"
+  url: 'https://techcrunch.com/category/climate/feed/'
+  site: https://techcrunch.com/category/climate/
+  category: startups
+  limit: 10
+  maxAgeDays: 2
+
+- id: su-impact-canary
+  title: "Canary Media"
+  url: 'https://www.canarymedia.com/rss.rss'
+  site: https://www.canarymedia.com/
+  category: startups
+  limit: 12
+  maxAgeDays: 2
+
 - id: launch-hn
   title: Launch HN
   url: https://hnrss.org/launches

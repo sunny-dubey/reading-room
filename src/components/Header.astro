@@ -3,13 +3,17 @@ import { u } from '../lib/url';
 import ThemeToggle from './ThemeToggle.astro';
 import { CATEGORIES } from '../lib/feeds';
 const path = Astro.url.pathname.replace(/\/?$/, '/');
-const sections = [
-    { href: u('/'), label: 'Today', cat: '' },
-    ...CATEGORIES.map(c => ({ href: u(`/${c.slug}/`), label: c.short, cat: c.id })),
-    { href: u('/canon/'), label: 'Canon', cat: '' },
-    { href: u('/big-tech/'), label: 'Big tech', cat: '' },
-    { href: u('/sources/'), label: 'Sources', cat: '' },
-];
+// One navigation: the six parts of the edition, in Sunny's priority order (2026-11-25). Every other page belongs
+// to a part (so its part is highlighted there); desks and study pages are reached from Learn, the rest from the footer.
+const PARTS = [
+    { href: '/digest/', label: 'Summary', also: [] },
+    { href: '/discover/', label: 'Discover', also: ['/startups/', '/big-tech/', '/communities/'] },
+    { href: '/learn/', label: 'Learn', also: [...CATEGORIES.map(c => `/${c.slug}/`), '/roadmap/', '/canon/', '/week/', '/sources/', '/notebook/'] },
+    { href: '/news/', label: 'News', also: ['/business/', '/briefing/', '/markets/', '/outages/', '/pulse/'] },
+    { href: '/try/', label: 'Try it', also: ['/puzzles/'] },
+    { href: '/papers/', label: 'Research', also: [] },
+    { href: '/thoughts/', label: 'Thoughts', also: [] },
+].map(p => ({ ...p, active: [p.href, ...p.also].some(h => path.startsWith(u(h))) }));
 ---
 <div class="nav-wrap">
     <nav class="nav" aria-label="Primary">
@@ -18,14 +22,7 @@ const sections = [
             <span class="brand-name">The Reading Room</span>
         </a>
         <div class="nav-links">
-            <a href={u('/week/')} aria-current={path.startsWith(u('/week/')) ? 'page' : undefined}>The week</a>
-            <a href={u('/briefing/')} aria-current={path.startsWith(u('/briefing/')) ? 'page' : undefined}>Briefing</a>
-            <a href={u('/business/')} aria-current={path.startsWith(u('/business/')) ? 'page' : undefined}>Business</a>
-            <a href={u('/communities/')} aria-current={path.startsWith(u('/communities/')) ? 'page' : undefined}>Communities</a>
-            <a href={u('/markets/')} aria-current={path.startsWith(u('/markets/')) ? 'page' : undefined}>Markets</a>
-            <a href={u('/outages/')} aria-current={path.startsWith(u('/outages/')) ? 'page' : undefined}>Incidents</a>
-            <a href={u('/puzzles/')} aria-current={path.startsWith(u('/puzzles/')) ? 'page' : undefined}>Puzzles</a>
-            <a href={u('/roadmap/')} aria-current={path.startsWith(u('/roadmap/')) ? 'page' : undefined}>Roadmap</a>
+            {PARTS.map(p => <a href={u(p.href)} aria-current={p.active ? 'page' : undefined}>{p.label}</a>)}
         </div>
         <div class="nav-tools">
             <a href={u('/search/')} class="icon-btn" aria-label="Search" title="Search">
@@ -34,14 +31,9 @@ const sections = [
             <ThemeToggle />
         </div>
     </nav>
-    <nav class="sections-bar" aria-label="Sections">
-        {/* On phones the top-bar pages live here, right after Today (so they aren't buried behind 13 desks);
-            on wider screens they're hidden here because the top bar shows them. */}
-        {sections.slice(0, 1).map(s => <a href={s.href} aria-current={path === u('/').replace(/\/?$/, '/') ? 'page' : undefined}>{s.label}</a>)}
-        {[['/week/', 'The week'], ['/briefing/', 'Briefing'], ['/business/', 'Business'], ['/communities/', 'Communities'], ['/markets/', 'Markets'], ['/outages/', 'Incidents'], ['/puzzles/', 'Puzzles'], ['/roadmap/', 'Roadmap']].map(([href, label]) => (
-            <a class="m-only" href={u(href)} aria-current={path.startsWith(u(href)) ? 'page' : undefined}>{label}</a>
-        ))}
-        <span class="m-only m-sep" aria-hidden="true"></span>
-        {sections.slice(1).map(s => <a href={s.href} aria-current={path.startsWith(s.href) ? 'page' : undefined}>{s.cat && <span class="cat-dot" data-cat={s.cat}></span>}{s.label}</a>)}
+    {/* Phones: the same six parts as a scrollable row (the top bar's links are hidden there). */}
+    <nav class="sections-bar parts-bar" aria-label="Parts">
+        <a href={u('/')} aria-current={path === u('/').replace(/\/?$/, '/') ? 'page' : undefined}>Today</a>
+        {PARTS.map(p => <a href={u(p.href)} aria-current={p.active ? 'page' : undefined}>{p.label}</a>)}
     </nav>
 </div>

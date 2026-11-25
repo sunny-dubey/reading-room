@@ -3,14 +3,74 @@ import Base from '../layouts/Base.astro';
 import ReadingMast from '../components/ReadingMast.astro';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading } from '../lib/reading';
+import { getStartups, type StartupStory } from '../lib/startups';
 const { startups, fetchedAt } = await getReading();
-const { launches, show, producthunt, funding } = startups;
+const { launches, show, producthunt } = startups;
+const su = await getStartups();
+const dek = (i: { summary: string; title: string }) => { const d = i.summary.replace(/\s+/g, ' ').trim(); return d && !d.toLowerCase().startsWith(i.title.toLowerCase().slice(0, 30)) ? d : ''; };
 const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
 ---
-<Base title="Startups" description="What the best new companies are building." accent="reading">
-    <div class="rd">
-        <ReadingMast compact title="Startups" sub="What the best new companies are building. Skim for ideas and patterns, not hype." updated={fetchedAt} />
+<Base title="Startups" description="The last 24 hours in startups: funding, deep tech, impact, hiring, launches and news." accent="reading">
+    <div class="rd su-page">
+        <ReadingMast compact title="Startups" sub={`The last 24 hours: ${su.funding.length} funding rounds, ${su.deep.length} deep tech, ${su.impact.length} impact stories, ${su.hiring.posts.length} new jobs on HN, and what launched.`} updated={fetchedAt} />
+        <nav class="su-jump" aria-label="On this page"><a href="#approach">Worth approaching</a><a href="#funding">Funding</a><a href="#deep">Deep tech</a><a href="#impact">Impact</a><a href="#hiring">Hiring</a><a href="#launches">Launches</a><a href="#news">News</a></nav>
 
+        <section class="fp-band" id="approach">
+            <h2 class="fp-band-h"><span>Worth approaching · engineering roles</span></h2>
+            <p class="bf-lede">Startups that just raised money (last 7 days), are hiring engineers on Hacker News this month, or launched on YC, matched to the systems, backend, software, AI and low-latency tracks. "Why" and "How to approach" are written by the local model{su.targets.some(t => !t.ai) ? ' or, where it had no time, from a standard playbook' : ''}.</p>
+            {su.targets.length === 0 ? <p class="fp-empty">No matching startups this week.</p> : (
+                <ol class="su-target-list" role="list">
+                    {su.targets.map(t => (
+                        <li class={`su-t su-t-${t.kind}`}>
+                            <p class="su-t-k">{t.kind === 'funding' ? 'Just raised' : t.kind === 'hiring' ? 'Hiring now' : 'YC launch'} · {t.signal}{t.topic ? ` · ${t.topic}` : ''}</p>
+                            <a class="su-t-h" href={t.url} target="_blank" rel="noopener noreferrer" data-read>{t.name}</a>
+                            <p class="su-t-line">{t.headline}</p>
+                            <p class="su-t-how"><b>How to approach:</b> {t.approach.mention}</p>
+                            <details class="su-t-more"><summary>Why it fits</summary><p class="su-t-why">{t.approach.why}</p></details>
+                        </li>
+                    ))}
+                </ol>
+            )}
+        </section>
+
+        {(() => {
+            const Row = (s: StartupStory, money = false) => (
+                <li data-link={s.item.link} data-ts={+s.item.date}>
+                    <p class="biz-meta">{money && (s.amount || s.round) && <b class="su-money">{[s.amount, s.round].filter(Boolean).join(' · ')}</b>}<time data-rel datetime={s.item.date.toISOString()}></time> · {s.item.feedTitle}{s.deep && money ? ' · deep tech' : ''}{s.impact && money ? ' · impact' : ''}</p>
+                    <a class="biz-h" href={s.item.link} target="_blank" rel="noopener noreferrer" data-read>{s.item.title}</a>
+                    {dek(s.item) && <p class="biz-dek">{dek(s.item)}</p>}
+                    {s.also.length > 0 && <p class="biz-also">Also: {s.also.map((a, n) => <>{n > 0 && ' · '}<a href={a.link} target="_blank" rel="noopener noreferrer">{a.feedTitle}</a></>)}</p>}
+                </li>
+            );
+            const Section = ({ id, title, note, list, money = false, empty }: any) => (
+                <section class="fp-band" id={id}>
+                    <h2 class="fp-band-h"><span>{title}</span></h2>
+                    {note && <p class="bf-lede">{note}</p>}
+                    {list.length === 0 ? <p class="fp-empty">{empty}</p> : <ol class="biz-list" role="list">{list.map((s: StartupStory) => Row(s, money))}</ol>}
+                </section>
+            );
+            return <>
+                {Section({ id: 'funding', title: 'Funding · last 24 hours', note: 'Rounds announced in the last day, biggest first when the amount is in dollars. Round and amount are read from the headline.', list: su.funding, money: true, empty: 'No funding rounds reported in the last 24 hours.' })}
+                {Section({ id: 'deep', title: 'Deep tech', note: 'Quantum, space, robotics, chips, energy, biotech and materials: hard science turning into companies.', list: su.deep, empty: 'No deep tech stories in the last 24 hours.' })}
+                {Section({ id: 'impact', title: 'Impact', note: 'Climate, health, education and inclusion.', list: su.impact, empty: 'No impact stories in the last 24 hours.' })}
+            </>;
+        })()}
+
+        <section class="fp-band" id="hiring">
+            <h2 class="fp-band-h"><span>Hiring · new on Hacker News</span></h2>
+            {su.hiring.thread ? (
+                <>
+                    <p class="bf-lede">New postings in India (onsite, hybrid or remote) or remote worldwide, last 24 hours, in <a href={su.hiring.thread.url} target="_blank" rel="noopener noreferrer">{su.hiring.thread.title}</a> ({su.hiring.total} such postings this month). Each line is the posting's own header.</p>
+                    {su.hiring.posts.length === 0 ? <p class="fp-empty">No new postings in the last 24 hours.</p> : (
+                        <ol class="su-hiring" role="list">
+                            {su.hiring.posts.slice(0, 30).map(h => <li><a href={h.url} target="_blank" rel="noopener noreferrer">{h.line}</a><span class="bf-tag new">{h.where}</span></li>)}
+                        </ol>
+                    )}
+                </>
+            ) : <p class="fp-empty">Couldn't reach the hiring thread for this edition.</p>}
+        </section>
+
+        <h2 class="fp-band-h" id="launches"><span>Launches</span></h2>
         <div class="su-grid">
             <section class="su-block su-wide">
                 <header class="block-head"><h2>Launched by YC startups</h2><a href="https://news.ycombinator.com/launches" target="_blank" rel="noopener noreferrer">Launch HN ↗</a></header>
@@ -57,19 +117,20 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
                     ))}
                 </ol>
             </section>
-
-            <section class="su-block su-wide">
-                <header class="block-head"><h2>Who's raising to build what</h2><span class="dim">TechCrunch Startups</span></header>
-                <ol class="su-list su-two" role="list">
-                    {funding.map(i => (
-                        <li data-link={i.link}>
-                            <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
-                            <span class="dim"><time data-rel datetime={i.date.toISOString()}></time></span>
-                        </li>
-                    ))}
-                </ol>
-            </section>
         </div>
+
+        <section class="fp-band" id="news">
+            <h2 class="fp-band-h"><span>Startup news</span></h2>
+            {su.news.length === 0 ? <p class="fp-empty">No other startup news in the last 24 hours.</p> : (
+                <ol class="biz-list" role="list">{su.news.map(s => (
+                    <li data-link={s.item.link} data-ts={+s.item.date}>
+                        <p class="biz-meta"><time data-rel datetime={s.item.date.toISOString()}></time> · {s.item.feedTitle}</p>
+                        <a class="biz-h" href={s.item.link} target="_blank" rel="noopener noreferrer" data-read>{s.item.title}</a>
+                    </li>
+                ))}</ol>
+            )}
+            <p class="side-note">Sources: TechCrunch, Crunchbase News, EU-Startups, Tech.eu, Sifted, Inc42, YourStory, TechCabal, Contxto, Rest of World, Y Combinator, The Quantum Insider, SpaceNews, The Robot Report, IEEE Spectrum, MIT Technology Review, Canary Media; launches from Launch HN, Show HN and Product Hunt; hiring from Hacker News.</p>
+        </section>
     </div>
     <ReadingClient />
 </Base>
