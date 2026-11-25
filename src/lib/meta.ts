@@ -71,6 +71,9 @@ export async function makeThumb(imageUrl: string, width: number): Promise<string
 /** A description worth showing: the author's own words, not boilerplate or a repeat of the title. */
 export function cleanDescription(d: string | undefined, title: string) {
     if (!d) return undefined;
+    // og:description is sometimes entity-encoded twice ("Silberman &#8211; T."): decode what's left.
+    const ENT: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…', mdash: '—', ndash: '–', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“' };
+    d = d.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) => e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10)) : ENT[e.toLowerCase()] ?? m);
     const t = d.replace(/\s*(Read more|Continue reading|\[…\]|\.\.\.)\s*$/i, '').trim();
     if (t.length < 40 || t.toLowerCase().startsWith(title.toLowerCase().slice(0, 40))) return undefined;
     if (/cookies|subscribe|sign up|newsletter|javascript/i.test(t.slice(0, 80))) return undefined;

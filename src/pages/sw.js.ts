@@ -9,7 +9,7 @@ export function GET() {
     const version = `rr-${Date.now().toString(36)}`;
     const base = u('/');
     const precache = [
-        '/', '/briefing/', '/markets/', '/outages/', '/puzzles/', '/week/', '/roadmap/', '/canon/', '/search/', '/sources/',
+        '/', '/briefing/', '/business/', '/communities/', '/markets/', '/outages/', '/puzzles/', '/week/', '/roadmap/', '/canon/', '/search/', '/sources/',
         '/search-index.json',
         ...CATEGORIES.map(c => `/${c.slug}/`),
     ].map(u);

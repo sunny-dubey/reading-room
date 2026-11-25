@@ -18,10 +18,11 @@ const when = (d: number) => d === 0 ? 'today' : d > 0 ? `in ${d} ${d === 1 ? 'da
 
         <div class="bf-two">
             <section class="fp-band" id="releases">
-                <h2 class="fp-band-h"><span>Release radar · last 30 days</span></h2>
+                <h2 class="fp-band-h"><span>Release radar · last 24 hours</span></h2>
                 <table class="bf-table">
                     <thead><tr><th>Project</th><th>Version</th><th>Released</th></tr></thead>
                     <tbody>
+                        {b.releases.length === 0 && <tr><td colspan="3" class="fp-empty">No new releases in your stack in the last 24 hours.</td></tr>}
                         {b.releases.map(r => (
                             <tr><td>{r.product}{r.newCycle && <span class="bf-tag new">new major</span>}{r.others > 0 && <span class="bf-date"> +{r.others} older {r.others === 1 ? 'line' : 'lines'}</span>}</td><td class="mono">{r.link ? <a href={r.link} target="_blank" rel="noopener noreferrer">{r.version}</a> : r.version}</td><td>{day(r.date)}</td></tr>
                         ))}
@@ -49,8 +50,8 @@ const when = (d: number) => d === 0 ? 'today' : d > 0 ? `in ${d} ${d === 1 ? 'da
         </div>
 
         <section class="fp-band" id="cves">
-            <h2 class="fp-band-h"><span>CVE watch · exploited in the wild, last 21 days</span></h2>
-            <p class="bf-lede">{b.cves.length} vulnerabilities added to CISA's Known Exploited Vulnerabilities catalogue in three weeks ({b.kevTotal.toLocaleString()} in total). These aren't theoretical: attackers are using them now. Rows marked <span class="bf-tag mine">your stack</span> name a vendor you use.</p>
+            <h2 class="fp-band-h"><span>CVE watch · exploited in the wild, last 24 hours</span></h2>
+            <p class="bf-lede">{b.cves.length === 0 ? 'No' : b.cves.length} {b.cves.length === 1 ? 'vulnerability' : 'vulnerabilities'} added to CISA's Known Exploited Vulnerabilities catalogue in the last 24 hours ({b.kevTotal.toLocaleString()} in the catalogue; CISA dates entries by day, so this counts today and yesterday). These aren't theoretical: attackers are using them now. Rows marked <span class="bf-tag mine">your stack</span> name a vendor you use.</p>
             <div class="bf-cves">
                 {b.cves.map(c => (
                     <details class:list={['bf-cve', { mine: c.mine }]}>
@@ -67,8 +68,8 @@ const when = (d: number) => d === 0 ? 'today' : d > 0 ? `in ${d} ${d === 1 ? 'da
         </section>
 
         <section class="fp-band" id="papers">
-            <h2 class="fp-band-h"><span>Paper drop · new on arXiv this week</span></h2>
-            <p class="bf-lede">The papers closest to your Roadmap out of {b.papersSeen} new ones in {Object.keys(b.cats).length} categories. Read the abstract; open the paper only if it earns it.</p>
+            <h2 class="fp-band-h"><span>Paper drop · new on arXiv in the last 24 hours</span></h2>
+            <p class="bf-lede">{b.papers.length === 0 ? 'No new papers in the last 24 hours (arXiv doesn’t post at weekends).' : `The papers closest to your Roadmap out of ${b.papersSeen} new ones in ${Object.keys(b.cats).length} categories. Read the abstract; open the paper only if it earns it.`}</p>
             <div class="bf-papers">
                 {b.papers.map(p => (
                     <article class="bf-paper">

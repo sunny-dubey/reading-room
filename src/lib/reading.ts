@@ -7,8 +7,8 @@ import { getMeta, makeThumb, cleanDescription } from './meta';
 import { mapLimit } from './summarize';
 
 const DAY = 864e5;
-/** Each edition carries only articles published in the 24 hours before the build. */
-export const EDITION_WINDOW = DAY;
+import { EDITION_WINDOW } from './edition';
+export { EDITION_WINDOW };
 
 /** How much an item deserves attention right now. The reader wants the latest, so freshness is strong:
  *  +4 today, +2 at 2.5 days, +1 at 5 days, +0.25 at 10. Worth (×2, so 2–10) still keeps weak posts down. */
@@ -40,7 +40,7 @@ async function buildReading() {
     const edition = learning.filter(i => +i.date <= now && now - +i.date < EDITION_WINDOW);
     const byRank = [...edition].sort((a, b) => rank(b, now) - rank(a, now) || +b.date - +a.date);
     // The big story: the same thing covered by several independent sources (headline feeds count too).
-    const big = await bigStories(items, now, 1);
+    const big = await bigStories(items.filter(i => i.category !== 'business'), now, 1); // business news has its own page
     if (process.env.BIG_DEBUG) for (const b of big) console.log('[big]', b.sources, b.items.map(i => `${i.feedTitle}: ${i.title}`).join(' | '));
 
     const used = new Set<string>();
@@ -79,12 +79,13 @@ async function buildReading() {
     });
 
     // Pulse: Hacker News by points, then Techmeme by recency; ten headlines.
-    const pulse = items.filter(i => i.category === 'pulse')
+    const inWindow = (i: FeedItem) => +i.date <= now && now - +i.date < EDITION_WINDOW;
+    const pulse = items.filter(i => i.category === 'pulse' && inWindow(i))
         .sort((a, b) => (b.points ?? 0) - (a.points ?? 0) || +b.date - +a.date)
         .slice(0, 10);
 
     // Startups: grouped by where the signal comes from.
-    const startup = (id: string) => items.filter(i => i.feedId === id);
+    const startup = (id: string) => items.filter(i => i.feedId === id && inWindow(i));
     const startups = {
         launches: startup('launch-hn').map(i => ({ i, ...parseLaunch(i.title) })),
         show: startup('show-hn').sort((a, b) => (b.points ?? 0) - (a.points ?? 0)),
@@ -114,13 +115,15 @@ async function buildReading() {
     const perFeed = new Map<string, number>();
     const wire = edition.filter(i => (i.brief?.worth ?? 0) >= 2.5 && i.link !== deepRead?.link).sort(newest)
         // All arXiv listings count as one source here, so new-submission batches can't fill the wire.
-        .filter(i => { const k = i.feedId.startsWith('arxiv') ? 'arxiv' : i.feedId; const n = perFeed.get(k) ?? 0; perFeed.set(k, n + 1); return n < 2; }).slice(0, 10);
+        .filter(i => { const k = i.feedId.startsWith('arxiv') ? 'arxiv' : i.feedId; const n = perFeed.get(k) ?? 0; perFeed.set(k, n + 1); return n < 2; }).slice(0, 11);
     // Top stories under the lead: the best recent pieces not already in the wire or the desks.
     const shownElsewhere = new Set([...wire, ...desks.flatMap(d => d.items)].map(i => i.link));
     const topStories = byRank.filter(i => isDeep(i) && !shownElsewhere.has(i.link) && !deepCands.some(d => d.link === i.link) && i.category !== 'postmortems').slice(0, 6);
     // The article's own description and preview image for everything shown with a picture or a dek.
     const showcase = [...new Set([...deepCands, ...topStories, ...desks.flatMap(d => d.items), ...wire])];
     await mapLimit(showcase, 8, async i => {
+        // arXiv's og:image is always its logo and its description is the abstract: show neither.
+        if (i.feedId.startsWith('arxiv')) { i.meta = {}; return; }
         const m = await getMeta(i.link);
         i.meta = { description: cleanDescription(m.description, i.title), image: m.image };
     });
@@ -132,7 +135,7 @@ async function buildReading() {
     await mapLimit(deepCands, 4, i => thumbFor(i, 760));
     await mapLimit([...topStories, ...desks.map(d => d.items[0])].filter(Boolean), 6, i => thumbFor(i, 360));
     // The week: each desk's best of the last 7 days by worth (not freshness), for days you didn't read.
-    const weekBig = await bigStories(items, now, 7, 6);
+    const weekBig = await bigStories(items.filter(i => i.category !== 'business'), now, 7, 6);
     const weekDesks = CATEGORIES.map(c => {
         const mine = learning.filter(i => i.category === c.id && +i.date <= now && now - +i.date < 7 * DAY && (i.brief?.worth ?? 0) >= 3 && !isRoundup(i.title));
         const score = (i: FeedItem) => (i.brief?.worth ?? 2) * 2 + (i.skill?.boost ?? 0) + (i.weight ?? 0);

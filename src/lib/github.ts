@@ -1,10 +1,10 @@
 // "On GitHub": the best technical projects being built in the open right now, picked fresh for every edition.
 // Candidates come from two official APIs, no scraping:
-//   1. Hacker News (Algolia API): repos linked from stories with 60+ points in the last 7 days. HN readers are a
+//   1. Hacker News (Algolia API): repos linked from stories with 60+ points in the last 24 hours. HN readers are a
 //      strong technical filter.
 //   2. GitHub Search API: new repos (≤ 60 days) in systems languages (Rust, Go, C, C++, Zig, OCaml, Haskell, Java),
 //      ranked by stars. Python/TypeScript come only via HN: by stars alone they are mostly AI-app wrappers.
-// A repo must be active (pushed in the last 14 days), young (created within a year, so "ongoing", not a giant
+// A repo must be active (pushed in the last 24 hours), young (created within a year, so "ongoing", not a giant
 // linked for a CVE), have an English description, show no game/emulator/piracy signals, not look star-farmed,
 // and its description must match a Roadmap topic by meaning (the same test articles pass). That match is also
 // its "Why look" line. One repo per owner. The featured repo rotates: one featured in the last 3 days isn't again.
@@ -12,6 +12,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { embed, cosine } from './embed';
 import type { Topic } from './roadmap';
+import { EDITION_WINDOW } from './edition';
 
 export interface Repo {
     name: string;          // owner/repo
@@ -60,9 +61,9 @@ async function readCache(): Promise<Cache> {
     try { return JSON.parse(await readFile(CACHE, 'utf8')); } catch { return { at: 0, repos: [], featured: {} }; }
 }
 
-/** Repos linked from Hacker News stories with 60+ points in the last 7 days. */
+/** Repos linked from Hacker News stories with 60+ points in the edition window (24 hours). */
 async function fromHN(now: number) {
-    const since = Math.floor((now - 7 * DAY) / 1000);
+    const since = Math.floor((now - EDITION_WINDOW) / 1000);
     const q = new URLSearchParams({ tags: 'story', query: 'github.com', restrictSearchableAttributes: 'url', numericFilters: `points>60,created_at_i>${since}`, hitsPerPage: '100' });
     const d = await json(`https://hn.algolia.com/api/v1/search_by_date?${q}`);
     const out = new Map<string, Repo['hn']>();
@@ -112,7 +113,7 @@ function toRepo(r: any, now: number, hn?: Repo['hn']): Repo {
 
 const eligible = (r: Repo, now: number) =>
     r.description.length >= 20 && english(r.description) && !SKIP.test(`${r.name} ${r.description}`)
-    && now - Date.parse(r.pushedAt) < 14 * DAY && now - Date.parse(r.createdAt) < 365 * DAY
+    && now - Date.parse(r.pushedAt) < EDITION_WINDOW && now - Date.parse(r.createdAt) < 365 * DAY
     // Star-farmed repos have stars and no forks. HN upvotes are real attention, so HN repos skip this guard.
     && (r.hn ? r.stars >= 20 : r.stars >= 50 && r.forks / Math.max(1, r.stars) >= 0.01);
 
@@ -122,7 +123,7 @@ export const getGitHub = (...a: Parameters<typeof build>) => (memo ??= build(...
 
 async function build(now: number, roadmap: { topics: Map<string, Topic>; topicVec: Map<string, number[]> }) {
     const cache = await readCache();
-    let repos: Repo[] = [];
+    let repos: Repo[] = [], fetched = false;
     try {
         const [hn, search] = await Promise.all([fromHN(now), fromSearch(now)]);
         const byName = new Map<string, Repo>();
@@ -137,11 +138,14 @@ async function build(now: number, roadmap: { topics: Map<string, Topic>; topicVe
             desc: r.description.length >= 20, english: english(r.description), skip: SKIP.exec(`${r.name} ${r.description}`)?.[0],
             pushedDays: Math.round((now - Date.parse(r.pushedAt)) / DAY), ageDays: Math.round((now - Date.parse(r.createdAt)) / DAY), stars: r.stars, forkRatio: +(r.forks / Math.max(1, r.stars)).toFixed(3) }));
         repos = [...byName.values()].filter(r => eligible(r, now));
+        fetched = true;
     } catch (e) {
         console.warn(`[github] fetch failed, using the last good list: ${(e as Error).message}`);
     }
-    if (!repos.length) repos = cache.repos;
-    else {
+    // The cache stands in only when the fetch failed, and only if it's from inside the edition window:
+    // an empty day shows an empty section, never yesterday's repos.
+    if (!fetched) repos = now - cache.at < EDITION_WINDOW ? cache.repos : [];
+    else if (repos.length) {
         // Topic match by meaning; drop anything that doesn't teach a Roadmap topic.
         const topics = [...roadmap.topics.values()].filter(t => TRACKS.has(t.track) && !SOFT_AREAS.has(t.areaN) && !SOFT_TOPICS.has(t.id) && roadmap.topicVec.has(t.id));
         const vecs = await embed(repos.map(r => `${r.name.split('/')[1].replace(/[-_]/g, ' ')}: ${r.description}`));

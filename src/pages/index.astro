@@ -5,13 +5,13 @@ import Story from '../components/Story.astro';
 import Cover from '../components/Cover.astro';
 import Thumb from '../components/Thumb.astro';
 import { categoryShort } from '../lib/feeds';
-import { editionName, istTime, istDate } from '../lib/edition';
+import { editionName, istTime, istDate, EDITION_WINDOW } from '../lib/edition';
 import ReadingClient from '../components/ReadingClient.astro';
 import { getReading, getCanon, rank, isDeep } from '../lib/reading';
 import { getToday } from '../lib/today';
 import { getOutages, fmtDuration, KINDS } from '../lib/outages';
 import { getBriefing } from '../lib/briefing';
-import MarketTicker from '../components/MarketTicker.astro';
+import MarketBrief from '../components/MarketBrief.astro';
 import PuzzleCard from '../components/PuzzleCard.astro';
 import NumbersCard from '../components/NumbersCard.astro';
 import IncidentDrill from '../components/IncidentDrill.astro';
@@ -20,6 +20,8 @@ import { getPuzzles } from '../lib/puzzles';
 import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
 import WebPuzzleList from '../components/WebPuzzleList.astro';
 import { getGitHub, LABEL } from '../lib/github';
+import { getBusiness, outlet } from '../lib/business';
+import { getCommunities, communityName } from '../lib/communities';
 
 const { big, learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
@@ -32,7 +34,15 @@ const webPicks = todaysPicks(await getWebPuzzles(), now);
 const bfDay = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 // Incident lessons: case studies picked in outages.ts.
 const outages = await getOutages();
+// The front page carries only the last 24 hours: incidents with an update in the edition window,
+// lessons (a stated cause or a postmortem) first.
+const lastUpdate = (i: { start: number; updates: { at: number }[] }) => Math.max(i.start, ...i.updates.map(x => x.at));
+const recentIncidents = outages.incidents.filter(i => now - lastUpdate(i) < EDITION_WINDOW);
+const recentLessons = [...recentIncidents].sort((a, b) => Number(!!(b.cause || b.rca)) - Number(!!(a.cause || a.rca)) || lastUpdate(b) - lastUpdate(a)).slice(0, 3);
 const gh = await getGitHub(now, roadmap);
+const biz = await getBusiness();
+const cm = await getCommunities(now, roadmap);
+const bizFront = [...biz.top, ...biz.river].slice(0, 6);
 const ghStars = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n);
 const outAnchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
 const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
@@ -56,7 +66,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         <!-- ===== Masthead ===== -->
         <header class="fp-mast">
             <h1 class="fp-title">The Reading Room</h1>
-            <p class="fp-for">A daily paper for engineers who read like researchers: CS research, distributed systems, system design, software engineering, agentic AI, security, HFT tech, quant finance, macro, applied maths and puzzles. The latest from the best experts in each, informative over opinion.</p>
+            <p class="fp-for">A daily paper for engineers who read like researchers.</p>
             <div class="fp-dateline">
                 <span>No. {issue}</span>
                 <span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span>
@@ -65,7 +75,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             <p class="fp-stale" data-stale={fetchedAt.toISOString()} hidden></p>
             <p class="fp-since" data-since hidden></p>
         </header>
-        <MarketTicker />
+        <MarketBrief />
 
         <!-- ===== The big story: one thing covered by several independent sources ===== -->
         {big.length > 0 && (
@@ -98,7 +108,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     {topStories.length > 0 && (
                         <div class="top-stories">
                             <h3 class="fp-box-h">Top stories</h3>
-                            <div class="top-grid">{topStories.map(i => <Story i={i} cover deck={false} />)}</div>
+                            <div class="top-grid">{topStories.map((i, n) => <Story i={i} cover={n === 0 || !!i.meta?.thumb} deck={false} />)}</div>
                         </div>
                     )}
                 </div>
@@ -110,7 +120,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     <ol class="wire-list" role="list">
                         {wire.map(i => (
                             <li data-link={i.link} data-cat={i.category} data-ts={+i.date}>
-                                <span class="wire-meta"><span class="new-badge" data-new hidden>New</span><span class="cat-dot" data-cat={i.category}></span><time data-rel datetime={i.date.toISOString()}></time> · {categoryShort(i.category)}</span>
+                                <span class="wire-meta"><span class="new-badge" data-new hidden>New</span><span class="cat-dot" data-cat={i.category} title={categoryShort(i.category)}></span><time data-rel datetime={i.date.toISOString()}></time></span>
                                 <a href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
                                 <span class="wire-src">{i.feedTitle}{i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}</span>
                             </li>
@@ -133,6 +143,19 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                     </section>
                 )}
 
+                <section class="fp-box biz-box" aria-label="Business and economy">
+                    <h3 class="fp-box-h"><a href={u('/business/')}>Business &amp; economy</a> <span class="web-note">last 24 hours</span></h3>
+                    {bizFront.length === 0 && <p class="fp-empty">No business news in the last 24 hours yet.</p>}
+                    <ol role="list">
+                        {bizFront.map(s => (
+                            <li data-link={s.lead.link} data-ts={+s.lead.date}>
+                                <a class="biz-t" href={s.lead.link} target="_blank" rel="noopener noreferrer" data-read>{s.lead.title}</a>
+                                <p class="biz-meta"><time data-rel datetime={s.lead.date.toISOString()}></time> · {outlet(s.lead)}{s.outlets > 1 ? ` + ${s.outlets - 1} more` : ''}</p>
+                            </li>
+                        ))}
+                    </ol>
+                    <a class="fp-more" href={u('/business/')}>All business &amp; economy news →</a>
+                </section>
             </aside>
         </section>
 
@@ -157,7 +180,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                         {d.items.map((i, n) => (
                             <article class:list={['desk-item', { first: n === 0 }]} data-link={i.link} data-ts={+i.date} data-story>
                                 {n === 0 && <a href={i.link} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><Thumb i={i} w={360} h={110} /></a>}
-                                <p class="desk-meta"><span class="new-badge" data-new hidden>New</span><time data-rel datetime={i.date.toISOString()}></time>{i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}{i.brief?.depth === 'deep' ? ' · deep dive' : ''}</p>
+                                <p class="desk-meta"><span class="new-badge" data-new hidden>New</span><time data-rel datetime={i.date.toISOString()}></time>{n === 0 && i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}{n === 0 && i.brief?.depth === 'deep' ? ' · deep dive' : ''}</p>
                                 <a class="desk-title" href={i.link} target="_blank" rel="noopener noreferrer" data-read>{i.title}</a>
                                 {n === 0 && i.meta?.description && <p class="desk-dek">{i.meta.description}</p>}
                                 <span class="desk-src">{i.feedTitle}</span>
@@ -194,12 +217,37 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
             </section>
         )}
 
+        <!-- ===== Communities: what tech communities are discussing, last 24 hours ===== -->
+        {cm.total > 0 && (
+            <section class="fp-band reveal cm-front" aria-label="Communities">
+                <h2 class="fp-band-h"><span>Communities · last 24 hours</span></h2>
+                <ul class="cm-front-list" role="list">
+                    {cm.everywhere.slice(0, 1).map(g => (
+                        <li>
+                            <p class="cm-front-k">In {new Set(g.threads.map(t => t.community)).size} communities</p>
+                            <a class="cm-t" href={g.threads[0].ext ?? g.threads[0].url} target="_blank" rel="noopener noreferrer">{g.threads[0].title}</a>
+                            <p class="cm-meta">{[...new Set(g.threads.map(t => communityName(t.community)))].join(' · ')}</p>
+                        </li>
+                    ))}
+                    {cm.gists.filter(g => g.threads.length).map(g => (
+                        <li>
+                            <p class="cm-front-k">{g.community.name}{g.themes[0] ? ` · mostly ${g.themes[0].area}` : ''}</p>
+                            <a class="cm-t" href={g.threads[0].url} target="_blank" rel="noopener noreferrer">{g.threads[0].title}</a>
+                            <p class="cm-meta">{g.threads[0].comments.toLocaleString('en-US')} {g.community.id === 'se' ? 'answers' : 'comments'}{g.threads[0].where ? ` · ${g.threads[0].where}` : ''}</p>
+                        </li>
+                    ))}
+                </ul>
+                <a class="fp-more" href={u('/communities/')}>What every community is talking about →</a>
+            </section>
+        )}
+
         <!-- ===== The briefing ===== -->
         <section class="fp-band reveal bf-front">
             <h2 class="fp-band-h"><span>The briefing</span></h2>
             <div class="bf-boxes">
                 <div class="bf-box">
                     <h3 class="fp-box-h"><a href={u('/briefing/#releases')}>Release radar</a></h3>
+                    {bf.releases.length === 0 && <p class="fp-empty">No new releases in your stack in the last 24 hours.</p>}
                     <ul role="list">{bf.releases.slice(0, 6).map(r => <li><b>{r.product}</b> <span class="mono">{r.version}</span>{r.newCycle && <span class="bf-tag new">new</span>}<span class="bf-date">{bfDay(r.date)}</span></li>)}</ul>
                 </div>
                 <div class="bf-box">
@@ -208,29 +256,34 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 </div>
                 <div class="bf-box">
                     <h3 class="fp-box-h"><a href={u('/briefing/#cves')}>CVE watch · exploited now</a></h3>
+                    {bf.cves.length === 0 && <p class="fp-empty">CISA added no exploited vulnerabilities in the last 24 hours.</p>}
                     <ul role="list">{bf.cves.slice(0, 5).map(c => <li class:list={{ mine: c.mine }}><b>{c.vendor} {c.product}</b>{c.ransomware && <span class="bf-tag ransom">ransomware</span>}<span class="bf-date">{bfDay(c.added)}</span></li>)}</ul>
                 </div>
                 <div class="bf-box">
                     <h3 class="fp-box-h"><a href={u('/briefing/#papers')}>Paper drop</a></h3>
+                    {bf.papers.length === 0 && <p class="fp-empty">No new arXiv papers in the last 24 hours (arXiv doesn’t post at weekends).</p>}
                     <ul role="list">{bf.papers.slice(0, 4).map(p => <li><a href={p.url} target="_blank" rel="noopener noreferrer">{p.title}</a><span class="bf-date">{p.topic?.name}</span></li>)}</ul>
                 </div>
             </div>
         </section>
 
         <!-- ===== Incident lessons: real outages with a stated cause or a postmortem ===== -->
-        {outages.cases.length > 0 && (
+        {(
             <section class="fp-band reveal out-front">
-                <h2 class="fp-band-h"><span>Incident lessons</span></h2>
+                <h2 class="fp-band-h"><span>Incidents · last 24 hours</span></h2>
+                {recentLessons.length === 0 && <p class="fp-empty">No public incidents at the providers we follow in the last 24 hours.</p>}
                 <ul class="out-lessons" role="list">
-                    {outages.cases.slice(0, 3).map(i => (
+                    {recentLessons.map(i => (
                         <li>
-                            <p class="fp-kicker">{i.provider} · {KINDS[i.kind]}{i.duration ? ` · ${fmtDuration(i.duration)} to fix` : ''}{i.rca ? ' · postmortem' : ''}</p>
-                            <a class="out-lesson-t" href={u(`/outages/#${outAnchor(i.id)}`)}>{i.title}</a>
+                            <p class="fp-kicker">{i.provider} · {KINDS[i.kind]}{i.ongoing ? ' · ongoing' : i.duration ? ` · ${fmtDuration(i.duration)} to fix` : ''}{i.rca ? ' · postmortem' : ''}</p>
+                            {outages.cases.includes(i)
+                                ? <a class="out-lesson-t" href={u(`/outages/#${outAnchor(i.id)}`)}>{i.title}</a>
+                                : <a class="out-lesson-t" href={i.url} target="_blank" rel="noopener noreferrer">{i.title}</a>}
                             {i.cause && <p class="out-lesson-cause">{i.cause}</p>}
                         </li>
                     ))}
                 </ul>
-                <a class="fp-more" href={u('/outages/')}>All case studies and the reliability table →</a>
+                <a class="fp-more" href={u('/outages/')}>Case studies and the reliability table →</a>
             </section>
         )}
 

@@ -11,6 +11,7 @@ export interface Market {
     points: Point[];              // oldest first (about 45 days, or 24 months for monthly series)
     last?: Point; prev?: Point;   // latest value and the one it's compared with (≈1 week back, or 1 month for monthly)
     change?: number;              // % change, or for yields the change in basis points
+    dayChange?: number;           // the same, over the last trading session (daily series only)
     ok: boolean;
 }
 
@@ -53,8 +54,9 @@ function compare(points: Point[], freq: Market['freq'], unit: Market['unit']) {
     if (!last) return {};
     const prev = freq === 'monthly' ? points.at(-2) : [...points].reverse().find(p => p.t <= last.t - 7 * DAY + DAY / 2);
     if (!prev) return { last };
-    const change = unit === 'yield' ? Math.round((last.v - prev.v) * 100) : (last.v / prev.v - 1) * 100;
-    return { last, prev, change };
+    const diff = (a: Point, b: Point) => unit === 'yield' ? Math.round((a.v - b.v) * 100) : (a.v / b.v - 1) * 100;
+    const before = points.at(-2);
+    return { last, prev, change: diff(last, prev), dayChange: freq === 'daily' && before ? diff(last, before) : undefined };
 }
 
 let cache: Promise<Market[]> | undefined;
@@ -97,4 +99,38 @@ export function sparkPath(points: Point[], w: number, h: number, n = 10) {
     if (pts.length < 2) return '';
     const vs = pts.map(p => p.v), lo = Math.min(...vs), hi = Math.max(...vs), span = hi - lo || 1;
     return pts.map((p, i) => `${i ? 'L' : 'M'}${(i / (pts.length - 1) * w).toFixed(1)} ${(h - 2 - ((p.v - lo) / span) * (h - 4)).toFixed(1)}`).join(' ');
+}
+
+/** "Markets, last session" in plain English for the front page: rule-based sentences from the last trading
+ *  session of fresh daily series (a monthly or stale value never appears; weekends fall back to Friday's
+ *  session, which the label says). Returns the sentences, or [] when there's nothing fresh to say. */
+export function marketBrief(markets: Market[], now = Date.now()) {
+    const fresh = new Map(markets.filter(m => m.freq === 'daily' && m.dayChange !== undefined && now - m.last!.t <= 4 * DAY).map(m => [m.id, m]));
+    const c = (id: string) => fresh.get(id)?.dayChange;
+    const pct = (v: number) => `${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(Math.abs(v) >= 10 ? 0 : 1)}%`;
+    const out: string[] = [];
+    // 1. Risk mood: stocks, the fear gauge and the 10-year yield.
+    const spx = c('spx'), vix = c('vix'), y10 = c('us10y');
+    if (spx !== undefined) {
+        const stocks = Math.abs(spx) < 0.4 ? `Stocks were little changed (S&P 500 ${pct(spx)})` : `Stocks ${spx > 0 ? 'rose' : 'fell'} (S&P 500 ${pct(spx)})`;
+        const fear = vix !== undefined && Math.abs(vix) >= 5 ? ` and fear ${vix > 0 ? 'rose' : 'eased'} (VIX ${pct(vix)})` : '';
+        let rates = '';
+        if (y10 !== undefined && Math.abs(y10) >= 5) {
+            const bp = `${Math.abs(y10)} bp`;
+            rates = y10 < 0 && spx <= -0.4 ? `, while the US 10-year yield fell ${bp}: money moved into bonds`
+                : y10 > 0 && spx <= -0.4 ? `, and the US 10-year yield rose ${bp}: higher rates weighed on stocks`
+                : `; the US 10-year yield ${y10 > 0 ? 'rose' : 'fell'} ${bp}`;
+        }
+        out.push(`${stocks}${fear}${rates}.`);
+    }
+    // 2. Up to two other notable moves, biggest (relative to what's normal for each) first.
+    const others = ([
+        ['usdinr', 0.3, (v: number, m: Market) => `The rupee ${v > 0 ? 'weakened' : 'strengthened'} to ${fmtValue(m)} per dollar`],
+        ['brent', 1.5, (v: number, m: Market) => `Oil ${v > 0 ? 'rose' : 'fell'} ${Math.abs(v).toFixed(1)}% to ${fmtValue(m)}`],
+        ['gold', 1.2, (v: number) => `Gold ${v > 0 ? 'rose' : 'fell'} ${Math.abs(v).toFixed(1)}%`],
+        ['btc', 3, (v: number) => `Bitcoin ${v > 0 ? 'rose' : 'fell'} ${Math.abs(v).toFixed(1)}%`],
+    ] as const).flatMap(([id, bar, say]) => { const m = fresh.get(id); const v = m?.dayChange; return m && v !== undefined && Math.abs(v) >= bar ? [{ size: Math.abs(v) / bar, text: say(v, m) }] : []; })
+        .sort((a, b) => b.size - a.size).slice(0, 2).map(o => o.text);
+    if (others.length) out.push(`${others.join('; ')}.`);
+    return out;
 }

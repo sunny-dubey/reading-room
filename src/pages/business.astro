@@ -1,0 +1,51 @@
+---
+// Business & economy: the last 24 hours from the outlets that break business and economic news.
+// Stories covered by two or more outlets lead; everything else follows newest first, Techmeme-style.
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getBusiness, outlet, bizDek } from '../lib/business';
+import { getFeeds } from '../lib/feeds';
+const { top, river, total, outlets } = await getBusiness();
+const { fetchedAt } = await getFeeds();
+---
+<Base title="Business & Economy" description="The last 24 hours of business, markets and economic news, newest first." accent="reading">
+    <div class="rd biz-page">
+        <ReadingMast compact title="Business & Economy" sub={`The last 24 hours from ${outlets.length} outlets: ${total} stories. The same story across outlets is shown once.`} updated={fetchedAt} />
+
+        {total === 0 && <p class="fp-empty">No business news in the last 24 hours yet.</p>}
+
+        {top.length > 0 && (
+            <section class="fp-band" aria-label="Covered by several outlets">
+                <h2 class="fp-band-h"><span>Covered by several outlets</span></h2>
+                <ol class="biz-list biz-top" role="list">
+                    {top.map(s => (
+                        <li data-link={s.lead.link} data-ts={+s.lead.date}>
+                            <p class="biz-meta"><time data-rel datetime={s.lead.date.toISOString()}></time> · <b>{outlet(s.lead)}</b> · {s.outlets} outlets</p>
+                            <a class="biz-h" href={s.lead.link} target="_blank" rel="noopener noreferrer" data-read>{s.lead.title}</a>
+                            {bizDek(s.lead) && <p class="biz-dek">{bizDek(s.lead)}</p>}
+                            <p class="biz-also">Also: {s.also.map((a, n) => <>{n > 0 && ' · '}<a href={a.link} target="_blank" rel="noopener noreferrer" title={a.title}>{outlet(a)}</a></>)}</p>
+                        </li>
+                    ))}
+                </ol>
+            </section>
+        )}
+
+        {river.length > 0 && (
+            <section class="fp-band" aria-label="The river">
+                <h2 class="fp-band-h"><span>Newest first</span></h2>
+                <ol class="biz-list" role="list">
+                    {river.map(s => (
+                        <li data-link={s.lead.link} data-ts={+s.lead.date}>
+                            <p class="biz-meta"><time data-rel datetime={s.lead.date.toISOString()}></time> · <b>{outlet(s.lead)}</b></p>
+                            <a class="biz-h" href={s.lead.link} target="_blank" rel="noopener noreferrer" data-read>{s.lead.title}</a>
+                            {bizDek(s.lead) && <p class="biz-dek">{bizDek(s.lead)}</p>}
+                        </li>
+                    ))}
+                </ol>
+            </section>
+        )}
+        <p class="side-note">Sources: {outlets.join(', ')}. Headlines and the outlets' own one-line descriptions, linked to the original; some outlets are paywalled.</p>
+    </div>
+    <ReadingClient />
+</Base>

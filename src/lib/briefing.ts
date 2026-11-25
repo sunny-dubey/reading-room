@@ -6,6 +6,7 @@ import { parse } from 'yaml';
 import { XMLParser } from 'fast-xml-parser';
 import { embed, cosine } from './embed';
 import { getReading } from './reading';
+import { EDITION_WINDOW, DATE_ONLY_WINDOW } from './edition';
 import type { Topic } from './roadmap';
 
 const DAY = 864e5;
@@ -34,7 +35,7 @@ async function lifecycles(now: number) {
             const cycles: any[] = await (await get(`https://endoflife.date/api/${p.slug}.json`)).json();
             for (const c of cycles.slice(0, 8)) {
                 const rel = c.latestReleaseDate ? +new Date(c.latestReleaseDate) : NaN;
-                if (rel && now - rel < 30 * DAY && rel <= now) releases.push({ others: 0,
+                if (rel && now - rel < DATE_ONLY_WINDOW && rel <= now) releases.push({ others: 0,
                     product: p.name, slug: p.slug, version: String(c.latest ?? c.cycle), cycle: String(c.cycle), date: rel,
                     newCycle: !!c.releaseDate && now - +new Date(c.releaseDate) < 30 * DAY, link: typeof c.link === 'string' ? c.link : undefined,
                 });
@@ -71,7 +72,7 @@ async function cves(now: number) {
             added: +new Date(v.dateAdded), due: +new Date(v.dueDate), summary: v.shortDescription,
             ransomware: v.knownRansomwareCampaignUse === 'Known', mine: re.test(`${v.vendorProject} ${v.product}`), cwe: v.cwes?.[0],
         }))
-        .filter((v: Cve) => now - v.added < 21 * DAY)
+        .filter((v: Cve) => now - v.added < DATE_ONLY_WINDOW)
         .sort((a: Cve, b: Cve) => b.added - a.added || Number(b.mine) - Number(a.mine));
     return { list, total: d.vulnerabilities?.length ?? 0 };
 }
@@ -109,7 +110,7 @@ async function papers(now: number) {
         } catch {}
     }));
     const unTeX = (a: string) => a.replace(/\\[`'^"~=.]\{?([A-Za-z])\}?/g, '$1').replace(/&#39;/g, "'");
-    kept = kept.filter(k => now - k.date < 7 * DAY).map(k => ({ ...k, authors: unTeX(k.authors) }));
+    kept = kept.filter(k => now - k.date < EDITION_WINDOW).map(k => ({ ...k, authors: unTeX(k.authors) }));
     try { await mkdir('.cache', { recursive: true }); await writeFile(file, JSON.stringify(kept)); } catch {}
 
     // Match each paper to the Roadmap topic it's closest to, within the tracks its category covers.

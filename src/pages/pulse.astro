@@ -6,9 +6,10 @@ import { getReading } from '../lib/reading';
 const { pulse, fetchedAt } = await getReading();
 const host = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
 ---
-<Base title="Pulse" description="The week in tech, in ten headlines." accent="reading">
+<Base title="Pulse" description="The last 24 hours in tech, in up to ten headlines." accent="reading">
     <div class="rd">
-        <ReadingMast compact title="Pulse" sub="The week in tech, in ten headlines. Enough to know what's happening, then back to learning." updated={fetchedAt} />
+        <ReadingMast compact title="Pulse" sub="The last 24 hours in tech, in up to ten headlines. Enough to know what's happening, then back to learning." updated={fetchedAt} />
+        {pulse.length === 0 && <p class="fp-empty">No headlines in the last 24 hours yet.</p>}
         <ol class="pulse-list">
             {pulse.map(i => (
                 <li data-link={i.link}>

@@ -14,7 +14,7 @@ const host = (url: string) => { try { return new URL(url).hostname.replace(/^www
         <div class="su-grid">
             <section class="su-block su-wide">
                 <header class="block-head"><h2>Launched by YC startups</h2><a href="https://news.ycombinator.com/launches" target="_blank" rel="noopener noreferrer">Launch HN ↗</a></header>
-                {launches.length === 0 ? <p class="dim">No recent launches.</p> : (
+                {launches.length === 0 ? <p class="dim">No launches in the last 24 hours.</p> : (
                     <ul class="su-launches" role="list">
                         {launches.map(({ i, name, batch, tagline }) => (
                             <li data-link={i.link}>

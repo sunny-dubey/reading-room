@@ -919,6 +919,178 @@
   limit: 8
   maxAgeDays: 7
 
+# ---------- business & economy (side page /business/, not a learning desk; added 2026-11-25) ----------
+# A Techmeme-style news river: the last 24 hours, newest first, same story across outlets shown once.
+- id: biz-techmeme
+  title: "Techmeme"
+  url: 'https://www.techmeme.com/feed.xml'
+  site: https://www.techmeme.com/
+  category: business
+  limit: 15
+  maxAgeDays: 2
+
+- id: biz-wsj-business
+  title: "WSJ: Business"
+  url: 'https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness'
+  site: https://www.wsj.com/business
+  category: business
+  limit: 12
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-wsj-economy
+  title: "WSJ: Economy"
+  url: 'https://feeds.content.dowjones.io/public/rss/socialeconomyfeed'
+  site: https://www.wsj.com/economy
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-wsj-markets
+  title: "WSJ: Markets"
+  url: 'https://feeds.content.dowjones.io/public/rss/RSSMarketsMain'
+  site: https://www.wsj.com/finance
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-ft
+  title: "Financial Times"
+  url: 'https://www.ft.com/rss/home'
+  site: https://www.ft.com/
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-ft-economy
+  title: "FT: Global Economy"
+  url: 'https://www.ft.com/global-economy?format=rss'
+  site: https://www.ft.com/global-economy
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-economist-fe
+  title: "The Economist: Finance & Economics"
+  url: 'https://www.economist.com/finance-and-economics/rss.xml'
+  site: https://www.economist.com/finance-and-economics
+  category: business
+  limit: 6
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-economist-biz
+  title: "The Economist: Business"
+  url: 'https://www.economist.com/business/rss.xml'
+  site: https://www.economist.com/business
+  category: business
+  limit: 6
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-cnbc
+  title: "CNBC"
+  url: 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114'
+  site: https://www.cnbc.com/
+  category: business
+  limit: 12
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-cnbc-economy
+  title: "CNBC: Economy"
+  url: 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258'
+  site: https://www.cnbc.com/economy/
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-nyt-business
+  title: "NYT: Business"
+  url: 'https://rss.nytimes.com/services/xml/rss/nyt/Business.xml'
+  site: https://www.nytimes.com/section/business
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-nyt-economy
+  title: "NYT: Economy"
+  url: 'https://rss.nytimes.com/services/xml/rss/nyt/Economy.xml'
+  site: https://www.nytimes.com/section/business/economy
+  category: business
+  limit: 8
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-bbc
+  title: "BBC Business"
+  url: 'https://feeds.bbci.co.uk/news/business/rss.xml'
+  site: https://www.bbc.com/business
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-marketwatch
+  title: "MarketWatch"
+  url: 'https://feeds.content.dowjones.io/public/rss/mw_topstories'
+  site: https://www.marketwatch.com/
+  category: business
+  limit: 8
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-scmp
+  title: "SCMP: Business"
+  url: 'https://www.scmp.com/rss/92/feed'
+  site: https://www.scmp.com/business
+  category: business
+  limit: 8
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-et-economy
+  title: "Economic Times: Economy"
+  url: 'https://economictimes.indiatimes.com/news/economy/rssfeeds/1373380680.cms'
+  site: https://economictimes.indiatimes.com/news/economy
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-mint-economy
+  title: "Mint: Economy"
+  url: 'https://www.livemint.com/rss/economy'
+  site: https://www.livemint.com/economy
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-mint-companies
+  title: "Mint: Companies"
+  url: 'https://www.livemint.com/rss/companies'
+  site: https://www.livemint.com/companies
+  category: business
+  limit: 10
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
+- id: biz-business-standard
+  title: "Business Standard"
+  url: 'https://www.business-standard.com/rss/home_page_top_stories.rss'
+  site: https://www.business-standard.com/
+  category: business
+  limit: 9
+  maxAgeDays: 2
+  skipTitles: 'podcast|newsletter|quiz|crossword|letters to the editor|live updates|watch:|video:|photos:|opinion'
+
 # ---------- security ----------
 - id: project-zero
   title: Google Project Zero

@@ -1,0 +1,70 @@
+---
+// Communities: what tech communities around the world are discussing, last 24 hours (src/lib/communities.ts).
+// Computed, not written: themes are Roadmap areas ranked by discussion; links only, every source credited.
+import Base from '../layouts/Base.astro';
+import ReadingMast from '../components/ReadingMast.astro';
+import ReadingClient from '../components/ReadingClient.astro';
+import { getReading } from '../lib/reading';
+import { getCommunities, communityName } from '../lib/communities';
+const { now, roadmap, fetchedAt } = await getReading();
+const { gists, everywhere, total } = await getCommunities(now, roadmap);
+const n = (x: number) => x.toLocaleString('en-US');
+---
+<Base title="Communities" description="What tech communities around the world are discussing in the last 24 hours." accent="reading">
+    <div class="rd cm-page">
+        <ReadingMast compact title="Communities" sub={`What ${gists.length} tech communities are discussing in the last 24 hours: ${n(total)} threads, grouped by subject and ranked by how much discussion they drew.`} updated={fetchedAt} />
+
+        {everywhere.length > 0 && (
+            <section class="fp-band" aria-label="Talked about everywhere">
+                <h2 class="fp-band-h"><span>Talked about in several communities</span></h2>
+                <ol class="cm-every" role="list">
+                    {everywhere.map(g => (
+                        <li>
+                            <a class="cm-h" href={g.threads[0].ext ?? g.threads[0].url} target="_blank" rel="noopener noreferrer">{g.threads[0].title}</a>
+                            <p class="cm-meta">{g.threads.map((t, k) => <>{k > 0 && ' · '}<a href={t.url} target="_blank" rel="noopener noreferrer">{communityName(t.community)}{t.comments ? ` (${n(t.comments)} comments)` : ''}</a></>)}</p>
+                        </li>
+                    ))}
+                </ol>
+            </section>
+        )}
+
+        <div class="cm-grid">
+            {gists.map(g => (
+                <section class="cm-card" id={g.community.id}>
+                    <h2 class="cm-name"><a href={g.community.home} target="_blank" rel="noopener noreferrer">{g.community.name}</a> <span class="cm-count">{g.threads.length} threads</span></h2>
+                    <p class="cm-about">{g.community.about}{!g.ok && ' (Couldn’t reach it for this edition; showing its last threads still inside the 24 hours.)'}</p>
+                    {g.threads.length === 0 && <p class="fp-empty">Nothing in the last 24 hours.</p>}
+                    {g.themes.length > 0 && (
+                        <>
+                            <h3 class="cm-k">Talking most about</h3>
+                            <ol class="cm-themes" role="list">
+                                {g.themes.map(th => (
+                                    <li>
+                                        <p class="cm-theme">{th.area} <span class="cm-meta">{th.threads.length} threads{th.comments ? ` · ${n(th.comments)} comments` : ''}</span></p>
+                                        {th.threads.slice(0, 2).map(t => <a class="cm-t" href={t.url} target="_blank" rel="noopener noreferrer">{t.title}</a>)}
+                                    </li>
+                                ))}
+                            </ol>
+                        </>
+                    )}
+                    {g.debated && (
+                        <p class="cm-debated"><span class="cm-k">Most debated</span> <a href={g.debated.url} target="_blank" rel="noopener noreferrer">{g.debated.title}</a> <span class="cm-meta">{n(g.debated.comments)} comments on {n(g.debated.score)} points</span></p>
+                    )}
+                    {g.threads.length > 0 && (
+                        <details class="cm-all" open={g.themes.length < 2}>
+                            <summary>Hottest threads</summary>
+                            <ol role="list">
+                                {g.threads.slice(0, 12).map(t => (
+                                    <li><a href={t.url} target="_blank" rel="noopener noreferrer">{t.title}</a> <span class="cm-meta">{t.where ? `${t.where} · ` : ''}{t.score ? `${n(t.score)} points · ` : ''}{n(t.comments)} {g.community.id === 'se' ? 'answers' : 'comments'}</span></li>
+                                ))}
+                            </ol>
+                        </details>
+                    )}
+                    <p class="cm-credit">Source: {g.community.credit}</p>
+                </section>
+            ))}
+        </div>
+        <p class="side-note">Threads come from each community's official API or feed: titles, links and counts only, nothing copied. Subjects are the closest Roadmap area to each thread by meaning (a local embedding model, no AI writing); a subject needs two or more threads. "Most debated" = the most comments per vote. Communities without public access for automated readers (Reddit, X, Discord) aren't included.</p>
+    </div>
+    <ReadingClient />
+</Base>

@@ -1,0 +1,27 @@
+---
+// "Markets · <last session>" under the masthead: two plain-English sentences built by rules from fresh daily data
+// (src/lib/markets.ts marketBrief), then the next macro event and what it moves. Replaced the scrolling ticker
+// (2026-11-25): ten bare numbers, stale monthly values and mixed periods didn't tell the reader anything.
+import { getMarkets, marketBrief } from '../lib/markets';
+import { getMacroCalendar, upcoming, fmtDays } from '../lib/macro-calendar';
+import { u } from '../lib/url';
+const markets = await getMarkets();
+const lines = marketBrief(markets);
+// The session the sentences describe: the S&P 500's latest close (weekends and holidays show Friday's).
+const spx = markets.find(m => m.id === 'spx');
+const session = spx?.last ? new Date(spx.last.t).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }) : '';
+const [next] = upcoming(await getMacroCalendar(), Date.now(), 1);
+const SAY: Record<string, string> = { rbi: 'The RBI decides on rates', fomc: 'The Fed decides on rates', ecb: 'The ECB decides on rates' };
+const nextSay = next && (next.kind === 'uscpi' ? `US ${next.what.toLowerCase()} is out` : SAY[next.kind ?? ''] ?? `${next.who}: ${next.what}`);
+---
+{(lines.length > 0 || next) && (
+    <section class="mkt-brief" aria-label="Markets, last session">
+        {lines.length > 0 && (
+            <p class="mkt-line"><span class="mkt-k">Markets{session ? ` · ${session}` : ''}</span>{lines.join(' ')}</p>
+        )}
+        {next && (
+            <p class="mkt-line"><span class="mkt-k">Next · {fmtDays(next)}</span>{[`${nextSay}.`, next.now && `${next.now}.`, next.short].filter(Boolean).join(' ')}</p>
+        )}
+        <a class="mkt-more" href={u('/markets/')}>All markets and the macro calendar →</a>
+    </section>
+)}

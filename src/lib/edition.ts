@@ -1,8 +1,14 @@
-// "Editions": the site is rebuilt and published on each push (no schedule; see .github/workflows/deploy.yml).
+// "Editions": four a day (cron '47 0,6,12,18 * * *' in .github/workflows/deploy.yml = 06:17, 12:17, 18:17,
+// 00:17 IST), plus one on every push. Every news section carries only the last 24 hours (EDITION_WINDOW).
 // Edition names follow Sunny's clock (IST); times are shown in each reader's own timezone.
 
-/** Scheduled build slots in UTC minutes past midnight (00:17 UTC = 5:47 am IST). */
-export const SLOTS_UTC = Array.from({ length: 8 }, (_, h) => h * 180 + 17); // 00:17, 03:17 … 21:17 UTC
+const DAY = 864e5;
+/** Every news section shows only what was published in the 24 hours before the build (Sunny, 2026-11-25). */
+export const EDITION_WINDOW = DAY;
+/** For sources that give a date without a time (CISA, endoflife.date): dated today or yesterday. */
+export const DATE_ONLY_WINDOW = EDITION_WINDOW + DAY;
+/** Hours between scheduled editions; the stale notice appears when an edition is clearly overdue. */
+export const EDITION_EVERY_HOURS = 6;
 
 /** Edition name for a build time, by the hour in IST (late or manual builds keep their window's name). */
 export function editionName(d: Date): string {

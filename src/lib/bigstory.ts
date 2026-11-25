@@ -14,31 +14,32 @@ export interface BigStory { lead: FeedItem; items: FeedItem[]; sources: number }
 const STOP = new Set('with from that this have been what your into more than about after over will when where which their they them there these those just like using used make made does into here only also some most much very year years week today first last best ways things introducing announcing release released launch launches launched update updates new now how why'.split(' '));
 const words = (t: string) => new Set((t.toLowerCase().match(/[a-z0-9][a-z0-9.+#-]{2,}/g) ?? []).filter(w => !STOP.has(w) && !/^\d{1,2}$/.test(w)));
 
+/** Groups of the same story: pairs from different sources whose titles are close in meaning (cosine ≥ sim)
+ *  AND share a distinctive word (in ≤ ~2% of titles, 4+ letters). Returns index groups (singletons included). */
+export function groupSame(titles: string[], sources: string[], vecs: number[][], sim = SIM): number[][] {
+    const ws = titles.map(words);
+    const df = new Map<string, number>();
+    for (const w of ws) for (const x of w) df.set(x, (df.get(x) ?? 0) + 1);
+    const rare = Math.max(2, Math.ceil(titles.length * 0.02));
+    const shares = (a: number, b: number) => { for (const x of ws[a]) if (ws[b].has(x) && (df.get(x) ?? 0) <= rare && x.length >= 4) return true; return false; };
+    const parent = titles.map((_, k) => k);
+    const find = (k: number): number => (parent[k] === k ? k : (parent[k] = find(parent[k])));
+    for (let a = 0; a < titles.length; a++) for (let b = a + 1; b < titles.length; b++) {
+        if (sources[a] === sources[b]) continue;
+        if (cosine(vecs[a], vecs[b]) >= sim && shares(a, b)) parent[find(a)] = find(b);
+    }
+    const groups = new Map<number, number[]>();
+    titles.forEach((_, k) => { const r = find(k); groups.set(r, [...(groups.get(r) ?? []), k]); });
+    return [...groups.values()];
+}
+
 export async function bigStories(items: FeedItem[], now: number, days = 3, max = 3): Promise<BigStory[]> {
     const pool = items.filter(i => now - +i.date < days * DAY && +i.date <= now + DAY);
     if (pool.length < MIN_SOURCES) return [];
     const vecs = await embed(pool.map(i => i.title));
     if (!vecs) return [];
-
-    // Distinctive words: present in at most ~2% of titles this window.
-    const ws = pool.map(i => words(i.title));
-    const df = new Map<string, number>();
-    for (const w of ws) for (const x of w) df.set(x, (df.get(x) ?? 0) + 1);
-    const rare = Math.max(2, Math.ceil(pool.length * 0.02));
-    const shares = (a: number, b: number) => { for (const x of ws[a]) if (ws[b].has(x) && (df.get(x) ?? 0) <= rare && x.length >= 4) return true; return false; };
-
-    // Union-find over same-story pairs from different sources.
-    const parent = pool.map((_, k) => k);
-    const find = (k: number): number => (parent[k] === k ? k : (parent[k] = find(parent[k])));
-    for (let a = 0; a < pool.length; a++) for (let b = a + 1; b < pool.length; b++) {
-        if (pool[a].feedId === pool[b].feedId) continue;
-        if (cosine(vecs[a], vecs[b]) >= SIM && shares(a, b)) parent[find(a)] = find(b);
-    }
-    const groups = new Map<number, number[]>();
-    pool.forEach((_, k) => { const r = find(k); groups.set(r, [...(groups.get(r) ?? []), k]); });
-
     const out: BigStory[] = [];
-    for (const ks of groups.values()) {
+    for (const ks of groupSame(pool.map(i => i.title), pool.map(i => i.feedId), vecs)) {
         const list = ks.map(k => pool[k]);
         const sources = new Set(list.map(i => i.feedId)).size;
         if (sources < MIN_SOURCES) continue;

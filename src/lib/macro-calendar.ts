@@ -14,7 +14,22 @@ const get = async (url: string) => {
 };
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-export interface MacroEvent { id: string; who: string; what: string; start: number; end: number; now?: string; url: string }
+export interface MacroEvent { id: string; who: string; what: string; start: number; end: number; now?: string; url: string; moves?: string; short?: string; signal?: string; kind?: string }
+
+// One line for the front page: what the event is and what it moves.
+const SHORT: Record<string, string> = {
+    rbi: 'Moves loan and deposit rates (EMIs), bond yields and the rupee.',
+    fomc: 'Moves Treasury yields and the dollar, and with them the rupee and stocks.',
+    uscpi: 'A hot print makes Fed cuts less likely: yields and the dollar up, stocks down.',
+    ecb: 'Moves euro bond yields and the euro, and through EUR/USD the dollar.',
+};
+// What each decision or print moves: the standard transmission, written once, not generated. Informative, not advice.
+const MOVES: Record<string, string> = {
+    rbi: 'Repo rate → bank loan and deposit rates (home-loan EMIs), India bond yields and the rupee; rate-sensitive stocks (banks, autos, real estate) react most.',
+    fomc: 'Fed funds rate → US Treasury yields and the dollar, then global risk appetite; a stronger dollar pulls money out of emerging markets, the rupee included.',
+    uscpi: 'Above expectations: Fed cuts look less likely, so yields and the dollar rise and stocks usually fall. Below: the reverse. The biggest scheduled data point for the Fed.',
+    ecb: 'Deposit rate → euro-area bond yields (Bunds), the euro and bank margins; through EUR/USD it moves the dollar too.',
+};
 
 /** FOMC: "<year> FOMC Meetings" panels, each meeting a month + "27-28" (or "Jan/Feb 31-1"). Decision on the last day. */
 async function fomc(): Promise<MacroEvent[]> {
@@ -55,11 +70,44 @@ async function fred(series: string) {
     return csv.trim().split('\n').slice(1).map(l => l.split(',')).map(([d, v]) => ({ d, v: Number(v) })).filter(p => p.v > 0 && Number.isFinite(p.v)); // blank months (e.g. the 2025 shutdown gap) read as 0
 }
 
+/** Year-on-year % for each month that has a value 12 months earlier (FRED has gaps). Newest last. */
+function yoy(p: { d: string; v: number }[]) {
+    const by = new Map(p.map(x => [x.d, x.v]));
+    return p.flatMap(l => { const y = by.get(`${Number(l.d.slice(0, 4)) - 1}${l.d.slice(4)}`); return y ? [{ d: l.d, v: (l.v / y - 1) * 100 }] : []; });
+}
+const monthName = (d: string) => new Date(d).toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const fresh = (d: string, months: number) => Date.now() - +new Date(d) < months * 31 * DAY;
+
+/** What the data says now, per event kind: computed from FRED, omitted when a series is missing or stale. */
+async function signals(fedUpper?: number) {
+    const out: Record<string, string> = {};
+    const inflation = (series: string, key: string, target: string, maxAgeMonths: number) => fred(series).then(p => {
+        const y = yoy(p); const l = y.at(-1); if (!l || !fresh(l.d, maxAgeMonths)) return;
+        const d3 = new Date(l.d); d3.setUTCMonth(d3.getUTCMonth() - 3);
+        const back = y.find(x => x.d === d3.toISOString().slice(0, 10)) ?? y.at(-4); // three months earlier
+        const trend = back ? `, ${l.v > back.v + 0.15 ? 'up' : l.v < back.v - 0.15 ? 'down' : 'little changed'} from ${back.v.toFixed(1)}% in ${monthName(back.d).split(' ')[0]}` : '';
+        out[key] = `Inflation ${l.v.toFixed(1)}% a year (${monthName(l.d)})${trend}; target ${target}.`;
+    });
+    await Promise.all([
+        // Two-year Treasury vs the Fed's target midpoint: what bond markets price for the policy rate over the next couple of years.
+        fedUpper ? fred('DGS2').then(p => {
+            const l = p.at(-1); if (!l || !fresh(l.d, 1)) return;
+            const mid = fedUpper - 0.125, gap = l.v - mid;
+            const lean = gap <= -0.25 ? 'bond markets are pricing rate cuts over the next two years' : gap >= 0.25 ? 'bond markets are pricing rate hikes over the next two years' : 'bond markets see little change in rates';
+            out.fomc = `2-year Treasury ${l.v.toFixed(2)}% vs target midpoint ${mid.toFixed(2)}%: ${lean}.`;
+        }) : Promise.resolve(),
+        inflation('CPIAUCSL', 'uscpi', '2% (the Fed targets it on PCE, a close cousin)', 4),
+        inflation('CP0000EZ19M086NEST', 'ecb', '2%', 4),
+        inflation('INDCPIALLMINMEI', 'rbi', '4% (band 2–6%)', 8),
+    ].map(p => p.catch(e => console.warn(`[macro-calendar] signal: ${(e as Error).message}`))));
+    return out;
+}
+
 async function current() {
     const out: Record<string, string> = {};
     const pct = (v: number) => `${v.toFixed(2)}%`;
     await Promise.all([
-        fred('DFEDTARU').then(p => { const l = p.at(-1)!; const lo = l.v - 0.25; out.fed = `Target ${pct(lo)}–${pct(l.v)}`; }),
+        fred('DFEDTARU').then(p => { const l = p.at(-1)!; const lo = l.v - 0.25; out.fed = `Target ${pct(lo)}–${pct(l.v)}`; out.fedUpper = String(l.v); }),
         fred('ECBDFR').then(p => { out.ecb = `Deposit rate ${pct(p.at(-1)!.v)}`; }),
         fred('CPIAUCSL').then(p => {
             // Latest month that has a value a year earlier (FRED has gaps, e.g. Oct 2025).
@@ -100,9 +148,13 @@ async function build(): Promise<MacroEvent[]> {
         if (last < Date.now()) console.warn(`[macro-calendar] ${k}: every hand-kept date has passed; add next year's to src/content/macro-calendar.yaml`);
     }
     const now = { ...prev.now, ...(await current()) };
-    try { await mkdir('.cache', { recursive: true }); await writeFile(file, JSON.stringify({ events: { fomc: events.fomc, ecb: events.ecb }, now })); } catch {}
+    // Signals: fresh ones replace cached ones; a cached signal older than 10 days is dropped rather than shown stale.
+    const fresh10 = (prev as any).signalsAt && Date.now() - (prev as any).signalsAt < 10 * DAY;
+    const got = await signals(now.fedUpper ? Number(now.fedUpper) : undefined);
+    const sig: Record<string, string> = { ...(fresh10 ? (prev as any).signals ?? {} : {}), ...got };
+    try { await mkdir('.cache', { recursive: true }); await writeFile(file, JSON.stringify({ events: { fomc: events.fomc, ecb: events.ecb }, now, signals: sig, signalsAt: Object.keys(got).length ? Date.now() : (prev as any).signalsAt })); } catch {}
     const label: Record<string, string | undefined> = { fomc: now.fed, ecb: now.ecb, rbi: now.rbi, uscpi: now.uscpi };
-    return Object.entries(events).flatMap(([k, list]) => list.map(e => ({ ...e, now: label[k] }))).sort((a, b) => a.end - b.end);
+    return Object.entries(events).flatMap(([k, list]) => list.map(e => ({ ...e, kind: k, now: label[k], moves: MOVES[k], short: SHORT[k], signal: sig[k] }))).sort((a, b) => a.end - b.end);
 }
 
 /** The next n events still ahead (the decision day not yet past), from the edition's time. */

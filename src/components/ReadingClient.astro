@@ -41,6 +41,10 @@ const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.da
         el.classList.toggle('is-new', isNew);
         if (isNew && el.dataset.link) fresh.add(el.dataset.link);
     });
+    // A badge on everything carries no information: when over a third of the page is new, hide the badges
+    // and let the "N new since your last visit" line say it.
+    const total = document.querySelectorAll('[data-ts]').length;
+    if (total && fresh.size / total > 1 / 3) document.querySelectorAll<HTMLElement>('[data-new]').forEach(b => { b.hidden = true; });
     const sinceEl = document.querySelector<HTMLElement>('[data-since]');
     if (sinceEl && since) {
         const ago = rtf.format(-Math.max(1, Math.round((Date.now() - since) / 3600e3)), 'hour').replace('in ', '');
@@ -66,12 +70,12 @@ const parts = Object.fromEntries((await getCollection('canon')).filter(c => c.da
     document.querySelectorAll<HTMLElement>('[data-edition-date]').forEach(el => {
         el.textContent = new Date(el.dataset.editionDate!).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     });
-    // Stale edition: editions are published on demand, so say so when this one is over a day old.
+    // Stale edition: a new edition comes every 6 hours, so say so when this one is clearly overdue (8+ hours).
     document.querySelectorAll<HTMLElement>('[data-stale]').forEach(el => {
         const hours = (Date.now() - +new Date(el.dataset.stale!)) / 3600e3;
-        if (!(hours > 24)) return;
+        if (!(hours > 8)) return;
         const days = Math.floor(hours / 24);
-        el.textContent = `This edition is ${days === 1 ? 'a day' : `${days} days`} old. Newer pieces are not in it yet.`;
+        el.textContent = `This edition is ${hours < 48 ? `${Math.floor(hours)} hours` : `${days} days`} old (a new one is due every 6 hours). Newer pieces are not in it yet.`;
         el.hidden = false;
     });
     document.querySelectorAll<HTMLElement>('[data-today]').forEach(el => {

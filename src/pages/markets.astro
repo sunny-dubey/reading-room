@@ -15,7 +15,7 @@ const cal = upcoming(await getMacroCalendar(), Date.now(), 8);
             <section class="fp-band" id="calendar">
                 <h2 class="fp-band-h"><span>Coming up in macro</span></h2>
                 <table class="bf-table mc-table">
-                    <thead><tr><th>When</th><th>Who</th><th>What</th><th>Where it stands</th></tr></thead>
+                    <thead><tr><th>When</th><th>Who</th><th>What</th><th>Where it stands</th><th>What it moves</th></tr></thead>
                     <tbody>
                         {cal.map(e => (
                             <tr>
@@ -23,11 +23,12 @@ const cal = upcoming(await getMacroCalendar(), Date.now(), 8);
                                 <td><a href={e.url} target="_blank" rel="noopener noreferrer">{e.who}</a></td>
                                 <td>{e.what}</td>
                                 <td>{e.now ?? '—'}</td>
+                                <td class="mc-impact">{e.moves}{e.signal && <span class="mc-signal">Now: {e.signal}</span>}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
-                <p class="side-note">Fed and ECB dates come from their official calendars, read when this edition was built. RBI dates come from the RBI's 2026-27 schedule, and US CPI dates from the BLS schedule (checked by hand; BLS doesn't allow automated access). Current rates: FRED and the RBI's homepage.</p>
+                <p class="side-note">Fed and ECB dates come from their official calendars, read when this edition was built. RBI dates come from the RBI's 2026-27 schedule, and US CPI dates from the BLS schedule (checked by hand; BLS doesn't allow automated access). Current rates: FRED and the RBI's homepage. "What it moves" describes how each decision usually travels through markets; "Now" is computed from FRED (the 2-year Treasury against the Fed's target, the latest inflation against each target). It's background for reading the news, not investment advice.</p>
             </section>
         )}
         {groups.map(g => (

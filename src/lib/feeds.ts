@@ -39,8 +39,9 @@ export const CATEGORIES = [
 export const PULSE = { id: 'pulse', slug: 'pulse', label: 'Pulse', short: 'Pulse', blurb: "The week's headlines, in one short page" };
 export const STARTUPS = { id: 'startups', slug: 'startups', label: 'Startups', short: 'Startups', blurb: 'What the best new companies are building' };
 /** Side pages that aren't learning tracks: no summaries, not on Today. */
-export const SIDE = new Set(['pulse', 'startups']);
-export const categoryLabel = (id: string) => CATEGORIES.find(c => c.id === id)?.label ?? (id === 'pulse' ? PULSE.label : id === 'startups' ? STARTUPS.label : id);
+export const BUSINESS = { id: 'business', slug: 'business', label: 'Business & Economy', short: 'Business', blurb: 'The last 24 hours of business, markets and economic news from the outlets that break it' };
+export const SIDE = new Set(['pulse', 'startups', 'business']);
+export const categoryLabel = (id: string) => CATEGORIES.find(c => c.id === id)?.label ?? (id === 'pulse' ? PULSE.label : id === 'startups' ? STARTUPS.label : id === 'business' ? BUSINESS.label : id);
 export const categoryShort = (id: string) => CATEGORIES.find(c => c.id === id)?.short ?? (id === 'pulse' ? PULSE.short : id);
 
 export interface FeedStatus {
@@ -79,8 +80,32 @@ const decode = (s: string) =>
             ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10))
             : ENTITIES[e.toLowerCase()] ?? m);
 
+// Inline LaTeX (arXiv titles and abstracts) → readable text: $T\subseteq V$ → T ⊆ V, $2^n$ → 2ⁿ, $O(n\log n)$ → O(n log n).
+const TEX: Record<string, string> = {
+    subseteq: '⊆', subset: '⊂', supseteq: '⊇', in: '∈', notin: '∉', cup: '∪', cap: '∩', setminus: '∖', emptyset: '∅',
+    le: '≤', leq: '≤', ge: '≥', geq: '≥', neq: '≠', ne: '≠', approx: '≈', sim: '∼', equiv: '≡', ll: '≪', gg: '≫',
+    times: '×', cdot: '·', pm: '±', infty: '∞', to: '→', rightarrow: '→', leftarrow: '←', mapsto: '↦', Rightarrow: '⇒', iff: '⇔',
+    forall: '∀', exists: '∃', neg: '¬', land: '∧', lor: '∨', sum: 'Σ', prod: 'Π', partial: '∂', nabla: '∇', ldots: '…', dots: '…', cdots: '⋯',
+    alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ', kappa: 'κ', lambda: 'λ',
+    mu: 'μ', nu: 'ν', xi: 'ξ', pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', phi: 'φ', varphi: 'φ', chi: 'χ', psi: 'ψ', omega: 'ω',
+    Gamma: 'Γ', Delta: 'Δ', Theta: 'Θ', Lambda: 'Λ', Sigma: 'Σ', Phi: 'Φ', Psi: 'Ψ', Omega: 'Ω', log: 'log', ln: 'ln', exp: 'exp', max: 'max', min: 'min',
+};
+const SUP: Record<string, string> = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹', n: 'ⁿ', i: 'ⁱ', k: 'ᵏ', d: 'ᵈ', m: 'ᵐ', t: 'ᵗ', x: 'ˣ', j: 'ʲ', r: 'ʳ', s: 'ˢ', p: 'ᵖ', a: 'ᵃ', b: 'ᵇ', c: 'ᶜ', e: 'ᵉ', '+': '⁺', '-': '⁻', '*': '*', T: 'ᵀ' };
+const SUB: Record<string, string> = { 0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄', 5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉', i: 'ᵢ', j: 'ⱼ', k: 'ₖ', n: 'ₙ', a: 'ₐ', e: 'ₑ', o: 'ₒ', x: 'ₓ', m: 'ₘ', t: 'ₜ', p: 'ₚ', s: 'ₛ', l: 'ₗ', h: 'ₕ', r: 'ᵣ', u: 'ᵤ', v: 'ᵥ', '+': '₊', '-': '₋' };
+const script = (s: string, map: Record<string, string>, mark: string) => [...s].every(c => map[c]) ? [...s].map(c => map[c]).join('') : `${mark}${s.length > 1 ? `(${s})` : s}`;
+const GREEK = /^[α-ωΑ-Ωε]$/;
+const grp = (x: string) => /^[\w.]+$/.test(x) ? x : `(${x})`;
+export const delatex = (s: string) => !/\$|\\[a-zA-Z]/.test(s) ? s : s.replace(/\$\$?([^$]{1,120})\$\$?/g, (all, m: string) => /^\d[\d,.]*(\s|$)/.test(m) ? all : m // "$5 and $10" is money, not maths
+    .replace(/\\(?:mathcal|mathbb|mathrm|mathbf|mathsf|text|textbf|textit|operatorname|widetilde|tilde|hat|bar|overline)\{([^{}]*)\}/g, (__, x: string) => x === 'R' && /mathbb/.test(__) ? 'ℝ' : x === 'N' && /mathbb/.test(__) ? 'ℕ' : x === 'Z' && /mathbb/.test(__) ? 'ℤ' : x)
+    .replace(/\\sqrt\{([^{}]*)\}/g, (__, x: string) => `√${grp(x)}`).replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, (__, a: string, b: string) => `${grp(a)}/${grp(b)}`)
+    // Operators and function names get spaces around them (T ⊆ V, n log n); Greek letters don't.
+    .replace(/\\([a-zA-Z]+)/g, (__, c: string) => { const t = TEX[c] ?? c; return GREEK.test(t) ? t : ` ${t} `; }).replace(/\\([{}%&_#,;!])/g, (__, c: string) => /[,;!]/.test(c) ? ' ' : c)
+    .replace(/\^\{([^{}]*)\}|\^(\w)/g, (__, a?: string, b?: string) => script(a ?? b!, SUP, '^'))
+    .replace(/_\{([^{}]*)\}|_(\w)/g, (__, a?: string, b?: string) => script(a ?? b!, SUB, '_'))
+    .replace(/[{}]/g, '').replace(/\s+/g, ' ').replace(/\( /g, '(').replace(/ \)/g, ')').trim());
+
 const clean = (html: string, max = 220) => {
-    const s = decode(decode(html).replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
+    const s = delatex(decode(decode(html).replace(/<[^>]*>/g, ' '))).replace(/\s+/g, ' ').trim();
     return s.length > max ? s.slice(0, max).replace(/\s+\S*$/, '') + '…' : s;
 };
 
