@@ -230,9 +230,9 @@ a.tile:hover, .tile.hoverable:hover { border-color: color-mix(in srgb, var(--acc
 /* ---------- Reading: "The Reading Room" ---------- */
 :root { --serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
         --s-outage: #dc2626; --s-model: #7c3aed; --s-migration: #d97706; --s-security: #db2777; --s-controversy: #0891b2;
-        --cat-news: #2563eb; --cat-ai: #7c3aed; --cat-engineering: #059669; --cat-security: #d97706; --cat-status: #dc2626; --cat-community: #d97706; --cat-posts: #0284c7; --cat-reddit: #ea580c; --cat-systems: #059669; --cat-backend: #2563eb; --cat-ai-eng: #7c3aed; --cat-ml: #db2777; --cat-postmortems: #dc2626; --cat-math: #0891b2; --cat-quant: #65a30d; --cat-hft: #a21caf; --cat-macro: #c2410c; --cat-research: #4338ca; }
+        --cat-news: #2563eb; --cat-ai: #7c3aed; --cat-engineering: #059669; --cat-security: #d97706; --cat-status: #dc2626; --cat-community: #d97706; --cat-posts: #0284c7; --cat-reddit: #ea580c; --cat-systems: #059669; --cat-backend: #2563eb; --cat-ai-eng: #7c3aed; --cat-ml: #db2777; --cat-postmortems: #dc2626; --cat-math: #0891b2; --cat-quant: #65a30d; --cat-hft: #a21caf; --cat-macro: #c2410c; --cat-research: #4338ca; --cat-swe: #9a3412; }
 [data-theme="dark"] { --s-outage: #f87171; --s-model: #a78bfa; --s-migration: #fbbf24; --s-security: #f472b6; --s-controversy: #22d3ee;
-        --cat-news: #60a5fa; --cat-ai: #a78bfa; --cat-engineering: #34d399; --cat-security: #fbbf24; --cat-status: #f87171; --cat-community: #fbbf24; --cat-posts: #38bdf8; --cat-reddit: #fb923c; --cat-systems: #34d399; --cat-backend: #60a5fa; --cat-ai-eng: #a78bfa; --cat-ml: #f472b6; --cat-postmortems: #f87171; --cat-math: #22d3ee; --cat-quant: #a3e635; --cat-hft: #e879f9; --cat-macro: #fb923c; --cat-research: #818cf8; }
+        --cat-news: #60a5fa; --cat-ai: #a78bfa; --cat-engineering: #34d399; --cat-security: #fbbf24; --cat-status: #f87171; --cat-community: #fbbf24; --cat-posts: #38bdf8; --cat-reddit: #fb923c; --cat-systems: #34d399; --cat-backend: #60a5fa; --cat-ai-eng: #a78bfa; --cat-ml: #f472b6; --cat-postmortems: #f87171; --cat-math: #22d3ee; --cat-quant: #a3e635; --cat-hft: #e879f9; --cat-macro: #fb923c; --cat-research: #818cf8; --cat-swe: #e0a26e; }
 [data-sig="outage"] { --sc: var(--s-outage); }
 [data-sig="model"] { --sc: var(--s-model); }
 [data-sig="migration"] { --sc: var(--s-migration); }
@@ -244,6 +244,7 @@ a.tile:hover, .tile.hoverable:hover { border-color: color-mix(in srgb, var(--acc
 [data-cat="security"] { --cc: var(--cat-security); }
 [data-cat="quant"] { --cc: var(--cat-quant); }
 [data-cat="hft"] { --cc: var(--cat-hft); }
+[data-cat="swe"] { --cc: var(--cat-swe); }
 [data-cat="macro"] { --cc: var(--cat-macro); }
 [data-cat="research"] { --cc: var(--cat-research); }
 [data-cat="status"] { --cc: var(--cat-status); }
@@ -1432,3 +1433,25 @@ details.inc[open] .inc-cause-line { display: none; }
 .wk-n { font: 500 11px var(--sans); color: var(--faint); text-transform: none; letter-spacing: 0; margin-left: 6px; }
 @media (max-width: 900px) { .wk-desks { grid-template-columns: minmax(0, 1fr); } }
 
+
+/* On GitHub: project of the edition + a short list */
+.gh-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px 32px; align-items: start; }
+.gh-feat { border-left: 3px solid var(--cc, var(--ed-accent)); padding: 2px 0 4px 16px; }
+.gh-k { margin: 0 0 4px; font: 700 11px var(--sans); text-transform: uppercase; letter-spacing: .12em; color: var(--ed-accent); }
+.gh-name { font: 700 15px var(--mono); color: var(--fg); text-decoration: none; overflow-wrap: anywhere; }
+.gh-feat .gh-name { font-size: 21px; margin: 0; }
+.gh-feat .gh-name a { color: inherit; text-decoration: none; }
+.gh-name:hover, .gh-feat .gh-name a:hover { text-decoration: underline; }
+.gh-desc { margin: 4px 0 6px; font: 15.5px/1.5 var(--serif); color: var(--fg); }
+.gh-feat .gh-desc { font-size: 17px; }
+.gh-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; font: 12px var(--sans); color: var(--muted); }
+.gh-meta a { color: var(--muted); }
+.gh-lang { font-weight: 600; color: var(--fg); }
+.gh-topic { color: var(--faint); }
+.gh-why { margin: 8px 0 0; font: 13px var(--sans); color: var(--muted); }
+.gh-why a { color: var(--fg); }
+.gh-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 26px; }
+.gh-list li { border-top: 1px solid var(--border-2); padding-top: 8px; }
+.gh-list .gh-desc { font-size: 14.5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.gh-note { margin: 14px 0 0; font: 12px var(--sans); color: var(--faint); }
+@media (max-width: 900px) { .gh-grid, .gh-list { grid-template-columns: minmax(0, 1fr); } }

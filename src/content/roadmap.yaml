@@ -1494,7 +1494,7 @@
 - id: testing-and-correctness
   n: 30
   title: Testing & Correctness
-  track: systems
+  track: swe
   why: Knowing your system is correct, not just hoping, is what separates engineers people trust with critical systems.
   topics:
   - id: deterministic-simulation-testing
@@ -1524,7 +1524,7 @@
 - id: engineering-craft-and-judgment
   n: 31
   title: Engineering Craft & Judgment
-  track: backend
+  track: swe
   why: 'Being a great engineer is mostly judgment: what to build, what to skip, and how to bring people with you.'
   topics:
   - id: design-docs
@@ -1965,3 +1965,78 @@
     name: "Deterministic replay and simulation of trading systems"
     group: "Engineering practice"
     about: "deterministic replay, event sourcing, market replay, backtesting infrastructure, simulation"
+
+- id: software-engineering
+  n: 35
+  title: Software Engineering
+  track: swe
+  why: Most of an engineer's life is reading, changing, testing and debugging code. Doing that well is a skill of its own, separate from knowing systems.
+  topics:
+  - id: swe-complexity
+    name: "Managing complexity: deep modules and information hiding"
+    group: "Design"
+    about: "software design, complexity, deep modules, information hiding, abstraction, coupling, cohesion, Parnas modularity, interfaces"
+  - id: swe-api-design
+    name: "API and interface design inside a codebase"
+    group: "Design"
+    about: "API design, function signatures, interfaces, abstraction boundaries, public functions, backwards compatibility, versioning libraries"
+  - id: swe-state
+    name: "State, immutability and functional core / imperative shell"
+    group: "Design"
+    about: "mutable state, immutability, pure functions, functional core imperative shell, side effects, out of the tar pit"
+  - id: swe-errors
+    name: "Error handling and defining errors out of existence"
+    group: "Design"
+    about: "error handling, exceptions, result types, error codes, panics, assertions, invariants, defensive programming"
+  - id: swe-types
+    name: "Type systems in practice: making illegal states unrepresentable"
+    group: "Design"
+    about: "type systems, static typing, generics, algebraic data types, type inference, parse don't validate, newtypes"
+  - id: swe-refactoring
+    name: "Refactoring and changing legacy code safely"
+    group: "Changing code"
+    about: "refactoring, legacy code, seams, characterization tests, tidying, code smells, incremental change"
+  - id: swe-large-changes
+    name: "Large-scale changes, deprecation and migrations in a codebase"
+    group: "Changing code"
+    about: "large-scale changes, codemods, deprecation, monorepo migrations, automated refactoring"
+  - id: swe-unit-tests
+    name: "Unit tests that survive refactoring"
+    group: "Testing"
+    about: "unit testing, test design, test doubles, mocks, fakes, stubs, brittle tests, testing behaviour not implementation"
+  - id: swe-debugging
+    name: "Debugging: bisecting, hypotheses and debuggers"
+    group: "Debugging & performance"
+    about: "debugging, debugger, gdb, lldb, git bisect, root cause, reproducing bugs, printf debugging, record and replay"
+  - id: swe-profiling
+    name: "Profiling and benchmarking code"
+    group: "Debugging & performance"
+    about: "profiling, benchmarking, microbenchmarks, flame graphs, perf, tracing, compile-time performance, measuring"
+  - id: swe-memory
+    name: "Memory management: allocators, GC and ownership"
+    group: "Debugging & performance"
+    about: "memory management, garbage collection, allocators, arenas, static allocation, ownership, borrow checker, reference counting"
+  - id: swe-concurrency-code
+    name: "Writing correct concurrent code: async, threads and cancellation"
+    group: "Debugging & performance"
+    about: "async await, threads, cancellation, structured concurrency, data races, futures, coroutines"
+  - id: swe-compilers
+    name: "How compilers and interpreters work"
+    group: "Languages & tools"
+    about: "compilers, interpreters, parsing, intermediate representation, optimization passes, JIT, LLVM, code generation"
+  - id: swe-build-systems
+    name: "Build systems and dependency management"
+    group: "Languages & tools"
+    about: "build systems, Bazel, incremental builds, caching builds, dependency management, package managers, lockfiles, Ninja"
+  - id: swe-version-control
+    name: "Version control internals and workflows"
+    group: "Languages & tools"
+    about: "git internals, version control, branching, merging, rebasing, monorepo, trunk-based development"
+  - id: swe-static-analysis
+    name: "Static analysis, linters and sanitizers"
+    group: "Languages & tools"
+    about: "static analysis, linters, type checkers, sanitizers, undefined behaviour, compiler warnings"
+  - id: swe-runtimes
+    name: "Language runtimes: JVM, Go, Rust and the JavaScript engines"
+    group: "Languages & tools"
+    about: "language runtime, JVM, Go runtime, Rust compiler, V8, JavaScript engine, value types, language design"

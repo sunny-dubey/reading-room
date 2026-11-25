@@ -19,6 +19,7 @@ import PuzzleClient from '../components/PuzzleClient.astro';
 import { getPuzzles } from '../lib/puzzles';
 import { getWebPuzzles, todaysPicks } from '../lib/web-puzzles';
 import WebPuzzleList from '../components/WebPuzzleList.astro';
+import { getGitHub, LABEL } from '../lib/github';
 
 const { big, learning, fetchedAt, now, deepRead, deepCands, fresh, picks, desks, wire, topStories, postmortem, tracks, pulse, startups, roadmap } = await getReading();
 const canon = await getCanon();
@@ -31,6 +32,8 @@ const webPicks = todaysPicks(await getWebPuzzles(), now);
 const bfDay = (t: number) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 // Incident lessons: case studies picked in outages.ts.
 const outages = await getOutages();
+const gh = await getGitHub(now, roadmap);
+const ghStars = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n);
 const outAnchor = (id: string) => `inc-${id.replace(/[^a-z0-9]+/gi, '-')}`;
 const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
 const mins = (m?: number) => (m ? `${m} min` : '');
@@ -53,7 +56,7 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
         <!-- ===== Masthead ===== -->
         <header class="fp-mast">
             <h1 class="fp-title">The Reading Room</h1>
-            <p class="fp-for">A daily paper for engineers who read like researchers: CS research, distributed systems, system design, agentic AI, security, HFT tech, quant finance, macro, applied maths and puzzles. The latest from the best experts in each, informative over opinion.</p>
+            <p class="fp-for">A daily paper for engineers who read like researchers: CS research, distributed systems, system design, software engineering, agentic AI, security, HFT tech, quant finance, macro, applied maths and puzzles. The latest from the best experts in each, informative over opinion.</p>
             <div class="fp-dateline">
                 <span>No. {issue}</span>
                 <span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span>
@@ -164,6 +167,32 @@ const practiceFresh = practice?.topics.flatMap(t => roadmap.itemsByTopic.get(t.i
                 ))}
             </div>
         </section>
+
+        <!-- ===== On GitHub: the best technical project being built in the open, picked per edition ===== -->
+        {gh.featured && (
+            <section class="fp-band reveal gh-front" aria-label="On GitHub">
+                <h2 class="fp-band-h"><span>On GitHub</span></h2>
+                <div class="gh-grid">
+                    <article class="gh-feat" data-cat={gh.featured.topic?.track}>
+                        <p class="gh-k">Project of the edition</p>
+                        <h3 class="gh-name"><a href={gh.featured.url} target="_blank" rel="noopener noreferrer" data-read>{gh.featured.name}</a></h3>
+                        <p class="gh-desc">{gh.featured.description}</p>
+                        <p class="gh-meta">{gh.featured.language && <span class="gh-lang">{gh.featured.language}</span>}<span>★ {ghStars(gh.featured.stars)}</span><span>+{ghStars(gh.featured.starsPerDay)} a day</span>{gh.featured.hn && <a href={gh.featured.hn.url} target="_blank" rel="noopener noreferrer">HN · {gh.featured.hn.points} points</a>}</p>
+                        {gh.featured.topic && gh.featured.topic.sim >= LABEL && <p class="gh-why"><span class="cat-dot" data-cat={gh.featured.topic.track}></span>Why look: you'll get better at <a href={u(`/roadmap/#${gh.featured.topic.id}`)}>{gh.featured.topic.name}</a></p>}
+                    </article>
+                    <ol class="gh-list" role="list">
+                        {gh.more.map(r => (
+                            <li data-cat={r.topic?.track}>
+                                <a class="gh-name" href={r.url} target="_blank" rel="noopener noreferrer" data-read>{r.name}</a>
+                                <p class="gh-desc">{r.description}</p>
+                                <p class="gh-meta">{r.language && <span class="gh-lang">{r.language}</span>}<span>★ {ghStars(r.stars)}</span>{r.hn && <a href={r.hn.url} target="_blank" rel="noopener noreferrer">HN {r.hn.points}</a>}{r.topic && r.topic.sim >= LABEL && <span class="gh-topic"><span class="cat-dot" data-cat={r.topic.track}></span>{r.topic.name}</span>}</p>
+                            </li>
+                        ))}
+                    </ol>
+                </div>
+                <p class="gh-note">New and active open-source projects that Hacker News readers upvoted or that are gaining stars fast, kept only when they teach a Roadmap topic. Games, emulators, lists and courses are left out.</p>
+            </section>
+        )}
 
         <!-- ===== The briefing ===== -->
         <section class="fp-band reveal bf-front">

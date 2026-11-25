@@ -105,6 +105,12 @@ const VOCAB: [RegExp, string][] = ([
     ['quantization', 'quantiz\\w+'], ['kv cache', 'kv[- ]cache'], ['scaling laws', 'scaling laws?'], ['mixture of experts', 'mixture[- ]of[- ]experts|\\bmoe\\b'],
     ['distillation', 'distillation'], ['interpretability', 'interpretability|mechanistic'], ['reasoning models', 'reasoning models?|chain[- ]of[- ]thought'],
     ['gpus', 'gpus?|cuda|kernels?'],
+    // software engineering
+    ['testing', 'unit tests?|integration tests?|test suites?|test-driven|\\btdd\\b|snapshot tests?|flaky tests?'], ['property-based testing', 'property-based|quickcheck|hypothesis testing library|proptest'],
+    ['refactoring', 'refactor\\w*|legacy code'], ['code review', 'code reviews?|pull requests?'], ['debugging', 'debugg\\w+|git bisect|\\bgdb\\b|\\blldb\\b'],
+    ['type systems', 'type systems?|type checker|type inference|generics|algebraic data types?'], ['compilers', 'compilers?|interpreters?|\\bllvm\\b|\\bjit\\b|codegen|intermediate representation'],
+    ['build systems', 'build systems?|bazel|incremental builds?|\\bninja\\b|cargo|dependency management'], ['memory management', 'garbage collect\\w*|allocators?|arena allocat\\w+|borrow checker|ownership'],
+    ['static analysis', 'static analysis|linters?|sanitizers?'], ['software design', 'software design|abstractions?|modularity|information hiding|coupling'],
     // mathematics
     ['probability', 'probabilit(y|ies)|bayes\\w*|random variables?'], ['statistics', 'statistic(s|al)|hypothesis test\\w*|p-values?|confidence intervals?'],
     ['linear algebra', 'linear algebra|matri(x|ces)|eigen\\w+|vectors?'], ['calculus', 'calculus|derivatives?|integrals?'],

@@ -32,7 +32,14 @@ jobs:
           path: .cache
           key: articles-${{ github.run_id }}
           restore-keys: articles-
-      - run: npm run build
+      - run: npm run build 2>&1 | tee build.log; test ${PIPESTATUS[0]} -eq 0
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}   # GitHub API for the "On GitHub" section (higher rate limit than anonymous)
+      - name: Fail if a content collection didn't load
+        run: |
+          # Astro logs a broken YAML collection as [ERROR] but still exits 0; don't publish a site missing the Canon.
+          if grep -q '\[ERROR\]' build.log; then grep '\[ERROR\]' build.log; exit 1; fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist

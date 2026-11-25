@@ -26,6 +26,7 @@ export const CATEGORIES = [
     { id: 'research', slug: 'research', label: 'CS Research', short: 'Research', blurb: 'Algorithms, theory, performance and the papers behind tomorrow\'s systems' },
     { id: 'systems', slug: 'systems', label: 'Distributed Systems & Databases', short: 'Systems & DBs', blurb: 'Consensus, replication, consistency, storage engines, Postgres internals' },
     { id: 'backend', slug: 'architecture', label: 'System Design & Architecture', short: 'System Design', blurb: 'Designing systems at scale: architecture, trade-offs, reliability patterns, APIs' },
+    { id: 'swe', slug: 'software-engineering', label: 'Software Engineering', short: 'Software Eng', blurb: 'The craft of building software: design, testing, debugging, performance, compilers, languages and tools' },
     { id: 'ai-eng', slug: 'ai-engineering', label: 'Agentic AI & AI Engineering', short: 'Agentic AI', blurb: 'Agents, evals, retrieval, tool use and LLMs in production' },
     { id: 'ml', slug: 'foundations', label: 'ML & LLM Foundations', short: 'ML Foundations', blurb: 'How transformers, training, fine-tuning and inference actually work' },
     { id: 'security', slug: 'security', label: 'Security', short: 'Security', blurb: 'How attacks work and how to build systems that survive them: web, crypto, cloud, detection' },

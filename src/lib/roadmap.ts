@@ -38,15 +38,16 @@ const CLASSIC = 0.5;    // article ↔ Canon read: close enough to say "builds o
 // Which roadmap areas an article may match, by the track of its source. Keeps "voting" in a maths
 // essay from matching Leader Election, while letting a queueing post match Queueing Theory.
 const ALLOWED: Record<string, string[]> = {
-    systems: ['systems', 'backend', 'math'],
-    backend: ['backend', 'systems', 'math', 'security'],
-    postmortems: ['backend', 'systems', 'security'],
+    systems: ['systems', 'backend', 'math', 'swe'],
+    backend: ['backend', 'systems', 'math', 'security', 'swe'],
+    swe: ['swe', 'backend', 'systems', 'hft'],
+    postmortems: ['backend', 'systems', 'security', 'swe'],
     'ai-eng': ['ai-eng', 'ml', 'backend', 'security'],
     security: ['security', 'backend', 'systems'],
     quant: ['quant', 'math', 'ml', 'backend', 'hft'],
-    hft: ['hft', 'quant', 'systems', 'backend'],
+    hft: ['hft', 'quant', 'systems', 'backend', 'swe'],
     macro: ['macro', 'quant', 'math'],
-    research: ['math', 'systems', 'ml', 'backend', 'security'],
+    research: ['math', 'systems', 'ml', 'backend', 'security', 'swe'],
     ml: ['ml', 'ai-eng', 'math'],
     math: ['math', 'ml'],
 };

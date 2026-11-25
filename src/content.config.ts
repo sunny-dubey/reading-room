@@ -21,7 +21,7 @@ const feeds = defineCollection({
 const canon = defineCollection({
     loader: file('./src/content/canon.yaml'),
     schema: z.object({
-        track: z.enum(['research', 'systems', 'backend', 'ai-eng', 'ml', 'security', 'hft', 'quant', 'macro', 'math', 'postmortems']),
+        track: z.enum(['research', 'systems', 'backend', 'swe', 'ai-eng', 'ml', 'security', 'hft', 'quant', 'macro', 'math', 'postmortems']),
         title: z.string(),
         author: z.string(),
         url: z.string().url(),

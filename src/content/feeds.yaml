@@ -167,7 +167,7 @@
   title: Hillel Wayne
   url: https://www.hillelwayne.com/index.xml
   site: https://www.hillelwayne.com/
-  category: systems
+  category: swe
   limit: 6
   maxAgeDays: 120
   weight: 0.5
@@ -175,7 +175,7 @@
   title: Dan Luu
   url: https://danluu.com/atom.xml
   site: https://danluu.com/
-  category: systems
+  category: swe
   limit: 6
   maxAgeDays: 120
   weight: 0.5
@@ -282,7 +282,7 @@
   title: Brandur
   url: https://brandur.org/articles.atom
   site: https://brandur.org/
-  category: backend
+  category: swe
   limit: 5
   maxAgeDays: 90
   weight: 0.8
@@ -348,7 +348,7 @@
   title: Julia Evans
   url: https://jvns.ca/atom.xml
   site: https://jvns.ca/
-  category: backend
+  category: swe
   limit: 5
   maxAgeDays: 90
   weight: 0.4
@@ -364,7 +364,7 @@
   title: Martin Fowler
   url: https://martinfowler.com/feed.atom
   site: https://martinfowler.com/
-  category: backend
+  category: swe
   limit: 6
   maxAgeDays: 90
   weight: 0.6
@@ -417,7 +417,7 @@
   title: Eli Bendersky
   url: 'https://eli.thegreenplace.net/feeds/all.atom.xml'
   site: https://eli.thegreenplace.net/
-  category: backend
+  category: swe
   limit: 4
   maxAgeDays: 180
   weight: 0.3
@@ -468,9 +468,111 @@
   title: "Mitchell Hashimoto"
   url: 'https://mitchellh.com/feed.xml'
   site: https://mitchellh.com/
-  category: backend
+  category: swe
   limit: 2
 
+
+# ---------- software engineering (the craft: design, testing, debugging, performance, languages, tools) ----------
+# Chosen for technical depth over opinion (2026-11-25). Fowler, Julia Evans, Dan Luu, Hillel Wayne,
+# Brandur, Eli Bendersky and Mitchell Hashimoto also live on this desk (moved from systems/backend).
+- id: matklad
+  title: "matklad (Alex Kladov)"
+  url: 'https://matklad.github.io/feed.xml'
+  site: https://matklad.github.io/
+  category: swe
+  limit: 2
+  maxAgeDays: 90
+  weight: 0.5
+
+- id: ploeh
+  title: "Mark Seemann (ploeh)"
+  url: 'https://blog.ploeh.dk/rss.xml'
+  site: https://blog.ploeh.dk/
+  category: swe
+  limit: 2
+  weight: 0.3
+  skipTitles: '\bAI\b|LLM|book|course|conference'
+
+- id: google-testing
+  title: "Google Testing Blog"
+  url: 'https://testing.googleblog.com/feeds/posts/default'
+  site: https://testing.googleblog.com/
+  category: swe
+  limit: 2
+  maxAgeDays: 120
+  weight: 0.5
+
+- id: entropic-thoughts
+  title: "Entropic Thoughts (kqr)"
+  url: 'https://entropicthoughts.com/feed.xml'
+  site: https://entropicthoughts.com/
+  category: swe
+  limit: 2
+
+- id: ryg
+  title: "The ryg blog (Fabian Giesen)"
+  url: 'https://fgiesen.wordpress.com/feed/'
+  site: https://fgiesen.wordpress.com/
+  category: swe
+  limit: 2
+  maxAgeDays: 180
+  weight: 0.5
+
+- id: nethercote
+  title: "Nicholas Nethercote (Rust compiler performance)"
+  url: 'https://nnethercote.github.io/feed.xml'
+  site: https://nnethercote.github.io/
+  category: swe
+  limit: 2
+  maxAgeDays: 90
+  weight: 0.3
+  skipTitles: 'my new job'
+
+- id: tristan-hume
+  title: "Tristan Hume"
+  url: 'https://thume.ca/atom.xml'
+  site: https://thume.ca/
+  category: swe
+  limit: 2
+  maxAgeDays: 120
+  weight: 0.3
+  skipTitles: 'tier list|workstation|ergonomic'
+
+- id: old-new-thing
+  title: "The Old New Thing (Raymond Chen)"
+  url: 'https://devblogs.microsoft.com/oldnewthing/feed'
+  site: https://devblogs.microsoft.com/oldnewthing/
+  category: swe
+  limit: 2
+  weight: -0.3
+
+- id: evan-martin
+  title: "Evan Martin (neugierig)"
+  url: 'https://neugierig.org/software/blog/atom.xml'
+  site: https://neugierig.org/software/blog/
+  category: swe
+  limit: 2
+  maxAgeDays: 120
+  weight: 0
+  skipTitles: 'youtube|albums'
+
+- id: go-blog
+  title: "The Go Blog"
+  url: 'https://go.dev/blog/feed.atom'
+  site: https://go.dev/blog/
+  category: swe
+  limit: 2
+  weight: 0
+  skipTitles: 'turns \d+|survey|priorities|gophercon|response to|release|go 1\.\d+ is released'
+
+- id: inside-java
+  title: "Inside Java (JVM and language internals)"
+  url: 'https://inside.java/feed.xml'
+  site: https://inside.java/
+  category: swe
+  limit: 2
+  weight: -0.3
+  skipTitles: 'newsletter|newscast|podcast|javaone|tutorial|sip of java|jep targeted|jep proposed|ea build'
 
 # ---------- ai-eng ----------
 - id: simon-willison

@@ -1,6 +1,6 @@
 # The Canon: foundational reads per track, in suggested order.
 # Progress is tracked in your browser. Edit freely: add, remove, reorder.
-# track: research | systems | backend | ai-eng | ml | security | hft | quant | macro | math | postmortems
+# track: research | systems | backend | swe | ai-eng | ml | security | hft | quant | macro | math | postmortems
 # kind: paper | article | book | video | course | docs
 # minutes: rough reading/watching time
 # parts: chapters (or sittings) of a long work, in reading order. Today's plan and the Canon
@@ -1152,3 +1152,95 @@
   kind: video
   minutes: 45
   why: "Why bank failures make recessions deeper and longer, from the economist who then ran the Fed through 2008."
+
+# ---------- Software Engineering ----------
+- id: parnas-modules
+  track: swe
+  title: "On the Criteria To Be Used in Decomposing Systems into Modules"
+  author: David Parnas (1972)
+  url: https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modularization.pdf
+  kind: paper
+  minutes: 30
+  why: The origin of information hiding. Split a system by the decisions likely to change, not by the steps of the flowchart.
+- id: philosophy-software-design
+  track: swe
+  title: A Philosophy of Software Design
+  author: John Ousterhout
+  url: https://web.stanford.edu/~ouster/cgi-bin/book.php
+  kind: book
+  minutes: 420
+  why: Complexity is the enemy; deep modules, information hiding and defining errors out of existence are the tools. The clearest modern book on design.
+  parts:
+    - { title: "Ch. 1–3. The nature of complexity; strategic vs tactical programming", minutes: 60 }
+    - { title: "Ch. 4–6. Deep modules, information hiding, general-purpose modules", minutes: 90 }
+    - { title: "Ch. 7–10. Layers, pulling complexity down, errors out of existence", minutes: 90 }
+    - { title: "Ch. 11–15. Design it twice, comments and names", minutes: 90 }
+    - { title: "Ch. 16–22. Modifying code, consistency, obvious code, performance", minutes: 90 }
+- id: out-of-the-tar-pit
+  track: swe
+  title: Out of the Tar Pit
+  author: Ben Moseley and Peter Marks (2006)
+  url: https://curtclifton.net/papers/MoseleyMarks06a.pdf
+  kind: paper
+  minutes: 90
+  why: Where complexity comes from (state, control, volume) and why mutable state is the worst of it.
+- id: simple-made-easy
+  track: swe
+  title: Simple Made Easy
+  author: Rich Hickey (Strange Loop 2011)
+  url: https://www.infoq.com/presentations/Simple-Made-Easy/
+  kind: video
+  minutes: 60
+  why: Simple (not intertwined) is not the same as easy (familiar). The vocabulary for arguing about design.
+- id: matklad-how-to-test
+  track: swe
+  title: How to Test
+  author: Alex Kladov (matklad)
+  url: https://matklad.github.io/2021/05/31/how-to-test.html
+  kind: article
+  minutes: 40
+  why: Test features, not code; make tests data-driven and fast; keep them independent of the internal API so refactoring stays cheap.
+- id: quickcheck-paper
+  track: swe
+  title: "QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs"
+  author: Koen Claessen and John Hughes (2000)
+  url: https://www.cs.tufts.edu/~nr/cs257/archive/john-hughes/quick.pdf
+  kind: paper
+  minutes: 60
+  why: "The paper behind property-based testing: state properties, generate inputs, let the tool find the counterexample."
+- id: simple-testing-failures
+  track: swe
+  title: "Simple Testing Can Prevent Most Critical Failures"
+  author: Ding Yuan et al. (OSDI 2014)
+  url: https://www.usenix.org/system/files/conference/osdi14/osdi14-paper-yuan.pdf
+  kind: paper
+  minutes: 60
+  why: 92% of catastrophic failures in Cassandra, HBase, HDFS, MapReduce and Redis came from mishandled errors that simple tests would have caught.
+- id: tiger-style
+  track: swe
+  title: TigerStyle
+  author: TigerBeetle
+  url: https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/TIGER_STYLE.md
+  kind: docs
+  minutes: 40
+  why: A concrete engineering style built on assertions, static allocation, limits on everything and zero technical debt.
+- id: swe-at-google
+  track: swe
+  title: Software Engineering at Google
+  author: Titus Winters, Tom Manshreck and Hyrum Wright
+  url: https://abseil.io/resources/swe-book
+  kind: book
+  minutes: 600
+  why: Engineering as programming integrated over time. Read the testing, review and tooling chapters; skip the culture ones if short of time.
+  parts:
+    - { title: "Ch. 9. Code Review", minutes: 45, url: "https://abseil.io/resources/swe-book/html/ch09.html" }
+    - { title: "Ch. 11. Testing Overview", minutes: 50, url: "https://abseil.io/resources/swe-book/html/ch11.html" }
+    - { title: "Ch. 12. Unit Testing", minutes: 50, url: "https://abseil.io/resources/swe-book/html/ch12.html" }
+    - { title: "Ch. 13. Test Doubles", minutes: 45, url: "https://abseil.io/resources/swe-book/html/ch13.html" }
+    - { title: "Ch. 14. Larger Testing", minutes: 50, url: "https://abseil.io/resources/swe-book/html/ch14.html" }
+    - { title: "Ch. 15. Deprecation", minutes: 35, url: "https://abseil.io/resources/swe-book/html/ch15.html" }
+    - { title: "Ch. 16. Version Control and Branch Management", minutes: 50, url: "https://abseil.io/resources/swe-book/html/ch16.html" }
+    - { title: "Ch. 18. Build Systems and Build Philosophy", minutes: 50, url: "https://abseil.io/resources/swe-book/html/ch18.html" }
+    - { title: "Ch. 20. Static Analysis", minutes: 35, url: "https://abseil.io/resources/swe-book/html/ch20.html" }
+    - { title: "Ch. 21. Dependency Management", minutes: 50, url: "https://abseil.io/resources/swe-book/html/ch21.html" }
+    - { title: "Ch. 22. Large-Scale Changes", minutes: 40, url: "https://abseil.io/resources/swe-book/html/ch22.html" }
