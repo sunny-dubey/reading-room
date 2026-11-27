@@ -15,6 +15,7 @@ const feeds = defineCollection({
         onlyTags: z.array(z.string()).optional(),   // keep only items whose own <category> tags include one of these
         skipTitles: z.string().optional(),          // regex (case-insensitive): drop items whose title matches
         bigtech: z.boolean().default(false),        // a big tech company's engineering blog (the Big tech section)
+        essays: z.boolean().default(false),         // an essayist: posts go to Thoughts (unless they're a how-to, paper or postmortem)
     }),
 });
 

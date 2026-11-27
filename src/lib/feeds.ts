@@ -13,6 +13,7 @@ export interface FeedItem {
     embedText?: string;  // title + start of article, for topic matching
     weight?: number;     // source-level ranking nudge from feeds.yaml
     bigtech?: boolean;   // from a big tech company's engineering blog (feeds.yaml `bigtech: true`)
+    essay?: boolean;     // from an essayist (feeds.yaml `essays: true`): placed in Thoughts
     movedFrom?: string;  // original desk when the article was moved to the desk its topic belongs to (roadmap.ts)
     skill?: import('./roadmap').SkillMatch; // closest Roadmap topic (build time)
     meta?: { description?: string; image?: string; thumb?: string }; // the article's own description and preview thumbnail
@@ -177,7 +178,7 @@ async function load(): Promise<{ items: FeedItem[]; status: FeedStatus[]; fetche
                 .filter(i => !data.skipTitles || !new RegExp(data.skipTitles, 'i').test(i.title))
                 .sort((a, b) => +b.date - +a.date)
                 .slice(0, data.limit)
-                .map(({ tags, ...i }) => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, weight: data.weight, bigtech: data.bigtech || undefined }));
+                .map(({ tags, ...i }) => ({ ...i, feedId: id, feedTitle: data.title, category: data.category, weight: data.weight, bigtech: data.bigtech || undefined, essay: data.essays || undefined }));
             return { status: { ...base, ok: true, count: items.length }, items };
         } catch (err) {
             const error = err instanceof Error ? err.message : String(err);

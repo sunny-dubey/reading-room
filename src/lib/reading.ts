@@ -30,7 +30,11 @@ const BAND: Record<ReadKind, Band> = {
     news: 'informative', analysis: 'informative', roundup: 'informative',
     deep: 'learn', case: 'learn', postmortem: 'learn', long: 'learn', article: 'learn', short: 'learn',
 };
-export const bandOf = (i: FeedItem): Band => (i.brief?.kind ? BAND[i.brief.kind] : /arxiv\.org\//.test(i.link) ? 'research' : 'learn');
+export const bandOf = (i: FeedItem): Band => {
+    const band: Band = i.brief?.kind ? BAND[i.brief.kind] : /arxiv\.org\//.test(i.link) ? 'research' : 'learn';
+    // Essayists (feeds.yaml `essays: true`) go to Thoughts, unless the piece is plainly a how-to, paper or postmortem.
+    return i.essay && !['howto', 'paper', 'postmortem', 'benchmark'].includes(i.brief?.kind ?? '') ? 'thoughts' : band;
+};
 
 export async function getCanon() {
     const all = await getCollection('canon');
@@ -56,7 +60,8 @@ async function buildReading() {
     if (process.env.BIG_DEBUG) for (const b of big) console.log('[big]', b.sources, b.items.map(i => `${i.feedTitle}: ${i.title}`).join(' | '));
 
     // Substance check (local model): front-page candidates that are hype stay off the front page (desk pages keep them).
-    const hype = await skills.substance(byRank.filter(i => bandOf(i) !== 'research').slice(0, 40));
+    // Papers and essays aren't judged: they're research and opinion by design, and have their own parts.
+    const hype = await skills.substance(byRank.filter(i => !['research', 'thoughts'].includes(bandOf(i))).slice(0, 40));
     for (const i of edition) if (hype.has(i.link)) i.hype = true;
     // What may lead or headline the front: not a paper, not an opinion, not news, not hype.
     const frontable = (i: FeedItem) => !i.hype && ['learn', 'experimental'].includes(bandOf(i));

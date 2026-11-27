@@ -32,6 +32,7 @@
 ## Sections (where to look)
 - **Startups** (`src/lib/startups.ts`): Worth approaching, Funding (round/amount from the headline; a funding word is required), Deep tech, Impact, Hiring (HN "Who is hiring?"), Launches, News. Feeds `su-news-*`, `su-deep-*`, `su-impact-*`, plus Launch HN, Show HN, Product Hunt.
 - **Big tech engineering:** every feed with `bigtech: true` (29 company blogs).
+- **Thoughts:** pieces whose kind is Opinion, plus every post from feeds with `essays: true` (19 essayists: Will Larson, Kent Beck, Thorsten Ball, Armin Ronacher, Tim Bray, Jacob Kaplan-Moss, Jessitron, Stay SaaSy, Dan Abramov, Bert Hubert, Commoncog, Ethan Mollick, Construction Physics, Charity Majors, Sean Goedecke, Scott Aaronson, Computational Complexity, Ben Recht, Interconnects) unless the post is a how-to, paper, benchmark or postmortem. Essays skip the substance check.
 - **On GitHub** (`src/lib/github.ts`): HN-linked repos (24h) + GitHub search (new, systems languages); active, young, English, no games/lists/courses, star-farm guard, Roadmap match; featured rotates every 3 days; needs `GITHUB_TOKEN` in CI.
 - **Communities** (`src/lib/communities.ts`): HN, Lobsters, Slashdot, programming.dev, DEV, Stack Exchange; subjects = Roadmap areas (bar 0.42), most debated, "in several communities".
 - **Business** (`src/lib/business.ts`): 19 business/economy feeds, same story across outlets once.

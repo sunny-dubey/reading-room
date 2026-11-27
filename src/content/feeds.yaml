@@ -51,6 +51,7 @@
   limit: 3
   maxAgeDays: 60
   weight: -0.8          # often essays and opinion; keep, but below the papers
+  essays: true
 - id: complexity-blog
   title: "Computational Complexity (Fortnow & Gasarch)"
   url: 'https://blog.computationalcomplexity.org/feeds/posts/default'
@@ -59,6 +60,7 @@
   limit: 3
   maxAgeDays: 45
   weight: -0.3
+  essays: true
 - id: arxiv-cs-ds
   title: "arXiv: Data Structures and Algorithms"
   url: 'https://rss.arxiv.org/rss/cs.DS'
@@ -99,6 +101,7 @@
   limit: 3
   maxAgeDays: 60
   weight: -0.3
+  essays: true
 
 - id: max-bernstein
   title: "Max Bernstein (compilers & runtimes)"
@@ -423,6 +426,7 @@
   limit: 4
   maxAgeDays: 180
   weight: -0.5
+  essays: true
 - id: eli-bendersky
   title: Eli Bendersky
   url: 'https://eli.thegreenplace.net/feeds/all.atom.xml'
@@ -631,6 +635,124 @@
   bigtech: true
   skipTitles: 'webinar|announc\w*|now available|customer|award|hiring|careers|join us|recap|event'
 
+# ---------- essays (added 2026-11-25; `essays: true` sends posts to the Thoughts part) ----------
+- id: lethain
+  title: "Will Larson (Irrational Exuberance)"
+  url: 'https://lethain.com/feeds/'
+  site: https://lethain.com/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: kent-beck
+  title: "Kent Beck (Tidy First?)"
+  url: 'https://tidyfirst.substack.com/feed'
+  site: https://tidyfirst.substack.com/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: thorsten-ball
+  title: "Thorsten Ball (Register Spill)"
+  url: 'https://registerspill.thorstenball.com/feed'
+  site: https://registerspill.thorstenball.com/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: armin-ronacher
+  title: "Armin Ronacher"
+  url: 'https://lucumr.pocoo.org/feed.atom'
+  site: https://lucumr.pocoo.org/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: tim-bray
+  title: "Tim Bray (ongoing)"
+  url: 'https://www.tbray.org/ongoing/ongoing.atom'
+  site: https://www.tbray.org/ongoing/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: jacob-kaplan-moss
+  title: "Jacob Kaplan-Moss"
+  url: 'https://jacobian.org/index.xml'
+  site: https://jacobian.org/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: jessitron
+  title: "Jessitron"
+  url: 'https://jessitron.com/feed/'
+  site: https://jessitron.com/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: stay-saasy
+  title: "Stay SaaSy"
+  url: 'https://staysaasy.com/feed.xml'
+  site: https://staysaasy.com/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: overreacted
+  title: "Dan Abramov (overreacted)"
+  url: 'https://overreacted.io/rss.xml'
+  site: https://overreacted.io/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: bert-hubert
+  title: "Bert Hubert"
+  url: 'https://berthub.eu/articles/index.xml'
+  site: https://berthub.eu/articles/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: commoncog
+  title: "Commoncog (Cedric Chin)"
+  url: 'https://commoncog.com/rss/'
+  site: https://commoncog.com/
+  category: swe
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: one-useful-thing
+  title: "One Useful Thing (Ethan Mollick)"
+  url: 'https://www.oneusefulthing.org/feed'
+  site: https://www.oneusefulthing.org/
+  category: ai-eng
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
+- id: construction-physics
+  title: "Construction Physics (Brian Potter)"
+  url: 'https://www.construction-physics.com/feed'
+  site: https://www.construction-physics.com/
+  category: macro
+  limit: 2
+  maxAgeDays: 14
+  essays: true
+
 # ---------- software engineering (the craft: design, testing, debugging, performance, languages, tools) ----------
 # Chosen for technical depth over opinion (2026-11-25). Fowler, Julia Evans, Dan Luu, Hillel Wayne,
 # Brandur, Eli Bendersky and Mitchell Hashimoto also live on this desk (moved from systems/backend).
@@ -825,6 +947,7 @@
   limit: 3
   maxAgeDays: 30
   weight: -0.2
+  essays: true
 
 - id: vllm
   title: "vLLM blog"
@@ -861,6 +984,7 @@
   limit: 5
   maxAgeDays: 180
   weight: -0.3
+  essays: true
 - id: karpathy
   title: Andrej Karpathy
   url: https://karpathy.github.io/feed.xml
