@@ -7,7 +7,7 @@ import Gets from '../components/Gets.astro';
 import ReadingClient from '../components/ReadingClient.astro';
 import { categoryShort } from '../lib/feeds';
 import { editionName, istTime, istDate, EDITION_WINDOW } from '../lib/edition';
-import { getReading, rank } from '../lib/reading';
+import { getReading, rank, bandOf } from '../lib/reading';
 import { getOutages } from '../lib/outages';
 import { getBriefing } from '../lib/briefing';
 import { getPuzzles } from '../lib/puzzles';
@@ -17,7 +17,7 @@ import { getBusiness, outlet } from '../lib/business';
 import { getCommunities } from '../lib/communities';
 import { getStartups } from '../lib/startups';
 
-const { learning, fetchedAt, now, deepCands, wire, topStories, roadmap, bigtech, experimental, research, thoughts } = await getReading();
+const { learning, fetchedAt, now, deepCands, wire, topStories, desks, roadmap, bigtech, experimental, research, thoughts } = await getReading();
 const su = await getStartups();
 const pz = await getPuzzles();
 const bf = await getBriefing();
@@ -34,26 +34,68 @@ const budgetPool = learning.filter(i => +i.date <= now && now - +i.date < EDITIO
     .sort((a, b) => rank(b, now) - rank(a, now)).slice(0, 60)
     .map(i => ({ u: i.link, t: i.title, m: i.brief!.minutes, k: i.brief?.kind ? KIND[i.brief.kind].label : '', d: categoryShort(i.category) }));
 const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // No. 1 = the site's first day
+const lead = deepCands[0];
+const notLead = (i: { link: string }) => i.link !== lead?.link;
+type Item = { href: string; title: string; meta: string };
+const cards: { slug: string; title: string; href: string; sub: string; items: Item[]; empty: string }[] = [
+    { slug: 'discover', title: 'Discover', href: '/discover/', sub: 'Startups worth approaching, big tech engineering, GitHub and communities', empty: 'Nothing new to discover in the last 24 hours.', items: [
+        ...su.targets.slice(0, 1).map(t => ({ href: t.url, title: t.name, meta: t.kind === 'funding' ? t.signal : t.kind === 'hiring' ? `Hiring · ${t.signal.replace(/^Hiring on HN · /, '')}` : t.signal })),
+        ...bigtech.day.filter(notLead).slice(0, 1).map(i => ({ href: i.link, title: i.title, meta: i.feedTitle })),
+        ...(gh.featured ? [{ href: gh.featured.url, title: gh.featured.name, meta: `On GitHub${gh.featured.language ? ` · ${gh.featured.language}` : ''}` }] : []),
+    ].slice(0, 3) },
+    { slug: 'learn', title: 'Learn', href: '/learn/', sub: 'The clearest deep reads of the day, then every desk', empty: 'No deep reads in the last 24 hours.', items:
+        // Top stories first; on a quiet day, the best piece from each desk fills the card.
+        [...topStories, ...desks.flatMap(d => d.items).filter(i => ['learn', 'experimental'].includes(bandOf(i)))].filter(notLead).filter((i, k, a) => a.findIndex(x => x.link === i.link) === k).slice(0, 3).map(i => ({ href: i.link, title: i.title, meta: `${categoryShort(i.category)}${i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}` })) },
+    { slug: 'news', title: 'News', href: '/news/', sub: 'Markets, business, releases, vulnerabilities and incidents', empty: 'No news in the last 24 hours.', items: [
+        ...[...biz.top, ...biz.river].slice(0, 1).map(b => ({ href: b.lead.link, title: b.lead.title, meta: outlet(b.lead) })),
+        ...wire.filter(i => !i.hype && notLead(i)).slice(0, 1).map(i => ({ href: i.link, title: i.title, meta: categoryShort(i.category) })),
+        ...[...bf.standards.slice(0, 1).map(x => ({ href: x.url, title: x.title, meta: x.kind === 'Release' ? x.who : x.kind })), ...recentLessons.slice(0, 1).map(i => ({ href: i.url, title: i.title, meta: `Incident · ${i.provider}` }))].slice(0, 1),
+    ] },
+    { slug: 'try', title: 'Try it', href: '/try/', sub: 'Hands-on pieces to follow along with, and the daily puzzle', empty: 'Nothing hands-on in the last 24 hours.', items: [
+        ...experimental.filter(notLead).slice(0, 2).map(i => ({ href: i.link, title: i.title, meta: `${i.brief?.kind ? KIND[i.brief.kind].label : 'How-to'}${i.brief?.minutes ? ` · ${i.brief.minutes} min` : ''}` })),
+        ...(pz.today ? [{ href: u('/try/'), title: pz.today.title, meta: "Today's puzzle" }] : []),
+    ] },
+    { slug: 'research', title: 'Research', href: '/papers/', sub: 'New papers, explained in plain words first', empty: 'No new papers in the last 24 hours.', items:
+        research.slice(0, 3).map(i => ({ href: i.link, title: i.title, meta: categoryShort(i.category) })) },
+    { slug: 'thoughts', title: 'Thoughts', href: '/thoughts/', sub: 'Essays and opinion, for perspective', empty: 'No essays in the last 24 hours.', items:
+        thoughts.slice(0, 4).map(i => ({ href: i.link, title: i.title, meta: i.feedTitle })) },
+];
+// Each headline appears once on the home page: an earlier card keeps it (cards are in priority order).
+{
+    const seen = new Set<string>(lead ? [lead.link] : []);
+    for (const c of cards) c.items = c.items.filter(x => !seen.has(x.href) && !!seen.add(x.href)).slice(0, 3);
+}
 ---
 <Base description="Learn something real every day: distributed systems, architecture, AI engineering, ML, security and maths." accent="reading">
-    <div class="rd fp calm">
-        <!-- ===== Masthead ===== -->
-        <header class="fp-mast">
-            <h1 class="fp-title">The Reading Room</h1>
-            <p class="fp-for">A reading and discovery room for careers in software and the industries around it, edited by a local AI.</p>
-            <div class="fp-dateline">
-                <span>No. {issue}</span>
-                <span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span>
-                <span>{editionName(fetchedAt)} edition · <time data-edition-time datetime={fetchedAt.toISOString()}>{istTime(fetchedAt)}</time></span>
-            </div>
+    <div class="home">
+        <!-- ===== Header: title, one line, a quiet date line ===== -->
+        <header class="home-mast">
+            <h1 class="home-title">The Reading Room</h1>
+            <p class="home-tag">A reading and discovery room for careers in software and the industries around it, edited by a local AI.</p>
+            <p class="home-meta"><span data-edition-date={fetchedAt.toISOString()}>{istDate(fetchedAt)}</span> · {editionName(fetchedAt)} edition · <time data-edition-time datetime={fetchedAt.toISOString()}>{istTime(fetchedAt)}</time> · No. {issue}</p>
             <p class="fp-stale" data-stale={fetchedAt.toISOString()} hidden></p>
             <p class="fp-since" data-since hidden></p>
         </header>
-        <!-- ===== Time budget: pick how long you have; the browser assembles the best unread reads that fit ===== -->
+
+        <!-- ===== Start here: the day's best piece, then the reading plan ===== -->
+        {lead && (
+            <section class="home-hero" data-link={lead.link} aria-label="Start here">
+                <p class="home-k">Start here{lead.brief?.kind ? ` · ${KIND[lead.brief.kind].label}` : ''}{lead.brief?.level ? ` · ${lead.brief.level}` : ''}{lead.brief?.minutes ? ` · ${lead.brief.minutes} min` : ''}</p>
+                <h2 class="home-hero-t"><a href={lead.link} target="_blank" rel="noopener noreferrer" data-read>{lead.title}</a></h2>
+                {(lead.learn || (lead.brief?.kind && KIND[lead.brief.kind].intent)) && <p class="home-hero-learn">{lead.learn ?? KIND[lead.brief!.kind].intent}</p>}
+                <p class="home-hero-src">{lead.feedTitle} · {categoryShort(lead.category)}</p>
+                <div class="home-actions">
+                    <a class="home-btn primary" href={lead.link} target="_blank" rel="noopener noreferrer" data-read>Read it</a>
+                    <a class="home-btn" href={u('/digest/')}>Today's reading plan</a>
+                </div>
+            </section>
+        )}
+
+        <!-- ===== Time budget ===== -->
         {budgetPool.length > 0 && (
-            <section class="tb" aria-label="Time budget">
+            <section class="tb home-tb" aria-label="Time budget">
                 <div class="tb-bar" role="group" aria-label="How much time do you have?">
-                    <span class="tb-k">How long do you have?</span>
+                    <span class="home-tb-k">Less time? Pick what fits:</span>
                     {[15, 30, 60].map(m => <button type="button" class="tb-chip" data-budget={m} aria-pressed="false">{m === 60 ? '1 hour' : `${m} min`}</button>)}
                 </div>
                 <ol class="tb-list" data-budget-list hidden></ol>
@@ -61,63 +103,25 @@ const issue = Math.floor((+fetchedAt - Date.UTC(2026, 10, 17)) / 864e5) + 1; // 
             </section>
         )}
 
-
-        <p class="fp-digest"><a href={u('/digest/')}>Today's summary: a reading plan and the edition in one page →</a></p>
-
-        <!-- ===== The six parts, short: three items each, then the part's own page ===== -->
-        {(() => {
-            const Part = (n: number, title: string, href: string, sub: string, children: any) => (
-                <section class="fp-sum" aria-labelledby={`sum-${n}`}>
-                    <header class="fp-sum-h"><span class="fp-part-n">{n}</span><h2 id={`sum-${n}`}><a href={u(href)}>{title}</a></h2><span class="fp-part-sub">{sub}</span><a class="fp-sum-open" href={u(href)}>Open {title} →</a></header>
-                    {children}
-                </section>
-            );
-            const Line = ({ href, k, title, note }: { href: string; k: string; title: string; note?: string }) => (
-                <li><p class="fp-sum-k">{k}</p><a class="fp-sum-t" href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" data-read>{title}</a>{note && <p class="fp-sum-note">{note}</p>}</li>
-            );
-            const lead = deepCands[0];
-            const discoverLines = [
-                ...su.targets.slice(0, 1).map(t => ({ href: t.url, k: `${t.kind === 'funding' ? 'Just raised' : t.kind === 'hiring' ? 'Hiring now' : 'YC launch'} · ${t.signal}`, title: t.name, note: `How to approach: ${t.approach.mention}` })),
-                ...bigtech.day.slice(0, 1).map(i => ({ href: i.link, k: `Big tech · ${i.feedTitle}`, title: i.title, note: i.learn })),
-                ...(gh.featured ? [{ href: gh.featured.url, k: `On GitHub · ${gh.featured.language || 'code'}`, title: gh.featured.name, note: gh.featured.description }] : []),
-                ...cm.everywhere.slice(0, 1).map(g => ({ href: g.threads[0].ext ?? g.threads[0].url, k: `In ${new Set(g.threads.map(t => t.community)).size} communities`, title: g.threads[0].title })),
-            ].slice(0, 3);
-            const newsLines = [
-                ...[...biz.top, ...biz.river].slice(0, 1).map(b => ({ href: b.lead.link, k: `Business · ${outlet(b.lead)}`, title: b.lead.title })),
-                ...wire.filter(i => !i.hype).slice(0, 1).map(i => ({ href: i.link, k: `The wire · ${categoryShort(i.category)}`, title: i.title })),
-                ...[...bf.standards.slice(0, 1).map(x => ({ href: x.url, k: `Standards · ${x.kind === 'Release' ? x.who : x.kind}`, title: x.title })), ...recentLessons.slice(0, 1).map(i => ({ href: i.url, k: `Incident · ${i.provider}`, title: i.title }))].slice(0, 1),
-            ];
-            return <div class="fp-sums">
-                {Part(1, 'Discover', '/discover/', "what's new and worth knowing", <>
-                    <ol class="fp-sum-list" role="list">{discoverLines.map(x => Line(x))}</ol>
-                </>)}
-                {Part(2, 'Learn', '/learn/', "the clearest pieces of the day", <>
-                    {lead && (
-                        <article class="fp-sum-lead" data-link={lead.link}>
-                            <a class="fp-sum-lead-t" href={lead.link} target="_blank" rel="noopener noreferrer" data-read>{lead.title}</a>
-                            <Gets i={lead} />
-                        </article>
+        <!-- ===== The six parts as cards: a line on what's inside, 2–3 headlines, "Open" ===== -->
+        <div class="home-grid">
+            {cards.map(c => (
+                <section class="home-card" aria-labelledby={`card-${c.slug}`}>
+                    <header class="home-card-h">
+                        <h2 id={`card-${c.slug}`}><a href={u(c.href)}>{c.title}</a></h2>
+                        <p>{c.sub}</p>
+                    </header>
+                    {c.items.length === 0 ? <p class="home-empty">{c.empty}</p> : (
+                        <ul class="home-items" role="list">
+                            {c.items.map(x => (
+                                <li><a href={x.href} target={x.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" data-read>{x.title}</a><span>{x.meta}</span></li>
+                            ))}
+                        </ul>
                     )}
-                    <ol class="fp-sum-list" role="list">{topStories.slice(0, 2).map(i => Line({ href: i.link, k: `${categoryShort(i.category)} · ${i.feedTitle}`, title: i.title, note: i.learn }))}</ol>
-                </>)}
-                {Part(3, 'News', '/news/', "what changed in the world your code runs in", <>
-                    <ol class="fp-sum-list" role="list">{newsLines.map(x => Line(x))}</ol>
-                </>)}
-                {Part(4, 'Try it', '/try/', "hands-on pieces and the puzzle", <>
-                    <ol class="fp-sum-list" role="list">
-                        {experimental.slice(0, 2).map(i => Line({ href: i.link, k: `${i.brief?.kind ? KIND[i.brief.kind].label : 'How-to'} · ${i.feedTitle}`, title: i.title, note: i.learn }))}
-                        {pz.today && Line({ href: u('/try/'), k: "Today's puzzle", title: pz.today.title })}
-                    </ol>
-                </>)}
-                {Part(5, 'Research', '/papers/', "new papers, in plain words first", <>
-                    <ol class="fp-sum-list" role="list">{research.slice(0, 3).map(i => Line({ href: i.link, k: `${categoryShort(i.category)} · ${i.feedTitle}`, title: i.title, note: i.paper?.gist }))}</ol>
-                </>)}
-                {Part(6, 'Thoughts', '/thoughts/', "essays and opinion, for perspective", <>
-                    <ol class="fp-sum-list" role="list">{thoughts.slice(0, 3).map(i => Line({ href: i.link, k: i.feedTitle, title: i.title }))}</ol>
-                    {thoughts.length === 0 && <p class="fp-empty">No essays in the last 24 hours.</p>}
-                </>)}
-            </div>;
-        })()}
+                    <a class="home-open" href={u(c.href)}>Open {c.title} →</a>
+                </section>
+            ))}
+        </div>
     </div>
     <ReadingClient />
 </Base>

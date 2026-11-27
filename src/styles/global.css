@@ -1757,3 +1757,54 @@ details.inc[open] .inc-cause-line { display: none; }
 }
 
 .su-t-more summary { cursor: pointer; font: 500 13px var(--sans); color: var(--muted); padding: 4px 0; }
+
+/* =====================================================================================================
+   Home page (2026-11-27, "fix the first page"): a clean header, a "Start here" hero, the time budget,
+   and the six parts as light cards (2 per row on desktop, 1 on phones), headlines only.
+   ===================================================================================================== */
+.home { max-width: 980px; margin: 0 auto; padding: 0 4px; }
+.home-mast { text-align: center; padding: 26px 0 18px; border-bottom: 1px solid var(--border); }
+.home-title { margin: 0; font: 700 clamp(38px, 6vw, 58px)/1 var(--serif-d); letter-spacing: -.03em; color: var(--fg); }
+.home-tag { margin: 10px auto 0; max-width: 620px; font: italic 16px/1.45 var(--serif-d); color: var(--muted); }
+.home-meta { margin: 10px 0 0; font: 500 13px var(--sans); color: var(--faint); }
+.home .fp-stale, .home .fp-since { margin: 8px auto 0; font: 500 13px var(--sans); }
+
+.home-hero { max-width: 760px; margin: 34px auto 0; padding: 28px 30px; border-radius: 18px; background: var(--tile); border: 1px solid var(--border); }
+.home-k { margin: 0 0 10px; font: 600 13px var(--sans); color: var(--ed-accent); }
+.home-hero-t { margin: 0; font: 700 clamp(26px, 4vw, 36px)/1.15 var(--serif-d); letter-spacing: -.015em; }
+.home-hero-t a { color: var(--fg); text-decoration: none; }
+.home-hero-t a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.home-hero-learn { margin: 12px 0 0; font: 18px/1.55 var(--serif-d); color: var(--fg); }
+.home-hero-src { margin: 10px 0 0; font: 500 13px var(--sans); color: var(--faint); }
+.home-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.home-btn { display: inline-block; padding: 9px 18px; border-radius: 999px; border: 1px solid var(--border-2); font: 600 14px var(--sans); color: var(--fg); text-decoration: none; }
+.home-btn:hover { border-color: var(--fg); }
+.home-btn.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+.home-tb { max-width: 760px; margin: 16px auto 0; }
+.home-tb .tb-bar { justify-content: center; }
+.home-tb-k { font: 500 14px var(--sans); color: var(--muted); margin-right: 4px; }
+.home-tb .tb-list { max-width: 760px; }
+
+.home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 40px 0 10px; }
+.home-card { display: flex; flex-direction: column; padding: 20px 22px; border-radius: 16px; border: 1px solid var(--border); background: var(--tile); min-width: 0; }
+.home-card-h h2 { margin: 0; font: 700 22px/1.2 var(--serif-d); }
+.home-card-h h2 a { color: var(--fg); text-decoration: none; }
+.home-card-h p { margin: 4px 0 12px; font: 14px/1.4 var(--sans); color: var(--faint); }
+.home-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; flex: 1; align-content: start; }
+.home-items li { display: grid; gap: 2px; padding-top: 12px; border-top: 1px solid var(--border); }
+.home-items a { font: 600 16.5px/1.35 var(--serif-d); color: var(--fg); text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.home-items a:hover { text-decoration: underline; }
+.home-items span { font: 500 12.5px var(--sans); color: var(--faint); }
+.home-items li.is-read a { color: var(--muted); }
+.home-empty { margin: 0; flex: 1; font: italic 15px var(--serif-d); color: var(--muted); }
+.home-open { margin-top: 16px; font: 600 14px var(--sans); color: var(--ed-accent); text-decoration: none; }
+.home-open:hover { text-decoration: underline; }
+
+@media (max-width: 760px) {
+    .home-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 28px; }
+    .home-hero { padding: 22px 18px; margin-top: 22px; border-radius: 14px; }
+    .home-hero-learn { font-size: 17px; }
+    .home-card { padding: 18px; }
+    .home-tb .tb-bar { justify-content: flex-start; }
+}

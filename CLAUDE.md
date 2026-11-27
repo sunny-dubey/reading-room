@@ -52,3 +52,4 @@
 - Small helpers inside `.astro` templates must be called as functions (`{Line(x)}`), not used as tags.
 - In YAML, quote values containing `: `.
 - Commands: `npm run dev` (http://localhost:4321/reading-room/; set `LLM_BUDGET_MIN=2` for quick reloads), `npm run build`, `npm run check:links`.
+- **Home page** (2026-11-27, "fix the first page"; `.home*` styles at the end of global.css): a clean header (title, tagline, quiet date line), a "Start here" hero (the lead with kind/level/minutes, You'll learn, Read it + Today's reading plan buttons), the time budget ("Less time?"), then the six parts as light cards (2 per row on desktop, 1 on phones; headlines only, ≤3 each, no headline repeated across cards, Learn falls back to desk picks on quiet days).

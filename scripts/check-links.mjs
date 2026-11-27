@@ -16,7 +16,9 @@ const UA = 'Mozilla/5.0 (compatible; reading-room link check)';
 const bad = [], limited = [];
 await Promise.all(pages.map(async ([url, l]) => {
     try {
-        const res = await fetch(url, { headers: { 'User-Agent': UA }, redirect: 'follow', signal: AbortSignal.timeout(20_000) });
+        const get = () => fetch(url, { headers: { 'User-Agent': UA }, redirect: 'follow', signal: AbortSignal.timeout(20_000) });
+        // A dropped connection (ECONNRESET, timeout) is usually a blip: try once more before calling it broken.
+        const res = await get().catch(async () => { await new Promise(r => setTimeout(r, 3000)); return get(); });
         if (res.status === 429) limited.push(`429  ${l.id}  ${url}`);
         else if (res.status >= 400) bad.push(`${res.status}  ${l.id}  ${url}`);
     } catch (err) {
