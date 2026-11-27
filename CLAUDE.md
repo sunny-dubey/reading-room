@@ -40,7 +40,7 @@
 - **Markets** (`src/lib/markets.ts`, `MarketBrief.astro`, `src/lib/macro-calendar.ts`): FRED + CoinGecko snapshot; the markets line = two rule-based sentences about the last session + the next macro event; `/markets/` calendar with "What it moves" and a FRED "Now" signal. Not advice; no Stooq/NSE/BSE.
 - **Incidents** (`src/lib/outages.ts`, `src/content/status-pages.yaml`): provider status feeds, stated timing and causes only, case studies, reliability table.
 - **Puzzles** (`src/lib/puzzles.ts`, `src/content/puzzles.yaml`, `numbers.yaml`, `web-puzzles.ts`): every answer verified (code run, interleavings enumerated, arithmetic in `proof`); click-only. When adding puzzles, verify them the same way.
-- **Canon** (`src/content/canon.yaml`, long works have `parts`), **Roadmap** (`src/content/roadmap.yaml`, 35 areas, topic map via UMAP), **overrides** (`src/content/overrides.yaml`), weekly design practice (`src/content/practice.yaml`), questions (`questions.yaml`), explainers (`explainers.yaml`).
+- **Canon** (`src/content/canon.yaml`, long works have `parts`), **Roadmap** (`src/content/roadmap.yaml`, 59 areas; 36–59 are the AI system design roadmap; topic map via UMAP), **overrides** (`src/content/overrides.yaml`), weekly design practice (`src/content/practice.yaml`), questions (`questions.yaml`), explainers (`explainers.yaml`).
 
 ## Deploy (`.github/workflows/deploy.yml`)
 - Caches: local models under a fixed key (`models-…-v1`; change it when a model changes); everything else in `.cache` per run.

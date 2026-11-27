@@ -1,6 +1,7 @@
 # The Roadmap: what you want to learn, area by area.
 # Areas 1-25 are your system design roadmap; 26-31 cover AI engineering, ML foundations, payments, mathematics,
-# testing & correctness, and engineering craft & judgment; 32 is the cybersecurity engineer roadmap; 33 is quantitative finance.
+# testing & correctness, and engineering craft & judgment; 32 is the cybersecurity engineer roadmap; 33 is quantitative finance;
+# 34 HFT; 35 software engineering; 36-59 are the AI system design roadmap.
 # Every article is matched to its closest topics by meaning (embeddings, at build time) and cards show
 # "Why read: you'll get better at <topic> (<area>). <why>". Topic ids are used for progress, so keep them
 # stable; a topic that appears in several areas shares one id.
@@ -2040,3 +2041,1161 @@
     name: "Language runtimes: JVM, Go, Rust and the JavaScript engines"
     group: "Languages & tools"
     about: "language runtime, JVM, Go runtime, Rust compiler, V8, JavaScript engine, value types, language design"
+
+# Areas 36-59: the AI system design roadmap (how AI systems actually work under the hood).
+- id: ai-and-machine-learning-fundamentals
+  n: 36
+  title: AI & Machine Learning Fundamentals
+  track: ml
+  why: Knowing what training, inference and evaluation actually mean keeps every later AI decision grounded.
+  topics:
+  - id: what-is-artificial-intelligence
+    name: What is Artificial Intelligence?
+  - id: ai-vs-ml-vs-deep-learning
+    name: AI vs ML vs Deep Learning
+  - id: traditional-ml-vs-generative-ai
+    name: Traditional ML vs Generative AI
+  - id: supervised-learning
+    name: Supervised Learning
+  - id: unsupervised-learning
+    name: Unsupervised Learning
+  - id: reinforcement-learning
+    name: Reinforcement Learning
+  - id: neural-networks-fundamentals
+    name: Neural Networks Fundamentals
+  - id: deep-learning-fundamentals
+    name: Deep Learning Fundamentals
+  - id: training-vs-inference
+    name: Training vs Inference
+  - id: model-parameters-and-hyperparameters
+    name: Model Parameters & Hyperparameters
+  - id: loss-functions-and-optimization
+    name: Loss Functions & Optimization
+  - id: overfitting-and-underfitting
+    name: Overfitting & Underfitting
+  - id: model-evaluation-metrics
+    name: Model Evaluation Metrics
+  - id: gpu-vs-cpu-computing
+    name: GPU vs CPU Computing
+  - id: ai-system-architecture-overview
+    name: AI System Architecture Overview
+- id: mathematics-and-computational-foundations
+  n: 37
+  title: Mathematics & Computational Foundations
+  track: math
+  why: "The maths behind models is small but unavoidable: vectors, probability and gradients explain why things work or break."
+  topics:
+  - id: vectors-matrices
+    name: Vectors & Matrices
+    group: Linear Algebra
+  - id: matrix-multiplication
+    name: Matrix Multiplication
+    group: Linear Algebra
+  - id: dot-products
+    name: Dot Products
+    group: Linear Algebra
+  - id: eigen
+    name: Eigenvalues & Eigenvectors
+    group: Linear Algebra
+  - id: matrix-decomposition
+    name: Matrix Decomposition
+    group: Linear Algebra
+  - id: probability-distributions
+    name: Probability Distributions
+    group: Probability & Statistics
+  - id: bayes-theorem
+    name: Bayes Theorem
+    group: Probability & Statistics
+  - id: conditional-probability
+    name: Conditional Probability
+    group: Probability & Statistics
+  - id: mean-variance-and-standard-deviation
+    name: Mean, Variance & Standard Deviation
+    group: Probability & Statistics
+  - id: sampling-and-distributions
+    name: Sampling & Distributions
+    group: Probability & Statistics
+  - id: derivatives-gradients
+    name: Derivatives & Gradients
+    group: Calculus
+  - id: partial-derivatives
+    name: Partial Derivatives
+    group: Calculus
+  - id: chain-rule
+    name: Chain Rule
+    group: Calculus
+  - id: gradient-descent
+    name: Gradient Descent
+    group: Calculus
+  - id: numerical-computing
+    name: Numerical Computing
+  - id: floating-point-arithmetic
+    name: Floating Point Arithmetic
+  - id: vectorization
+    name: Vectorization
+  - id: parallel-computing-fundamentals
+    name: Parallel Computing Fundamentals
+- id: deep-learning-architecture
+  n: 38
+  title: Deep Learning Architecture
+  track: ml
+  why: Knowing the building blocks of neural networks turns model behaviour from magic into mechanics.
+  topics:
+  - id: neural-network-architecture
+    name: Neural Network Architecture
+  - id: forward-propagation
+    name: Forward Propagation
+  - id: backpropagation
+    name: Backpropagation
+  - id: activation-functions
+    name: Activation Functions
+  - id: loss-functions
+    name: Loss Functions
+  - id: sgd
+    name: SGD
+    group: Optimizers
+  - id: momentum
+    name: Momentum
+    group: Optimizers
+  - id: rmsprop
+    name: RMSprop
+    group: Optimizers
+  - id: adam-and-adamw
+    name: Adam & AdamW
+    group: Optimizers
+  - id: batch-normalization
+    name: Batch Normalization
+  - id: layer-normalization
+    name: Layer Normalization
+  - id: dropout-and-regularization
+    name: Dropout & Regularization
+  - id: cnns
+    name: CNNs
+  - id: rnns
+    name: RNNs
+  - id: lstms-and-grus
+    name: LSTMs & GRUs
+  - id: attention-mechanism
+    name: Attention Mechanism
+  - id: self-attention
+    name: Self-Attention
+  - id: transformer-architecture
+    name: Transformer Architecture
+- id: large-language-models-llms
+  n: 39
+  title: Large Language Models (LLMs)
+  track: ml
+  why: Knowing how an LLM turns tokens into text explains its costs, limits and failure modes.
+  topics:
+  - id: what-are-large-language-models
+    name: What are Large Language Models?
+  - id: evolution-of-language-models
+    name: Evolution of Language Models
+  - id: tokenization
+    name: Tokenization
+  - id: tokens-and-vocabulary
+    name: Tokens & Vocabulary
+  - id: embeddings
+    name: Embeddings
+  - id: positional-encoding
+    name: Positional Encoding
+  - id: transformer-blocks
+    name: Transformer Blocks
+  - id: multi-head-attention
+    name: Multi-Head Attention
+  - id: feed-forward-networks
+    name: Feed Forward Networks
+  - id: residual-connections
+    name: Residual Connections
+  - id: layer-normalization
+    name: Layer Normalization
+  - id: context-windows
+    name: Context Windows
+  - id: autoregressive-generation
+    name: Autoregressive Generation
+  - id: next-token-prediction
+    name: Next Token Prediction
+  - id: temperature-and-sampling
+    name: Temperature & Sampling
+  - id: top-k-and-top-p-sampling
+    name: Top-K & Top-P Sampling
+  - id: kv-cache
+    name: KV Cache
+  - id: model-parameters-and-model-size
+    name: Model Parameters & Model Size
+  - id: dense-vs-mixture-of-experts-moe
+    name: Dense vs Mixture of Experts (MoE)
+  - id: multimodal-llms
+    name: Multimodal LLMs
+  - id: open-source-vs-closed-source-models
+    name: Open-Source vs Closed-Source Models
+- id: llm-training-and-fine-tuning
+  n: 40
+  title: LLM Training & Fine-Tuning
+  track: ml
+  why: How models are trained and tuned decides what they can do, and when fine-tuning is worth it.
+  topics:
+  - id: pretraining
+    name: Pretraining
+  - id: dataset-collection-and-preparation
+    name: Dataset Collection & Preparation
+  - id: data-cleaning-and-deduplication
+    name: Data Cleaning & Deduplication
+  - id: data-tokenization
+    name: Data Tokenization
+  - id: distributed-training
+    name: Distributed Training
+  - id: training-pipelines
+    name: Training Pipelines
+  - id: checkpointing
+    name: Checkpointing
+  - id: supervised-fine-tuning-sft
+    name: Supervised Fine-Tuning (SFT)
+  - id: instruction-tuning
+    name: Instruction Tuning
+  - id: lora
+    name: LoRA
+    group: Parameter-Efficient Fine-Tuning
+  - id: qlora
+    name: QLoRA
+    group: Parameter-Efficient Fine-Tuning
+  - id: adapters
+    name: Adapters
+    group: Parameter-Efficient Fine-Tuning
+  - id: rlhf
+    name: RLHF
+  - id: dpo
+    name: DPO
+  - id: reward-models
+    name: Reward Models
+  - id: quantization-aware-training
+    name: Quantization-Aware Training
+  - id: model-evaluation
+    name: Model Evaluation
+  - id: model-alignment
+    name: Model Alignment
+  - id: training-cost-optimization
+    name: Training Cost Optimization
+- id: ai-infrastructure-and-hardware
+  n: 41
+  title: AI Infrastructure & Hardware
+  track: ai-eng
+  why: AI runs on GPUs, memory bandwidth and interconnects. Hardware limits set the cost and speed of everything above them.
+  topics:
+  - id: cpu-vs-gpu-vs-tpu
+    name: CPU vs GPU vs TPU
+  - id: gpu-architecture
+    name: GPU Architecture
+  - id: cuda-fundamentals
+    name: CUDA Fundamentals
+  - id: gpu-memory-and-vram
+    name: GPU Memory & VRAM
+  - id: hbm-and-memory-bandwidth
+    name: HBM & Memory Bandwidth
+  - id: pcie-and-nvlink
+    name: PCIe & NVLink
+  - id: multi-gpu-systems
+    name: Multi-GPU Systems
+  - id: gpu-clusters
+    name: GPU Clusters
+  - id: distributed-computing
+    name: Distributed Computing
+  - id: data-parallelism
+    name: Data Parallelism
+  - id: tensor-parallelism
+    name: Tensor Parallelism
+  - id: pipeline-parallelism
+    name: Pipeline Parallelism
+  - id: expert-parallelism
+    name: Expert Parallelism
+  - id: model-parallelism
+    name: Model Parallelism
+  - id: all-reduce-and-all-gather
+    name: All-Reduce & All-Gather
+  - id: network-topologies
+    name: Network Topologies
+  - id: gpu-scheduling
+    name: GPU Scheduling
+  - id: fault-tolerance
+    name: Fault Tolerance
+  - id: ai-hardware-cost-optimization
+    name: AI Hardware Cost Optimization
+- id: llm-inference-internals
+  n: 42
+  title: LLM Inference Internals
+  track: ai-eng
+  why: Inference is where AI money is spent. Prefill, decode and the KV cache decide latency and cost per token.
+  topics:
+  - id: what-is-model-inference
+    name: What is Model Inference?
+  - id: training-vs-inference
+    name: Training vs Inference
+  - id: prefill-phase
+    name: Prefill Phase
+  - id: decode-phase
+    name: Decode Phase
+  - id: time-to-first-token-ttft
+    name: Time To First Token (TTFT)
+  - id: time-per-output-token-tpot
+    name: Time Per Output Token (TPOT)
+  - id: latency-and-throughput
+    name: Throughput & Latency
+  - id: kv-cache-management
+    name: KV Cache Management
+  - id: dynamic-batching
+    name: Dynamic Batching
+  - id: continuous-batching
+    name: Continuous Batching
+  - id: pagedattention
+    name: PagedAttention
+  - id: flashattention
+    name: FlashAttention
+  - id: speculative-decoding
+    name: Speculative Decoding
+  - id: prefix-caching
+    name: Prefix Caching
+  - id: chunked-prefill
+    name: Chunked Prefill
+  - id: int8
+    name: INT8
+    group: Quantization
+  - id: int4
+    name: INT4
+    group: Quantization
+  - id: fp16
+    name: FP16
+    group: Quantization
+  - id: bf16
+    name: BF16
+    group: Quantization
+  - id: model-sharding
+    name: Model Sharding
+  - id: cpu-offloading
+    name: CPU Offloading
+  - id: gpu-memory-optimization
+    name: GPU Memory Optimization
+  - id: inference-cost-optimization
+    name: Inference Cost Optimization
+- id: model-serving-and-deployment
+  n: 43
+  title: Model Serving & Deployment
+  track: ai-eng
+  why: Serving models reliably is ordinary production engineering with expensive, scarce GPUs underneath.
+  topics:
+  - id: model-serving-architecture
+    name: Model Serving Architecture
+  - id: model-serving-apis
+    name: Model Serving APIs
+  - id: synchronous-vs-asynchronous-inference
+    name: Synchronous vs Asynchronous Inference
+  - id: rest-vs-grpc
+    name: REST vs gRPC
+  - id: streaming-responses
+    name: Streaming Responses
+  - id: vllm
+    name: vLLM
+    group: Model Servers
+  - id: nvidia-triton
+    name: NVIDIA Triton
+    group: Model Servers
+  - id: hugging-face-tgi
+    name: Hugging Face TGI
+    group: Model Servers
+  - id: tensorrt-llm
+    name: TensorRT-LLM
+    group: Model Servers
+  - id: model-loading-and-unloading
+    name: Model Loading & Unloading
+  - id: model-versioning
+    name: Model Versioning
+  - id: model-routing
+    name: Model Routing
+  - id: what-is-load-balancing
+    name: Load Balancing
+  - id: autoscaling
+    name: Autoscaling
+  - id: gpu-resource-scheduling
+    name: GPU Resource Scheduling
+  - id: rate-limiting
+    name: Rate Limiting
+  - id: request-queuing
+    name: Request Queuing
+  - id: health-checks
+    name: Health Checks
+  - id: model-rollbacks
+    name: Model Rollbacks
+  - id: high-availability
+    name: High Availability
+- id: embeddings-and-vector-search
+  n: 44
+  title: Embeddings & Vector Search
+  track: ai-eng
+  why: Embeddings and vector search power retrieval, recommendations and semantic search in most AI products.
+  topics:
+  - id: what-are-embeddings
+    name: What are Embeddings?
+  - id: text-embeddings
+    name: Text Embeddings
+  - id: image-embeddings
+    name: Image Embeddings
+  - id: multimodal-embeddings
+    name: Multimodal Embeddings
+  - id: embedding-models
+    name: Embedding Models
+  - id: vector-similarity
+    name: Vector Similarity
+  - id: cosine-similarity
+    name: Cosine Similarity
+  - id: euclidean-distance
+    name: Euclidean Distance
+  - id: dot-product-similarity
+    name: Dot Product Similarity
+  - id: vector-indexing
+    name: Vector Indexing
+  - id: approximate-nearest-neighbors-ann
+    name: Approximate Nearest Neighbors (ANN)
+  - id: hnsw
+    name: HNSW
+  - id: ivf
+    name: IVF
+  - id: product-quantization
+    name: Product Quantization
+  - id: vector-index-optimization
+    name: Vector Index Optimization
+  - id: metadata-filtering
+    name: Metadata Filtering
+  - id: hybrid-search
+    name: Hybrid Search
+  - id: reranking
+    name: Reranking
+  - id: vector-database-architecture
+    name: Vector Database Architecture
+  - id: vector-search-scalability
+    name: Vector Search Scalability
+- id: retrieval-augmented-generation-rag
+  n: 45
+  title: Retrieval-Augmented Generation (RAG)
+  track: ai-eng
+  why: Most useful AI features need your own data, and retrieval quality caps answer quality.
+  topics:
+  - id: what-is-rag
+    name: What is RAG?
+  - id: rag-architecture
+    name: RAG Architecture
+  - id: document-ingestion
+    name: Document Ingestion
+  - id: document-parsing
+    name: Document Parsing
+  - id: text-extraction
+    name: Text Extraction
+  - id: chunking-strategies
+    name: Chunking Strategies
+  - id: embedding-generation
+    name: Embedding Generation
+  - id: vector-storage
+    name: Vector Storage
+  - id: query-processing
+    name: Query Processing
+  - id: query-embedding
+    name: Query Embedding
+  - id: semantic-retrieval
+    name: Semantic Retrieval
+  - id: keyword-retrieval
+    name: Keyword Retrieval
+  - id: hybrid-retrieval
+    name: Hybrid Retrieval
+  - id: metadata-filtering
+    name: Metadata Filtering
+  - id: reranking
+    name: Reranking
+  - id: context-construction
+    name: Context Construction
+  - id: prompt-augmentation
+    name: Prompt Augmentation
+  - id: context-window-management
+    name: Context Window Management
+  - id: grounded-generation
+    name: Grounded Generation
+  - id: rag-evaluation
+    name: RAG Evaluation
+  - id: advanced-rag
+    name: Advanced RAG
+  - id: graphrag
+    name: GraphRAG
+  - id: agentic-rag
+    name: Agentic RAG
+  - id: rag-performance-optimization
+    name: RAG Performance Optimization
+- id: ai-agents-and-agentic-systems
+  n: 46
+  title: AI Agents & Agentic Systems
+  track: ai-eng
+  why: Agents turn models into systems that act. Designing them to be reliable is the hard part.
+  topics:
+  - id: what-are-ai-agents
+    name: What are AI Agents?
+  - id: llm-vs-ai-agent
+    name: LLM vs AI Agent
+  - id: agent-architecture
+    name: Agent Architecture
+  - id: reasoning-and-planning
+    name: Reasoning & Planning
+  - id: tool-calling
+    name: Tool Calling
+  - id: function-calling
+    name: Function Calling
+  - id: agent-memory
+    name: Agent Memory
+  - id: short-term-memory
+    name: Short-Term Memory
+  - id: long-term-memory
+    name: Long-Term Memory
+  - id: working-memory
+    name: Working Memory
+  - id: react-architecture
+    name: ReAct Architecture
+  - id: planning-and-execution
+    name: Planning & Execution
+  - id: task-decomposition
+    name: Task Decomposition
+  - id: reflection-and-self-correction
+    name: Reflection & Self-Correction
+  - id: multi-agent-systems
+    name: Multi-Agent Systems
+  - id: agent-communication
+    name: Agent Communication
+  - id: orchestration
+    name: Orchestration
+  - id: human-in-the-loop
+    name: Human-in-the-Loop
+  - id: agent-state-management
+    name: Agent State Management
+  - id: durable-execution
+    name: Durable Execution
+  - id: agent-failure-recovery
+    name: Agent Failure Recovery
+  - id: mcp-model-context-protocol
+    name: MCP (Model Context Protocol)
+  - id: agent-evaluation
+    name: Agent Evaluation
+- id: ai-application-architecture-area
+  n: 47
+  title: AI Application Architecture
+  track: ai-eng
+  why: "An AI feature is mostly a normal application: gateways, queues, storage and streaming around a model call."
+  topics:
+  - id: ai-application-architecture
+    name: AI Application Architecture
+  - id: frontend-and-backend-integration
+    name: Frontend & Backend Integration
+  - id: api-gateway
+    name: API Gateway
+  - id: llm-gateway
+    name: LLM Gateway
+  - id: model-provider-abstraction
+    name: Model Provider Abstraction
+  - id: multi-model-architecture
+    name: Multi-Model Architecture
+  - id: model-fallback-strategies
+    name: Model Fallback Strategies
+  - id: prompt-management
+    name: Prompt Management
+  - id: conversation-management
+    name: Conversation Management
+  - id: chat-history-storage
+    name: Chat History Storage
+  - id: streaming-architecture
+    name: Streaming Architecture
+  - id: websocket-and-server-sent-events
+    name: WebSocket & Server-Sent Events
+  - id: background-job-processing
+    name: Background Job Processing
+  - id: message-queues
+    name: Message Queues
+  - id: redis-and-caching
+    name: Redis & Caching
+  - id: database-design-for-ai-apps
+    name: Database Design for AI Apps
+  - id: file-and-object-storage
+    name: File & Object Storage
+  - id: session-management
+    name: Session Management
+  - id: authentication-and-authorization
+    name: Authentication & Authorization
+  - id: multi-tenant-ai-systems
+    name: Multi-Tenant AI Systems
+  - id: ai-application-scalability
+    name: AI Application Scalability
+- id: distributed-systems-for-ai
+  n: 48
+  title: Distributed Systems for AI
+  track: systems
+  why: AI systems are distributed systems first. The classic failure modes still apply, at larger scale and cost.
+  topics:
+  - id: distributed-systems-fundamentals
+    name: Distributed Systems Fundamentals
+  - id: horizontal-vs-vertical-scaling
+    name: Horizontal vs Vertical Scaling
+  - id: service-discovery
+    name: Service Discovery
+  - id: what-is-load-balancing
+    name: Load Balancing
+  - id: distributed-task-queues
+    name: Distributed Task Queues
+  - id: message-brokers
+    name: Message Brokers
+  - id: kafka-and-rabbitmq
+    name: Kafka & RabbitMQ
+  - id: distributed-caching
+    name: Distributed Caching
+  - id: consistent-hashing
+    name: Consistent Hashing
+  - id: distributed-coordination
+    name: Distributed Coordination
+  - id: leader-election
+    name: Leader Election
+  - id: raft
+    name: Raft
+    group: Consensus Algorithms
+  - id: paxos
+    name: Paxos
+    group: Consensus Algorithms
+  - id: data-replication-strategies
+    name: Replication
+  - id: sharding-and-partitioning
+    name: Sharding
+  - id: fault-tolerance
+    name: Fault Tolerance
+  - id: circuit-breakers
+    name: Circuit Breakers
+  - id: retries-and-backoff
+    name: Retries & Backoff
+  - id: idempotency
+    name: Idempotency
+  - id: event-driven-architecture
+    name: Event-Driven Architecture
+  - id: backpressure
+    name: Backpressure
+  - id: cap-theorem
+    name: CAP Theorem
+  - id: multi-region-ai-systems
+    name: Multi-Region AI Systems
+- id: ai-data-engineering
+  n: 49
+  title: AI Data Engineering
+  track: backend
+  why: Models are only as good as their data. Pipelines, validation and lineage are where AI quality starts.
+  topics:
+  - id: data-engineering-fundamentals
+    name: Data Engineering Fundamentals
+  - id: data-collection-pipelines
+    name: Data Collection Pipelines
+  - id: data-ingestion
+    name: Data Ingestion
+  - id: batch-vs-stream-processing
+    name: Batch vs Stream Processing
+  - id: etl-and-elt-pipelines
+    name: ETL & ELT Pipelines
+  - id: data-validation
+    name: Data Validation
+  - id: data-cleaning
+    name: Data Cleaning
+  - id: data-deduplication
+    name: Data Deduplication
+  - id: data-versioning
+    name: Data Versioning
+  - id: data-lineage
+    name: Data Lineage
+  - id: data-lakes
+    name: Data Lakes
+  - id: data-warehouses
+    name: Data Warehouses
+  - id: feature-stores
+    name: Feature Stores
+  - id: embedding-pipelines
+    name: Embedding Pipelines
+  - id: vector-data-pipelines
+    name: Vector Data Pipelines
+  - id: cdc-and-event-streams
+    name: CDC & Event Streams
+  - id: data-quality-monitoring
+    name: Data Quality Monitoring
+  - id: data-governance
+    name: Data Governance
+  - id: dataset-management
+    name: Dataset Management
+- id: ai-caching-and-performance-optimization
+  n: 50
+  title: AI Caching & Performance Optimization
+  track: ai-eng
+  why: Caching, batching and routing are the main levers for making AI fast and affordable.
+  topics:
+  - id: prompt-caching
+    name: Prompt Caching
+  - id: semantic-caching
+    name: Semantic Caching
+  - id: response-caching
+    name: Response Caching
+  - id: embedding-caching
+    name: Embedding Caching
+  - id: kv-cache-optimization
+    name: KV Cache Optimization
+  - id: prefix-caching
+    name: Prefix Caching
+  - id: cache-invalidation
+    name: Cache Invalidation
+  - id: cache-eviction-policies
+    name: Cache Eviction Policies
+  - id: cache-stampede
+    name: Cache Stampede
+  - id: request-batching
+    name: Request Batching
+  - id: token-optimization
+    name: Token Optimization
+  - id: context-compression
+    name: Context Compression
+  - id: model-routing
+    name: Model Routing
+  - id: small-vs-large-model-selection
+    name: Small vs Large Model Selection
+  - id: speculative-execution
+    name: Speculative Execution
+  - id: latency-optimization
+    name: Latency Optimization
+  - id: throughput-optimization
+    name: Throughput Optimization
+  - id: cost-vs-performance-trade-offs
+    name: Cost vs Performance Trade-offs
+- id: ai-evaluation-and-observability
+  n: 51
+  title: AI Evaluation & Observability
+  track: ai-eng
+  why: Without evals and monitoring you can't tell whether a change made an AI system better or worse.
+  topics:
+  - id: why-ai-evaluation-matters
+    name: Why AI Evaluation Matters
+  - id: model-evaluation-metrics
+    name: Model Evaluation Metrics
+  - id: offline-vs-online-evaluation
+    name: Offline vs Online Evaluation
+  - id: benchmarking
+    name: Benchmarking
+  - id: golden-datasets
+    name: Golden Datasets
+  - id: human-evaluation
+    name: Human Evaluation
+  - id: llm-as-a-judge
+    name: LLM-as-a-Judge
+  - id: rag-evaluation
+    name: RAG Evaluation
+  - id: retrieval-precision-and-recall
+    name: Retrieval Precision & Recall
+  - id: faithfulness-and-groundedness
+    name: Faithfulness & Groundedness
+  - id: hallucination-detection
+    name: Hallucination Detection
+  - id: agent-evaluation
+    name: Agent Evaluation
+  - id: tracing-and-logging
+    name: Tracing & Logging
+  - id: token-usage-monitoring
+    name: Token Usage Monitoring
+  - id: latency-monitoring
+    name: Latency Monitoring
+  - id: gpu-utilization-monitoring
+    name: GPU Utilization Monitoring
+  - id: cost-monitoring
+    name: Cost Monitoring
+  - id: drift-detection
+    name: Drift Detection
+  - id: a-b-testing
+    name: A/B Testing
+  - id: production-ai-monitoring
+    name: Production AI Monitoring
+- id: ai-security-and-safety
+  n: 52
+  title: AI Security & Safety
+  track: security
+  why: Models follow instructions from anywhere. AI systems need their own threat model and guardrails.
+  topics:
+  - id: ai-security-fundamentals
+    name: AI Security Fundamentals
+  - id: prompt-injection
+    name: Prompt Injection
+  - id: indirect-prompt-injection
+    name: Indirect Prompt Injection
+  - id: jailbreaking
+    name: Jailbreaking
+  - id: data-leakage
+    name: Data Leakage
+  - id: pii-detection-and-protection
+    name: PII Detection & Protection
+  - id: model-access-control
+    name: Model Access Control
+  - id: api-key-management
+    name: API Key Management
+  - id: secure-tool-calling
+    name: Secure Tool Calling
+  - id: agent-permission-boundaries
+    name: Agent Permission Boundaries
+  - id: rag-data-isolation
+    name: RAG Data Isolation
+  - id: multi-tenant-security
+    name: Multi-Tenant Security
+  - id: model-supply-chain-security
+    name: Model Supply Chain Security
+  - id: adversarial-attacks
+    name: Adversarial Attacks
+  - id: output-validation
+    name: Output Validation
+  - id: rate-limiting-and-abuse-prevention
+    name: Rate Limiting & Abuse Prevention
+  - id: ai-guardrails
+    name: AI Guardrails
+  - id: responsible-ai
+    name: Responsible AI
+- id: ai-reliability-and-production-engineering
+  n: 53
+  title: AI Reliability & Production Engineering
+  track: ai-eng
+  why: Providers fail, GPUs fail and models misbehave. Production AI needs fallbacks, SLOs and incident practice.
+  topics:
+  - id: production-ai-architecture
+    name: Production AI Architecture
+  - id: service-level-objectives-slos
+    name: Service Level Objectives (SLOs)
+  - id: service-level-agreements-slas
+    name: Service Level Agreements (SLAs)
+  - id: availability-and-reliability
+    name: Availability & Reliability
+  - id: graceful-degradation
+    name: Graceful Degradation
+  - id: model-provider-failures
+    name: Model Provider Failures
+  - id: fallback-models
+    name: Fallback Models
+  - id: timeout-management
+    name: Timeout Management
+  - id: retry-strategies
+    name: Retry Strategies
+  - id: queue-management
+    name: Queue Management
+  - id: gpu-failure-recovery
+    name: GPU Failure Recovery
+  - id: model-warmup
+    name: Model Warmup
+  - id: blue-green-deployment
+    name: Blue-Green Deployment
+    group: Deployment Strategies
+  - id: canary-deployment
+    name: Canary Deployment
+    group: Deployment Strategies
+  - id: rolling-deployment
+    name: Rolling Deployment
+    group: Deployment Strategies
+  - id: disaster-recovery
+    name: Disaster Recovery
+  - id: backup-and-restore
+    name: Backup & Restore
+  - id: capacity-planning
+    name: Capacity Planning
+  - id: production-incident-management
+    name: Production Incident Management
+- id: multimodal-ai-system-design
+  n: 54
+  title: Multimodal AI System Design
+  track: ai-eng
+  why: Voice, image and video add new pipelines, latency budgets and costs on top of text.
+  topics:
+  - id: multimodal-ai-architecture
+    name: Multimodal AI Architecture
+  - id: text-processing-systems
+    name: Text Processing Systems
+  - id: image-understanding-systems
+    name: Image Understanding Systems
+  - id: computer-vision
+    name: Computer Vision
+  - id: audio-processing
+    name: Audio Processing
+  - id: speech-to-text
+    name: Speech-to-Text
+  - id: text-to-speech
+    name: Text-to-Speech
+  - id: real-time-voice-ai
+    name: Real-Time Voice AI
+  - id: video-understanding
+    name: Video Understanding
+  - id: image-generation-systems
+    name: Image Generation Systems
+  - id: video-generation-systems
+    name: Video Generation Systems
+  - id: cross-modal-embeddings
+    name: Cross-Modal Embeddings
+  - id: multimodal-rag
+    name: Multimodal RAG
+  - id: real-time-multimodal-streaming
+    name: Real-Time Multimodal Streaming
+  - id: media-processing-pipelines
+    name: Media Processing Pipelines
+  - id: multimodal-inference-optimization
+    name: Multimodal Inference Optimization
+- id: ai-system-design-case-studies
+  n: 55
+  title: AI System Design Case Studies
+  track: ai-eng
+  why: Worked designs of real AI products show how all the pieces fit under real constraints.
+  topics:
+  - id: design-chatgpt
+    name: Design ChatGPT
+  - id: design-an-ai-coding-assistant
+    name: Design an AI Coding Assistant
+  - id: design-an-ai-search-engine
+    name: Design an AI Search Engine
+  - id: design-a-rag-based-document-assistant
+    name: Design a RAG-Based Document Assistant
+  - id: design-an-ai-customer-support-system
+    name: Design an AI Customer Support System
+  - id: design-an-ai-interview-platform
+    name: Design an AI Interview Platform
+  - id: design-an-ai-recommendation-system
+    name: Design an AI Recommendation System
+  - id: design-an-ai-agent-platform
+    name: Design an AI Agent Platform
+  - id: design-a-multi-agent-research-system
+    name: Design a Multi-Agent Research System
+  - id: design-an-ai-image-generator
+    name: Design an AI Image Generator
+  - id: design-a-real-time-voice-assistant
+    name: Design a Real-Time Voice Assistant
+  - id: design-an-ai-meeting-summarizer
+    name: Design an AI Meeting Summarizer
+  - id: design-an-ai-translation-system
+    name: Design an AI Translation System
+  - id: design-an-ai-email-assistant
+    name: Design an AI Email Assistant
+  - id: design-an-ai-video-processing-platform
+    name: Design an AI Video Processing Platform
+  - id: design-a-large-scale-vector-search-engine
+    name: Design a Large-Scale Vector Search Engine
+  - id: design-an-llm-inference-api
+    name: Design an LLM Inference API
+  - id: design-a-distributed-model-serving-platform
+    name: Design a Distributed Model Serving Platform
+  - id: design-an-ai-model-training-platform
+    name: Design an AI Model Training Platform
+- id: ai-system-design-tools-and-technologies
+  n: 56
+  title: AI System Design Tools & Technologies
+  track: ai-eng
+  why: Knowing the standard AI tools well is how designs become running systems.
+  topics:
+  - id: python
+    name: Python
+    group: Programming
+  - id: go
+    name: Go
+    group: Programming
+  - id: c
+    name: C++
+    group: Programming
+  - id: pytorch
+    name: PyTorch
+    group: Deep Learning
+  - id: tensorflow
+    name: TensorFlow
+    group: Deep Learning
+  - id: jax
+    name: JAX
+    group: Deep Learning
+  - id: hugging-face-transformers
+    name: Hugging Face Transformers
+    group: LLM Frameworks
+  - id: langchain
+    name: LangChain
+    group: LLM Frameworks
+  - id: llamaindex
+    name: LlamaIndex
+    group: LLM Frameworks
+  - id: dspy
+    name: DSPy
+    group: LLM Frameworks
+  - id: vllm
+    name: vLLM
+    group: Inference
+  - id: ollama
+    name: Ollama
+    group: Inference
+  - id: nvidia-triton
+    name: NVIDIA Triton
+    group: Inference
+  - id: tensorrt-llm
+    name: TensorRT-LLM
+    group: Inference
+  - id: faiss
+    name: FAISS
+    group: Vector Databases
+  - id: qdrant
+    name: Qdrant
+    group: Vector Databases
+  - id: milvus
+    name: Milvus
+    group: Vector Databases
+  - id: weaviate
+    name: Weaviate
+    group: Vector Databases
+  - id: postgresql
+    name: PostgreSQL
+    group: Data & Messaging
+  - id: redis
+    name: Redis
+    group: Data & Messaging
+  - id: kafka
+    name: Kafka
+    group: Data & Messaging
+  - id: s3
+    name: S3
+    group: Data & Messaging
+  - id: docker
+    name: Docker
+    group: Infrastructure
+  - id: kubernetes
+    name: Kubernetes
+    group: Infrastructure
+  - id: terraform
+    name: Terraform
+    group: Infrastructure
+  - id: aws-gcp-azure
+    name: AWS / GCP / Azure
+    group: Infrastructure
+  - id: prometheus
+    name: Prometheus
+    group: Observability
+  - id: grafana
+    name: Grafana
+    group: Observability
+  - id: opentelemetry
+    name: OpenTelemetry
+    group: Observability
+  - id: langfuse
+    name: Langfuse
+    group: Observability
+- id: build-your-own-ai-systems
+  n: 57
+  title: Build Your Own AI Systems
+  track: ai-eng
+  why: Building small versions yourself is the fastest way to really understand how AI systems work.
+  topics:
+  - id: build-a-neural-network-from-scratch
+    name: Build a Neural Network From Scratch
+  - id: build-a-tokenizer
+    name: Build a Tokenizer
+  - id: implement-self-attention
+    name: Implement Self-Attention
+  - id: build-a-mini-transformer
+    name: Build a Mini Transformer
+  - id: train-a-small-language-model
+    name: Train a Small Language Model
+  - id: build-an-embedding-search-engine
+    name: Build an Embedding Search Engine
+  - id: build-a-vector-database
+    name: Build a Vector Database
+  - id: build-a-rag-pipeline
+    name: Build a RAG Pipeline
+  - id: build-an-llm-inference-server
+    name: Build an LLM Inference Server
+  - id: implement-kv-caching
+    name: Implement KV Caching
+  - id: build-a-model-router
+    name: Build a Model Router
+  - id: build-an-ai-api-gateway
+    name: Build an AI API Gateway
+  - id: build-a-streaming-chat-application
+    name: Build a Streaming Chat Application
+  - id: build-an-ai-agent-runtime
+    name: Build an AI Agent Runtime
+  - id: build-a-multi-agent-system
+    name: Build a Multi-Agent System
+  - id: build-a-distributed-job-queue
+    name: Build a Distributed Job Queue
+  - id: build-an-ai-evaluation-framework
+    name: Build an AI Evaluation Framework
+  - id: build-an-ai-observability-platform
+    name: Build an AI Observability Platform
+  - id: build-a-mini-llm-serving-platform
+    name: Build a Mini LLM Serving Platform
+- id: ai-engineering-practice
+  n: 58
+  title: AI Engineering Practice
+  track: ai-eng
+  why: Reading real code, papers and benchmarks builds judgment that tutorials can't.
+  topics:
+  - id: read-transformer-papers
+    name: Read Transformer Papers
+  - id: study-attention-is-all-you-need
+    name: Study Attention Is All You Need
+  - id: explore-pytorch-internals
+    name: Explore PyTorch Internals
+  - id: study-vllm-architecture
+    name: Study vLLM Architecture
+  - id: read-llama-cpp-source-code
+    name: Read llama.cpp Source Code
+  - id: analyze-inference-pipelines
+    name: Analyze Inference Pipelines
+  - id: benchmark-different-llms
+    name: Benchmark Different LLMs
+  - id: compare-quantization-methods
+    name: Compare Quantization Methods
+  - id: benchmark-vector-databases
+    name: Benchmark Vector Databases
+  - id: optimize-rag-retrieval
+    name: Optimize RAG Retrieval
+  - id: simulate-gpu-memory-constraints
+    name: Simulate GPU Memory Constraints
+  - id: benchmark-model-serving
+    name: Benchmark Model Serving
+  - id: investigate-ai-latency-bottlenecks
+    name: Investigate AI Latency Bottlenecks
+  - id: analyze-token-throughput
+    name: Analyze Token Throughput
+  - id: study-distributed-training
+    name: Study Distributed Training
+  - id: debug-production-ai-systems
+    name: Debug Production AI Systems
+  - id: contribute-to-open-source-ai-projects
+    name: Contribute to Open-Source AI Projects
+- id: ai-mastery-and-career-preparation
+  n: 59
+  title: Mastery & Career Preparation
+  track: ai-eng
+  why: "Pulling it together: deep understanding of AI systems, ready for design interviews and senior work."
+  topics:
+  - id: understand-llm-architecture-deeply
+    name: Understand LLM Architecture Deeply
+  - id: master-inference-optimization
+    name: Master Inference Optimization
+  - id: understand-gpu-computing
+    name: Understand GPU Computing
+  - id: master-distributed-systems
+    name: Master Distributed Systems
+  - id: understand-ai-infrastructure
+    name: Understand AI Infrastructure
+  - id: design-scalable-ai-applications
+    name: Design Scalable AI Applications
+  - id: build-production-ready-rag-systems
+    name: Build Production-Ready RAG Systems
+  - id: agent-design
+    name: Design Reliable AI Agents
+  - id: master-model-serving
+    name: Master Model Serving
+  - id: optimize-ai-infrastructure-costs
+    name: Optimize AI Infrastructure Costs
+  - id: understand-ai-security
+    name: Understand AI Security
+  - id: reading-papers
+    name: Read AI Research Papers
+  - id: study-large-scale-ai-architectures
+    name: Study Large-Scale AI Architectures
+  - id: prepare-for-ai-system-design-interviews
+    name: Prepare for AI System Design Interviews
+  - id: continuous-learning
+    name: Continuous Learning

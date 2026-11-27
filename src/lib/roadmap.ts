@@ -54,9 +54,9 @@ const ALLOWED: Record<string, string[]> = {
 };
 
 // How hard each Roadmap topic is to understand: a base level per area (fundamentals and craft are Intro; HFT, quant,
-// advanced distributed systems and testing & correctness are Advanced; the rest Intermediate), nudged by the topic's
+// advanced distributed systems, testing & correctness and LLM inference internals are Advanced; the rest Intermediate), nudged by the topic's
 // own words ("internals", "consensus", "formal" up; "what is", "basics" down).
-const AREA_LEVEL: Record<number, number> = { 1: 0, 2: 0, 3: 0, 23: 0, 25: 0, 31: 0, 19: 2, 30: 2, 33: 2, 34: 2 };
+const AREA_LEVEL: Record<number, number> = { 1: 0, 2: 0, 3: 0, 23: 0, 25: 0, 31: 0, 36: 0, 56: 0, 59: 0, 19: 2, 30: 2, 33: 2, 34: 2, 42: 2 };
 const HARDER = /\b(advanced|internals?|consensus|paxos|raft|byzantine|formal|tla\+|model checking|crdts?|lock-free|memory ordering|linearizab\w*|serializab\w*|mvcc|kernel bypass|fpga|stochastic|itô|ito|calculus|eigen\w*|measure theory|vector clocks?|quorum|deterministic simulation|compiler|jit|garbage collect\w*|market making|microstructure|interpretability|rlhf|kv[- ]cache)\b/i;
 const EASIER = /\b(what is|introduction|intro to|basics?|fundamentals|overview|getting started|101|beginner)\b/i;
 export function topicLevel(areaN: number, text: string): Topic['level'] {
@@ -179,7 +179,7 @@ async function build(articles: FeedItem[]) {
         if (!v) return { id: t.id, name: t.name, topics: [], canon: [] };
         const near = topicList.map((tp, j) => ({ tp, sim: cosine(v, tv[j]) }))
             // Skip general/meta areas (fundamentals, requirements, HLD/LLD, case studies, tools, practice, career).
-            .filter(m => ![2, 3, 20, 21, 22, 23, 24, 25, 31].includes(m.tp.areaN) && !/^what is/i.test(m.tp.name) && m.tp.id !== t.id)
+            .filter(m => ![2, 3, 20, 21, 22, 23, 24, 25, 31, 55, 56, 57, 58, 59].includes(m.tp.areaN) && !/^what is/i.test(m.tp.name) && m.tp.id !== t.id)
             .sort((a, b) => b.sim - a.sim).slice(0, 5).map(m => m.tp);
         const reads = canon.map((c, j) => ({ c, sim: cosine(v, cv[j]) })).filter(m => focused(m.c)).sort((a, b) => b.sim - a.sim).slice(0, 3).map(m => m.c);
         return { id: t.id, name: t.name, topics: near, canon: reads };
